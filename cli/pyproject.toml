@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "insight"
+version = "0.1.0"
+description = "CLI for the insight system"
+authors = ["Johan <johan@ftm.nl>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+click = "^8.1.7"
+
+[tool.poetry.scripts]
+insight = "insight:cli"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
