@@ -27,8 +27,6 @@ if not config_file.exists():
 else:
     config.read(config_file)
 
-session = requests.Session()
-
 
 def get_token():
     token = keyring.get_password("insight", "insight")
@@ -46,6 +44,7 @@ def cli():
 def login():
     data = {"client_id": config["auth"]["client-id"]}
 
+    session = requests.Session()
     res = session.post(config["auth"]["device-endpoint"], data=data)
     body = res.json()
     webbrowser.open(body["verification_uri_complete"])
@@ -63,6 +62,15 @@ def login():
 
 
 @cli.command()
-def list_todos():
-    token = get_token()
-    print(token)
+def logout():
+    keyring.delete_password("insight", "insight")
+
+
+@cli.command()
+def query_api():
+    session = requests.Session()
+    token = get_token()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = session.get("http://localhost:3000/todos", headers=headers)
+    print(res.text)
