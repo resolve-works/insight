@@ -1,39 +1,68 @@
-import logging
-from configparser import ConfigParser
+import time
+import json
 import click
 import os
+import keyring
+import requests
+import webbrowser
 from pathlib import Path
-from authlib.integrations.requests_client import OAuth2Session
-from authlib.oauth2.rfc7523 import ClientSecretJWT
+from configparser import ConfigParser
+
+
+class AuthException(Exception):
+    pass
+
 
 xdg_config_home = os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")
 config_file = xdg_config_home / "insight.conf"
 
+config = ConfigParser()
 if not config_file.exists():
-    config = ConfigParser()
     config["auth"] = {
-        "token_endpoint": "https://example.net/auth/realms/insight/protocol/openid-connect/token",
-        "client-id": "insight",
-        # "client-secret": "uIZXGkVKJjV4PIJNMyRJndQ0SGPEXRuW",
+        "device-endpoint": "https://secure.ftm.nl/realms/insight/protocol/openid-connect/auth/device",
+        "token-endpoint": "https://secure.ftm.nl/realms/insight/protocol/openid-connect/token",
+        "client-id": "insight-cli",
     }
     config.write(open(config_file, "w"))
-    logging.error(f"Insight unconfigured, default config file written to {config_file}")
-    exit(1)
+else:
+    config.read(config_file)
 
-config = ConfigParser()
-config.read(config_file)
-
-try:
-    session = OAuth2Session(
-        config["auth"]["client-id"],
-        "",
-        # config["auth"]["client-secret"],
-        token_endpoint_auth_method=ClientSecretJWT(config["auth"]["token_endpoint"]),
-    )
-except KeyError:
-    raise ValueError(f"Insight auth misconfigured, check [auth] in {config_file}")
+session = requests.Session()
 
 
-@click.command()
+def get_token():
+    token = keyring.get_password("insight", "insight")
+    if token is None:
+        raise AuthException('Not authenticated, see "insight login"')
+    return json.loads(token)
+
+
+@click.group()
 def cli():
-    click.echo("Hello World!")
+    pass
+
+
+@cli.command()
+def login():
+    data = {"client_id": config["auth"]["client-id"]}
+
+    res = session.post(config["auth"]["device-endpoint"], data=data)
+    body = res.json()
+    webbrowser.open(body["verification_uri_complete"])
+    data["device_code"] = body["device_code"]
+    data["grant_type"] = "urn:ietf:params:oauth:grant-type:device_code"
+
+    until_time = time.time() + body["expires_in"]
+    while until_time > time.time():
+        res = session.post(config["auth"]["token-endpoint"], data=data)
+        if res.status_code == 200:
+            break
+        time.sleep(body["interval"])
+
+    keyring.set_password("insight", "insight", res.text)
+
+
+@cli.command()
+def list_todos():
+    token = get_token()
+    print(token)

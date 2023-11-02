@@ -8,8 +8,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 click = "^8.1.7"
-authlib = "^1.2.1"
 requests = "^2.31.0"
+keyring = "^24.2.0"
 
 [tool.poetry.scripts]
 insight = "insight:cli"
