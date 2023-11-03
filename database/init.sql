@@ -1,19 +1,24 @@
 begin;
 
-\set pguser `echo $PGUSER`
-\set pgpassword `echo $PGPASSWORD`
-\set pgrst_db_anon_role `echo $PGRST_DB_ANON_ROLE`
+\set authenticator `echo $PGUSER`
+\set authenticator_password `echo $PGPASSWORD`
+\set web_anon `echo $PGRST_DB_ANON_ROLE`
+
+create role :web_anon nologin;
+create role web_user nologin;
+
+create role :authenticator noinherit login password :'authenticator_password';
+grant :web_anon to :authenticator;
+grant web_user to :authenticator;
 
 create schema insight;
-
-create role :pgrst_db_anon_role nologin;
-
-create role :pguser noinherit login password :'pgpassword';
-grant :pgrst_db_anon_role to :pguser;
+grant usage on schema insight to web_user;
 
 create table insight.files (
   id serial primary key,
   name text not null
 );
+grant all on insight.files to web_user;
+grant usage, select on sequence insight.files_id_seq to web_user;
 
 commit;
