@@ -17,6 +17,14 @@ def set_tokens(data):
         keyring.set_password("insight", token, data[token])
 
 
+def delete_tokens():
+    for token in ("refresh_token", "access_token"):
+        try:
+            keyring.delete_password("insight", token)
+        except keyring.errors.PasswordDeleteError:
+            pass
+
+
 def authorize_device():
     session = Session()
     res = session.post(
@@ -40,7 +48,10 @@ def authorize_device():
             break
         time.sleep(body["interval"])
 
-    set_tokens(res.json())
+    if res.status_code == 200:
+        set_tokens(res.json())
+    else:
+        raise Exception(res.text)
 
 
 def refresh_token():
@@ -53,10 +64,11 @@ def refresh_token():
             "grant_type": "refresh_token",
         },
     )
-    if res.status_code == 400 and res.json()["error"] == "invalid_grant":
-        keyring.delete_password("insight", "refresh_token")
-    else:
+    if res.status_code == 200:
         set_tokens(res.json())
+    else:
+        delete_tokens()
+        raise Exception(res.text)
 
 
 class OAuthSession(Session):
@@ -101,11 +113,7 @@ def login():
 
 @cli.command()
 def logout():
-    for token in ("refresh_token", "access_token"):
-        try:
-            keyring.delete_password("insight", token)
-        except keyring.errors.PasswordDeleteError:
-            pass
+    delete_tokens()
 
 
 @click.group()
@@ -116,7 +124,7 @@ def files():
 @files.command()
 def list():
     session = OAuthSession()
-    res = session.get("http://localhost:3000/todos")
+    res = session.get("http://localhost:3000/files")
     print(res.json())
 
 
