@@ -3,7 +3,7 @@ import json
 import click
 import os
 import keyring
-import requests
+from requests import Session
 import webbrowser
 from pathlib import Path
 from configparser import ConfigParser
@@ -11,6 +11,18 @@ from configparser import ConfigParser
 
 class AuthException(Exception):
     pass
+
+
+class OAuthSession(Session):
+    def request(self, *args, **kwargs):
+        token = load_token()
+        self.headers["Authorization"] = f"Bearer {token['access_token']}"
+
+        res = super().request(*args, **kwargs)
+        if res.status_code == 401 and res.json()["message"] == "JWT expired":
+            refresh_token()
+            return self.request(*args, **kwargs)
+        return res
 
 
 xdg_config_home = os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")
@@ -28,7 +40,24 @@ else:
     config.read(config_file)
 
 
-def get_token():
+def refresh_token():
+    token = load_token()
+    session = Session()
+    data = {
+        "client_id": config["auth"]["client-id"],
+        "refresh_token": token["refresh_token"],
+        "grant_type": "refresh_token",
+    }
+    res = session.post(config["auth"]["token-endpoint"], data=data)
+    if res.status_code == 400 and res.json()["error"] == "invalid_grant":
+        delete_token()
+
+
+def delete_token():
+    keyring.delete_password("insight", "insight")
+
+
+def load_token():
     token = keyring.get_password("insight", "insight")
     if token is None:
         raise AuthException('Not authenticated, see "insight login"')
@@ -44,7 +73,7 @@ def cli():
 def login():
     data = {"client_id": config["auth"]["client-id"]}
 
-    session = requests.Session()
+    session = Session()
     res = session.post(config["auth"]["device-endpoint"], data=data)
     body = res.json()
     webbrowser.open(body["verification_uri_complete"])
@@ -63,14 +92,11 @@ def login():
 
 @cli.command()
 def logout():
-    keyring.delete_password("insight", "insight")
+    delete_token()
 
 
 @cli.command()
-def query_api():
-    session = requests.Session()
-    token = get_token()["access_token"]
-    headers = {"Authorization": f"Bearer {token}"}
-
-    res = session.get("http://localhost:3000/todos", headers=headers)
-    print(res.text)
+def list_todos():
+    session = OAuthSession()
+    res = session.get("http://localhost:3000/todos")
+    print(res.json())
