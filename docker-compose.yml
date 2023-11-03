@@ -7,12 +7,14 @@ services:
     ports:
       - "3000:3000"
     environment:
-      PGRST_DB_URI: postgres://insight:insight@database:5432/insight
+      PGHOST: database 
+      PGDATABASE: insight
       PGRST_DB_SCHEMAS: insight
-      PGRST_DB_ANON_ROLE: anonymous
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
       PGRST_JWT_ROLE_CLAIM_KEY: .realm_access.roles[2]
       PGRST_OPENAPI_SERVER_PROXY_URI: http://127.0.0.1:3000
+    env_file:
+      - .env
     secrets:
       - jwk
     depends_on:
@@ -30,8 +32,11 @@ services:
     environment:
       POSTGRES_USER: insight
       POSTGRES_PASSWORD: insight
+    env_file:
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
 
 secrets:
    jwk:

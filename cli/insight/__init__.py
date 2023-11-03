@@ -1,5 +1,4 @@
 import time
-import json
 import click
 import os
 import keyring
@@ -103,11 +102,22 @@ def login():
 @cli.command()
 def logout():
     for token in ("refresh_token", "access_token"):
-        keyring.delete_password("insight", token)
+        try:
+            keyring.delete_password("insight", token)
+        except keyring.errors.PasswordDeleteError:
+            pass
 
 
-@cli.command()
-def list_todos():
+@click.group()
+def files():
+    pass
+
+
+@files.command()
+def list():
     session = OAuthSession()
     res = session.get("http://localhost:3000/todos")
     print(res.json())
+
+
+cli.add_command(files)
