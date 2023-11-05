@@ -2,8 +2,8 @@ import time
 import click
 import os
 import keyring
-from requests import Session
 import webbrowser
+from requests import Session
 from pathlib import Path
 from configparser import ConfigParser
 

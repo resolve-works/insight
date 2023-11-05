@@ -2,10 +2,15 @@
 version: '3'
 
 services:
+  gateway:
+    image: nginx
+    ports:
+     - "8080:80"
+    volumes:
+     - ./templates:/etc/nginx/templates
+
   api:
     image: postgrest/postgrest
-    ports:
-      - "3000:3000"
     environment:
       PGHOST: database 
       PGDATABASE: insight
@@ -25,7 +30,7 @@ services:
     #ports:
       #- "8080:8080"
     #environment:
-      #API_URL: http://localhost:3000/
+      #API_URL: http://api:3000/
 
   database:
     image: postgres

@@ -14,11 +14,22 @@ grant web_user to :authenticator;
 create schema insight;
 grant usage on schema insight to web_user;
 
-create table insight.files (
-  id serial primary key,
-  name text not null
+create table insight.upload (
+    id uuid not null default gen_random_uuid(),
+    name text not null,
+    primary key (id)
 );
-grant all on insight.files to web_user;
-grant usage, select on sequence insight.files_id_seq to web_user;
+grant all on insight.upload to web_user;
+
+create table insight.file (
+    id uuid not null default gen_random_uuid(),
+    upload_id uuid not null,
+    name text not null,
+
+    primary key (id),
+    foreign key(upload_id) references insight.upload (id) match simple on delete restrict not valid
+);
+
+grant all on insight.file to web_user;
 
 commit;
