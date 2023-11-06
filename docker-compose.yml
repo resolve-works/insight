@@ -33,6 +33,9 @@ services:
     #environment:
       #API_URL: http://api:3000/
 
+  ingest:
+    build: ingest
+
   database:
     image: postgres
     environment:
