@@ -35,7 +35,7 @@ def load_file(path):
 def create(files):
     session = OAuthSession()
     for path in files:
-        headers = {"Content-Disposition": f'filename: "{path.name}"'}
+        headers = {"Content-Disposition": f'filename="{path.name}"'}
         res = session.post(
             "http://localhost:8080/api/v1/pagestreams",
             data=load_file(path),

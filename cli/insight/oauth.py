@@ -80,7 +80,7 @@ class OAuthSession(Session):
         self.headers["Authorization"] = f"Bearer {get_access_token()}"
 
         res = super().request(*args, **kwargs)
-        if res.status_code == 401 and res.json()["message"] == "JWT expired":
+        if res.status_code == 401:
             refresh_token()
             return self.request(*args, **kwargs)
         return res
