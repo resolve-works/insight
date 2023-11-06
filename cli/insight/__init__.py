@@ -1,5 +1,5 @@
 import click
-from .uploads import uploads
+from .pagestreams import pagestreams
 from .oauth import authorize_device, delete_tokens
 
 
@@ -18,4 +18,4 @@ def logout():
     delete_tokens()
 
 
-cli.add_command(uploads)
+cli.add_command(pagestreams)

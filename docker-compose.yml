@@ -8,7 +8,7 @@ services:
       - "8080:80"
     volumes:
       - ./templates:/etc/nginx/templates
-      - uploads:/uploads
+      - pagestreams:/pagestreams
 
   api:
     image: postgrest/postgrest
@@ -50,5 +50,5 @@ secrets:
 
 volumes:
   pgdata: {}
-  uploads: {}
+  pagestreams: {}
 
