@@ -11,7 +11,6 @@ server {
         client_max_body_size 8G;
 
         proxy_pass_request_headers on;
-        proxy_set_header X-File-Name $request_body_file; 
         proxy_set_body "{ \"name\": \"$request_body_file\" }";
         proxy_redirect off;
 

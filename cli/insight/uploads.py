@@ -1,4 +1,6 @@
 import click
+from tqdm import tqdm
+from pathlib import Path
 from .oauth import OAuthSession
 
 
@@ -14,13 +16,26 @@ def list():
     print(res.json())
 
 
+def load_file(path):
+    progressbar = tqdm(
+        desc=path.name,
+        total=path.stat().st_size,
+        unit="iB",
+        unit_scale=True,
+        unit_divisor=1024,
+    )
+
+    for chunk in iter(open(path, "rb")):
+        progressbar.update(len(chunk))
+        yield chunk
+
+
 @uploads.command()
-@click.argument("files", nargs=-1, type=click.File("rb"))
+@click.argument("files", nargs=-1, type=click.Path(path_type=Path))
 def create(files):
     session = OAuthSession()
-    for file in files:
-        res = session.post("http://localhost:8080/api/v1/uploads", data=file)
+    for path in files:
+        res = session.post("http://localhost:8080/api/v1/uploads", data=load_file(path))
 
         if res.status_code != 201:
-            click.echo(res.text)
             exit(1)

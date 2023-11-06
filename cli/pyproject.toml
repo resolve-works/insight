@@ -10,6 +10,7 @@ python = "^3.11"
 click = "^8.1.7"
 requests = "^2.31.0"
 keyring = "^24.2.0"
+tqdm = "^4.66.1"
 
 [tool.poetry.scripts]
 insight = "insight:cli"
