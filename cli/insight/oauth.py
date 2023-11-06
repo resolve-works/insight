@@ -5,6 +5,13 @@ from requests import Session
 from .config import config
 
 
+def get_access_token():
+    token = keyring.get_password("insight", "access_token")
+    if token is None:
+        raise AuthException('Unauthenticated, run "insight login"')
+    return token
+
+
 def set_tokens(data):
     for token in ("refresh_token", "access_token"):
         keyring.set_password("insight", token, data[token])
@@ -70,11 +77,7 @@ class AuthException(Exception):
 
 class OAuthSession(Session):
     def request(self, *args, **kwargs):
-        token = keyring.get_password("insight", "access_token")
-        if token is None:
-            raise AuthException('Unauthenticated, run "insight login"')
-
-        self.headers["Authorization"] = f"Bearer {token}"
+        self.headers["Authorization"] = f"Bearer {get_access_token()}"
 
         res = super().request(*args, **kwargs)
         if res.status_code == 401 and res.json()["message"] == "JWT expired":

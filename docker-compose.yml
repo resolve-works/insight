@@ -5,9 +5,10 @@ services:
   gateway:
     image: nginx
     ports:
-     - "8080:80"
+      - "8080:80"
     volumes:
-     - ./templates:/etc/nginx/templates
+      - ./templates:/etc/nginx/templates
+      - uploads:/uploads
 
   api:
     image: postgrest/postgrest
@@ -49,4 +50,5 @@ secrets:
 
 volumes:
   pgdata: {}
+  uploads: {}
 
