@@ -3,18 +3,26 @@ upstream api {
     server api:3000;
 }
 
+map $http_content_disposition $filename {
+    '~^.*filename="(.+?)"$' $1;
+}
+
 server {
+    location /api/v1/pagestreams/authenticate {
+        internal;
+        proxy_set_body off;
+        proxy_pass http://api/pagestreams;
+    }
+
     location /api/v1/pagestreams {
+        auth_request /api/v1/pagestreams/authenticate;
         client_body_temp_path /pagestreams/;
         client_body_in_file_only on;
         client_body_buffer_size 1M;
         client_max_body_size 8G;
 
         proxy_pass_request_headers on;
-        proxy_set_body "{ 
-            \"path\": \"$request_body_file\", 
-            \"name\": \"$http_content_disposition\",
-        }";
+        proxy_set_body "{ \"path\": \"$request_body_file\", \"name\": \"$filename\" }";
         proxy_redirect off;
 
         proxy_hide_header Content-Location;
