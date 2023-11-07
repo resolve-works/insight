@@ -6,6 +6,8 @@ begin;
 \set pg_ingest_password `echo $PG_INGEST_PASSWORD`
 \set web_anon `echo $PG_ANONYMOUS`
 
+create schema insight;
+
 create role :web_anon nologin;
 create role web_user nologin;
 
@@ -14,40 +16,48 @@ grant :web_anon to :pg_api_user;
 grant web_user to :pg_api_user;
 
 create role :pg_ingest_user noinherit login password :'pg_ingest_password';
+alter role :pg_ingest_user set search_path = "$user", insight;
 
-create schema insight;
 grant usage on schema insight to web_user;
+grant usage on schema insight to :pg_ingest_user;
 
-create table insight.pagestreams (
+create or replace function notify()
+returns trigger language plpgsql as
+$$
+begin
+    perform pg_notify(tg_table_name, to_json(new)::text);
+    return null;
+end;
+$$;
+
+create table insight.pagestream (
     id uuid not null default gen_random_uuid(),
     path text not null,
     name text not null,
     primary key (id)
 );
-grant all on insight.pagestreams to web_user;
+grant all on insight.pagestream to web_user;
+grant all on insight.pagestream to :pg_ingest_user;
 
-create or replace function pagestreams_notify()
-returns trigger language plpgsql as
-$$
-begin
-    perform pg_notify('pagestreams', to_json(new)::text);
-    return null;
-end;
-$$;
+create trigger notify_pagestream
+after insert on insight.pagestream for each row 
+execute function notify();
 
-create trigger pagestreams_notify
-after insert on pagestreams for each row 
-execute function pagestreams_notify();
-
-create table insight.files (
+create table insight.file (
     id uuid not null default gen_random_uuid(),
     pagestream_id uuid not null,
+    first_page integer not null,
+    last_page integer not null,
     name text not null,
 
     primary key (id),
-    foreign key(pagestream_id) references insight.pagestreams (id) match simple on delete restrict not valid
+    foreign key(pagestream_id) references insight.pagestream (id) match simple on delete restrict not valid
 );
-grant all on insight.files to web_user;
-grant all on insight.files to :pg_ingest_user;
+grant all on insight.file to web_user;
+grant all on insight.file to :pg_ingest_user;
+
+create trigger notify_file
+after insert on insight.file for each row 
+execute function notify();
 
 commit;

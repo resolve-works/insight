@@ -8,7 +8,8 @@ services:
       - "8080:80"
     volumes:
       - ./templates:/etc/nginx/templates
-      - pagestreams:/pagestreams
+      - pagestreams:/insight/pagestreams
+      - files:/insight/files
     depends_on:
       - api
 
@@ -38,13 +39,17 @@ services:
 
   ingest:
     build: ingest
+    command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/ingest -p="*.py" -R insight-ingest -- process-messages
     environment:
       PGHOST: ${PG_HOST}
       PGDATABASE: ${PG_DATABASE}
       PGUSER: ${PG_INGEST_USER}
       PGPASSWORD: ${PG_INGEST_PASSWORD}
+      INGEST_FILES_PATH: /insight/files
     volumes:
-      - pagestreams:/pagestreams
+      - pagestreams:/insight/pagestreams
+      - files:/insight/files
+      - ./ingest/ingest:/usr/local/lib/python3.12/site-packages/ingest
     depends_on:
       - database
 
@@ -68,4 +73,5 @@ secrets:
 volumes:
   pgdata: {}
   pagestreams: {}
+  files: {}
 
