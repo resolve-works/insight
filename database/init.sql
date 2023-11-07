@@ -22,6 +22,19 @@ create table insight.pagestreams (
 );
 grant all on insight.pagestreams to web_user;
 
+create or replace function pagestreams_notify()
+returns trigger language plpgsql as
+$$
+begin
+    perform pg_notify('pagestreams', to_json(new)::text);
+    return null;
+end;
+$$;
+
+create trigger pagestreams_notify
+after insert on pagestreams for each row 
+execute function pagestreams_notify();
+
 create table insight.files (
     id uuid not null default gen_random_uuid(),
     pagestream_id uuid not null,

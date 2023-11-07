@@ -14,7 +14,7 @@ conn = psycopg2.connect(
 )
 
 cursor = conn.cursor()
-cursor.execute("LISTEN match_updates;")
+cursor.execute("LISTEN pagestreams;")
 conn.commit()
 
 
