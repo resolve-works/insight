@@ -9,6 +9,8 @@ services:
     volumes:
       - ./templates:/etc/nginx/templates
       - pagestreams:/pagestreams
+    depends_on:
+      - api
 
   api:
     image: postgrest/postgrest
@@ -35,6 +37,8 @@ services:
     build: ingest
     env_file:
       - .env
+    volumes:
+      - pagestreams:/pagestreams
 
   database:
     image: postgres
