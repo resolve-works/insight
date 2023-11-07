@@ -12,6 +12,8 @@ asyncio = "^3.4.3"
 click = "^8.1.7"
 ocrmypdf = "^15.4.0"
 pikepdf = "^8.6.0"
+sqlalchemy = "^2.0.23"
+watchdog = "^3.0.0"
 
 [tool.poetry.scripts]
 insight-ingest = "ingest:cli"

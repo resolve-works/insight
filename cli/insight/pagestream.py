@@ -5,14 +5,14 @@ from .oauth import OAuthSession
 
 
 @click.group()
-def pagestreams():
+def pagestream():
     pass
 
 
-@pagestreams.command()
+@pagestream.command()
 def list():
     session = OAuthSession()
-    res = session.get("http://localhost:8080/api/v1/pagestreams")
+    res = session.get("http://localhost:8080/api/v1/pagestream")
     print(res.json())
 
 
@@ -30,14 +30,14 @@ def load_file(path):
         yield chunk
 
 
-@pagestreams.command()
+@pagestream.command()
 @click.argument("files", nargs=-1, type=click.Path(path_type=Path))
 def create(files):
     session = OAuthSession()
     for path in files:
         headers = {"Content-Disposition": f'filename="{path.name}"'}
         res = session.post(
-            "http://localhost:8080/api/v1/pagestreams",
+            "http://localhost:8080/api/v1/pagestream",
             data=load_file(path),
             headers=headers,
         )
