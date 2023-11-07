@@ -3,18 +3,20 @@ import psycopg2
 import asyncio
 import os
 import logging
+from sqlalchemy import create_engine
 
 logging.basicConfig(level=logging.INFO)
 
-conn = psycopg2.connect(
-    host=os.environ.get("PGHOST"),
-    dbname=os.environ.get("PGDATABASE"),
-    user=os.environ.get("PGUSER"),
-    password=os.environ.get("PGPASSWORD"),
+engine = create_engine(
+    "postgresql+psycopg2://{PGUSER}:{PGPASSWORD}@{PGHOST}/{PGDATABASE}".format(
+        **os.environ
+    )
 )
 
+conn = engine.connect()
+
 cursor = conn.cursor()
-cursor.execute("LISTEN pagestreams;")
+cursor.execute("listen pagestreams;")
 conn.commit()
 
 
