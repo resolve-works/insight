@@ -1,6 +1,6 @@
 FROM python
 
-RUN apt update && apt install -y tesseract-ocr tesseract-ocr-nld ghostscript
+RUN apt update && apt install -y ocrmypdf tesseract-ocr-nld
 
 COPY . /home
 WORKDIR /home

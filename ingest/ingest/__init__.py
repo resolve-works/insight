@@ -4,6 +4,7 @@ import asyncio
 import os
 import logging
 import ocrmypdf
+from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from pikepdf import Pdf
@@ -42,6 +43,10 @@ def process_pagestream(id, path, name):
         session.commit()
 
 
+def ocrmypdf_process(input_file, output_file):
+    ocrmypdf.ocr(input_file, output_file, force_ocr=True, language="nld")
+
+
 def process_file(id, pagestream_id, first_page, last_page, name):
     logging.info(f"Ingesting file {id}")
 
@@ -63,6 +68,9 @@ def process_file(id, pagestream_id, first_page, last_page, name):
         # OCR & optimize new PDF
         output_file = Path(os.environ.get("INGEST_FILES_PATH")) / f"{id}.pdf"
         ocrmypdf.ocr(temp_file, output_file, force_ocr=True)
+        p = Process(target=ocrmypdf_process, args=(temp_file, output_file))
+        p.start()
+        p.join()
 
 
 def reader():
