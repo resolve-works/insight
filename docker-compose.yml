@@ -45,6 +45,8 @@ services:
     environment:
       POSTGRES_USER: insight
       POSTGRES_PASSWORD: insight
+    ports:
+      - "5432:5432"
     env_file:
       - .env
     volumes:
