@@ -15,12 +15,15 @@ services:
   api:
     image: postgrest/postgrest
     environment:
+      PGHOST: ${PG_HOST}
+      PGDATABASE: ${PG_DATABASE}
+      PGUSER: ${PG_API_USER}
+      PGPASSWORD: ${PG_API_PASSWORD}
       PGRST_DB_SCHEMAS: insight
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
       PGRST_JWT_ROLE_CLAIM_KEY: .realm_access.roles[2]
       PGRST_OPENAPI_SERVER_PROXY_URI: http://127.0.0.1:3000
-    env_file:
-      - .env
+      PGRST_DB_ANON_ROLE: ${PG_ANONYMOUS}
     secrets:
       - jwk
     depends_on:
@@ -35,10 +38,15 @@ services:
 
   ingest:
     build: ingest
-    env_file:
-      - .env
+    environment:
+      PGHOST: ${PG_HOST}
+      PGDATABASE: ${PG_DATABASE}
+      PGUSER: ${PG_INGEST_USER}
+      PGPASSWORD: ${PG_INGEST_PASSWORD}
     volumes:
       - pagestreams:/pagestreams
+    depends_on:
+      - database
 
   database:
     image: postgres

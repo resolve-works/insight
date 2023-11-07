@@ -1,15 +1,19 @@
 begin;
 
-\set authenticator `echo $PGUSER`
-\set authenticator_password `echo $PGPASSWORD`
-\set web_anon `echo $PGRST_DB_ANON_ROLE`
+\set pg_api_user `echo $PG_API_USER`
+\set pg_api_password `echo $PG_API_PASSWORD`
+\set pg_ingest_user `echo $PG_INGEST_USER`
+\set pg_ingest_password `echo $PG_INGEST_PASSWORD`
+\set web_anon `echo $PG_ANONYMOUS`
 
 create role :web_anon nologin;
 create role web_user nologin;
 
-create role :authenticator noinherit login password :'authenticator_password';
-grant :web_anon to :authenticator;
-grant web_user to :authenticator;
+create role :pg_api_user noinherit login password :'pg_api_password';
+grant :web_anon to :pg_api_user;
+grant web_user to :pg_api_user;
+
+create role :pg_ingest_user noinherit login password :'pg_ingest_password';
 
 create schema insight;
 grant usage on schema insight to web_user;
@@ -44,5 +48,6 @@ create table insight.files (
     foreign key(pagestream_id) references insight.pagestreams (id) match simple on delete restrict not valid
 );
 grant all on insight.files to web_user;
+grant all on insight.files to :pg_ingest_user;
 
 commit;
