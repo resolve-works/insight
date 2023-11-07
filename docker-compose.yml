@@ -9,7 +9,7 @@ services:
     volumes:
       - ./templates:/etc/nginx/templates
       - pagestreams:/insight/pagestreams
-      - files:/insight/files
+      - files:/insight/files:ro
     depends_on:
       - api
 
@@ -47,7 +47,7 @@ services:
       PGPASSWORD: ${PG_INGEST_PASSWORD}
       INGEST_FILES_PATH: /insight/files
     volumes:
-      - pagestreams:/insight/pagestreams
+      - pagestreams:/insight/pagestreams:ro
       - files:/insight/files
       - ./ingest/ingest:/usr/local/lib/python3.12/site-packages/ingest
     depends_on:

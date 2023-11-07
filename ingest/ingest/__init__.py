@@ -3,6 +3,8 @@ import json
 import asyncio
 import os
 import logging
+import ocrmypdf
+from tempfile import TemporaryDirectory
 from pathlib import Path
 from pikepdf import Pdf
 from sqlalchemy import create_engine, text
@@ -46,15 +48,21 @@ def process_file(id, pagestream_id, first_page, last_page, name):
     with Session(engine) as session:
         pagestream = session.query(Pagestream).get(pagestream_id)
 
-    # Split PDF from pagestream
-    destination = Pdf.new()
-    with Pdf.open(pagestream.path) as pdf:
-        for page in pdf.pages[first_page:last_page]:
-            destination.pages.append(page)
-        destination.copy_foreign(pdf.docinfo)
-        destination.save(Path(os.environ.get("INGEST_FILES_PATH")) / f"{id}.pdf")
+    with TemporaryDirectory() as directory:
+        temp_file = Path(directory) / "file.pdf"
 
-    # OCR & optimize new PDF
+        # Split PDF from pagestream
+        destination = Pdf.new()
+        logging.info(f"Saving pages {first_page}:{last_page} - {name}")
+        with Pdf.open(pagestream.path) as pdf:
+            for page in pdf.pages[first_page:last_page]:
+                destination.pages.append(page)
+            destination.copy_foreign(pdf.docinfo)
+            destination.save(temp_file)
+
+        # OCR & optimize new PDF
+        output_file = Path(os.environ.get("INGEST_FILES_PATH")) / f"{id}.pdf"
+        ocrmypdf.ocr(temp_file, output_file, force_ocr=True)
 
 
 def reader():
