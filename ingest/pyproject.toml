@@ -9,7 +9,10 @@ readme = "README.md"
 python = "^3.11"
 psycopg2 = "^2.9.9"
 asyncio = "^3.4.3"
+click = "^8.1.7"
 
+[tool.poetry.scripts]
+insight-ingest = "ingest:cli"
 
 [build-system]
 requires = ["poetry-core"]

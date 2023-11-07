@@ -13,8 +13,6 @@ services:
   api:
     image: postgrest/postgrest
     environment:
-      PGHOST: database 
-      PGDATABASE: insight
       PGRST_DB_SCHEMAS: insight
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
       PGRST_JWT_ROLE_CLAIM_KEY: .realm_access.roles[2]
@@ -35,6 +33,8 @@ services:
 
   ingest:
     build: ingest
+    env_file:
+      - .env
 
   database:
     image: postgres

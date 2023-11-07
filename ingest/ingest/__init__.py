@@ -1,9 +1,16 @@
+import click
 import psycopg2
 import asyncio
+import os
+import logging
 
-# dbname should be the same for the notifying process
+logging.basicConfig(level=logging.INFO)
+
 conn = psycopg2.connect(
-    host="localhost", dbname="example", user="example", password="example"
+    host=os.environ.get("PGHOST"),
+    dbname=os.environ.get("PGDATABASE"),
+    user=os.environ.get("PGUSER"),
+    password=os.environ.get("PGPASSWORD"),
 )
 
 cursor = conn.cursor()
@@ -14,10 +21,18 @@ conn.commit()
 def handle_notify():
     conn.poll()
     for notify in conn.notifies:
-        print(notify.payload)
+        logging.info(notify.payload)
     conn.notifies.clear()
 
 
-loop = asyncio.get_event_loop()
-loop.add_reader(conn, handle_notify)
-loop.run_forever()
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+def process_messages():
+    logging.info("Processing messages")
+    loop = asyncio.get_event_loop()
+    loop.add_reader(conn, handle_notify)
+    loop.run_forever()
