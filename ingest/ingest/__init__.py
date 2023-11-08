@@ -14,12 +14,7 @@ from .models import Pagestream, File
 
 logging.basicConfig(level=logging.INFO)
 
-engine = create_engine(
-    "postgresql+psycopg2://{PGUSER}:{PGPASSWORD}@{PGHOST}/{PGDATABASE}".format(
-        **os.environ
-    )
-)
-
+engine = create_engine(os.environ.get("PG_DB_URI"))
 conn = engine.connect()
 conn.execute(text("listen pagestream; listen file;"))
 conn.commit()

@@ -16,10 +16,7 @@ services:
   api:
     image: postgrest/postgrest
     environment:
-      PGHOST: ${PG_HOST}
-      PGDATABASE: ${PG_DATABASE}
-      PGUSER: ${PG_API_USER}
-      PGPASSWORD: ${PG_API_PASSWORD}
+      PGRST_DB_URI: postgresql://${PG_API_USER}:${PG_API_PASSWORD}@database/insight
       PGRST_DB_SCHEMAS: insight
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
       PGRST_JWT_ROLE_CLAIM_KEY: .realm_access.roles[2]
@@ -41,10 +38,7 @@ services:
     build: ingest
     command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/ingest -p="*.py" -R insight-ingest -- process-messages
     environment:
-      PGHOST: ${PG_HOST}
-      PGDATABASE: ${PG_DATABASE}
-      PGUSER: ${PG_INGEST_USER}
-      PGPASSWORD: ${PG_INGEST_PASSWORD}
+      PG_DB_URI: postgresql://${PG_INGEST_USER}:${PG_INGEST_PASSWORD}@database/insight
       INGEST_FILES_PATH: /insight/files
     volumes:
       - pagestreams:/insight/pagestreams:ro
