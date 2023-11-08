@@ -4,7 +4,6 @@ import asyncio
 import os
 import logging
 import ocrmypdf
-import requests
 from lxml import html
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
@@ -13,10 +12,11 @@ from pikepdf import Pdf
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 from .models import Pagestream, File
+from elasticsearch import Elasticsearch
 
 logging.basicConfig(level=logging.INFO)
 
-engine = create_engine(os.environ.get("DATABASE_URI"))
+engine = create_engine(os.environ.get("POSTGRES_URI"))
 conn = engine.connect()
 conn.execute(text("listen pagestream; listen file;"))
 conn.commit()
@@ -34,8 +34,15 @@ def process_pagestream(id, path, name):
         session.commit()
 
 
-def ocrmypdf_process(input_file, output_file):
-    ocrmypdf.ocr(input_file, output_file, force_ocr=True, language="nld")
+def ocrmypdf_process(input_file, output_file, file_id):
+    ocrmypdf.ocr(
+        input_file,
+        output_file,
+        force_ocr=True,
+        language="nld",
+        plugins=["ingest.plugin"],
+        file_id=file_id,
+    )
 
 
 def extract_file(input_file, from_page, to_page, output_file):
@@ -61,21 +68,9 @@ def process_file(id, pagestream_id, from_page, to_page, name):
 
         # OCR & optimize new PDF
         output_file = Path(os.environ.get("INGEST_FILES_PATH")) / f"{id}.pdf"
-        process = Process(target=ocrmypdf_process, args=(temp_file, output_file))
+        process = Process(target=ocrmypdf_process, args=(temp_file, output_file, id))
         process.start()
         process.join()
-
-    headers = {
-        "Accept": "text/html",
-        "Content-Type": "application/pdf",
-    }
-    res = requests.put(
-        os.environ.get("EXTRACT_URI"), data=open(output_file, "rb"), headers=headers
-    )
-
-    document = html.document_fromstring(res.text)
-    for index, page in enumerate(document.find_class("page")):
-        logging.info(f"Indexing page {index}")
 
 
 def reader():
@@ -103,3 +98,9 @@ def process_messages():
     loop = asyncio.get_event_loop()
     loop.add_reader(conn.connection, reader)
     loop.run_forever()
+
+
+@cli.command()
+def create_indices():
+    es = Elasticsearch(os.environ.get("ELASTICSEARCH_URI"))
+    es.indices.create(index="insight")

@@ -1,6 +1,6 @@
 
-upstream api {
-    server api:3000;
+upstream postgrest {
+    server postgrest:3000;
 }
 
 map $http_content_disposition $filename {
@@ -11,7 +11,7 @@ server {
     location /api/v1/pagestream/authenticate {
         internal;
         proxy_set_body off;
-        proxy_pass http://api/pagestream;
+        proxy_pass http://postgrest/pagestream;
     }
 
     location /api/v1/pagestream {
@@ -28,7 +28,7 @@ server {
         proxy_hide_header Content-Location;
         proxy_set_header  Connection "";
         proxy_http_version 1.1;
-        proxy_pass http://api/pagestream;
+        proxy_pass http://postgrest/pagestream;
     }
 
     location /api/v1/ {
@@ -37,7 +37,7 @@ server {
         add_header Content-Location  /api/v1/$upstream_http_content_location;
         proxy_set_header  Connection "";
         proxy_http_version 1.1;
-        proxy_pass http://api/;
+        proxy_pass http://postgrest/;
     }
 }
 

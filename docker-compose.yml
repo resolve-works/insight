@@ -5,7 +5,7 @@ services:
   nginx:
     image: nginx
     ports:
-      - "8080:80"
+      - 8080:80
     volumes:
       - ./templates:/etc/nginx/templates
       - pagestreams:/insight/pagestreams
@@ -31,25 +31,22 @@ services:
     build: ingest
     command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/ingest -p="*.py" -R insight-ingest -- process-messages
     environment:
-      DATABASE_URI: postgresql://${PG_INGEST_USER}:${PG_INGEST_PASSWORD}@postgres/insight
-      EXTRACT_URI: http://tika:9998/tika
+      POSTGRES_URI: postgresql://${PG_INGEST_USER}:${PG_INGEST_PASSWORD}@postgres/insight
+      ELASTICSEARCH_URI: http://elasticsearch:9200
       INGEST_FILES_PATH: /insight/files
     volumes:
       - pagestreams:/insight/pagestreams:ro
       - files:/insight/files
       - ./ingest/ingest:/usr/local/lib/python3.12/site-packages/ingest
     depends_on:
-      - tika
       - elasticsearch
       - postgres
-
-  tika:
-    image: apache/tika
 
   elasticsearch:
     image: elasticsearch:8.11.0
     environment:
       - discovery.type=single-node
+      - xpack.security.enabled=false
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
 
@@ -59,7 +56,7 @@ services:
       POSTGRES_USER: insight
       POSTGRES_PASSWORD: insight
     ports:
-      - "5432:5432"
+      - 5432:5432
     env_file:
       - .env
     volumes:
