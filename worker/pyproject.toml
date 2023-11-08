@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "worker"
+name = "insight-worker"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
@@ -12,7 +12,7 @@ asyncio = "^3.4.3"
 psycopg2 = "^2.9.9"
 
 [tool.poetry.scripts]
-insight-worker = "worker:cli"
+insight-worker = "insight_worker:cli"
 
 [build-system]
 requires = ["poetry-core"]
