@@ -23,7 +23,7 @@ def elasticsearch_url(path):
 
 
 def process_page(id, pagestream_id, index, contents):
-    logging.info(f"Indexing page {id}")
+    logging.info(f"Indexing page {id} at index {index} in pagestream {pagestream_id}")
 
     statement = (
         select(File)
@@ -34,10 +34,18 @@ def process_page(id, pagestream_id, index, contents):
     with Session(engine) as session:
         file = session.scalar(statement)
 
-    requests.put(
+    res = requests.put(
         elasticsearch_url(f"/insight/_doc/{id}"),
-        json={"file_id": str(file.id), "file_name": file.name, "contents": contents},
+        json={
+            "file_id": str(file.id),
+            "file_name": file.name,
+            "index": index - file.from_page,
+            "contents": contents,
+        },
     )
+
+    if res.status_code != 201:
+        raise Exception(res.text)
 
 
 def reader():
@@ -63,3 +71,20 @@ def process_messages():
     loop = asyncio.get_event_loop()
     loop.add_reader(conn.connection, reader)
     loop.run_forever()
+
+
+@cli.command
+def create_mapping():
+    requests.put(
+        elasticsearch_url(f"/insight"),
+        json={
+            "mappings": {
+                "properties": {
+                    "file_id": {"type": "keyword"},
+                    "file_name": {"type": "keyword"},
+                    "contents": {"type": "text"},
+                    "index": {"type": "integer"},
+                }
+            }
+        },
+    )
