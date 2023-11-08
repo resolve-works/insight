@@ -10,9 +10,9 @@ from .models import Page
 engine = create_engine(os.environ.get("POSTGRES_URI"))
 
 
-def get_page_index(output_text):
+def get_page_number(output_text):
     # /tmp/ocrmypdf.io.20wy83mv/000003_ocr_tess.txt
-    return int(re.search(r"^.+(\d+)_ocr_tess.txt$", str(output_text)).group(1)) - 1
+    return re.search(r"^.+/(\d+)_ocr_tess.txt$", str(output_text)).group(1)
 
 
 class InsightEngine(TesseractOcrEngine):
@@ -21,7 +21,8 @@ class InsightEngine(TesseractOcrEngine):
         TesseractOcrEngine.generate_pdf(input_file, output_pdf, output_text, options)
 
         with Session(engine) as session:
-            index = int(options.from_page) + get_page_index(output_text)
+            page_number = get_page_number(output_text)
+            index = int(options.from_page) + int(page_number) - 1
             page = Page(
                 pagestream_id=options.pagestream_id,
                 index=index,
