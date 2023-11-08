@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ingest"
+name = "insight-ingest"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
@@ -16,7 +16,7 @@ ocrmypdf = "^15.4.0"
 psycopg2 = "^2.9.9"
 
 [tool.poetry.scripts]
-insight-ingest = "ingest:cli"
+insight-ingest = "insight_ingest:cli"
 
 [tool.poetry.group.dev.dependencies]
 sqlacodegen = {version = "^3.0.0rc3", allow-prereleases = true}
