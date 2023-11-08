@@ -14,7 +14,6 @@ sqlalchemy = "^2.0.23"
 watchdog = "^3.0.0"
 ocrmypdf = "^15.4.0"
 psycopg2 = "^2.9.9"
-elasticsearch = "^8.10.1"
 
 [tool.poetry.scripts]
 insight-ingest = "ingest:cli"
