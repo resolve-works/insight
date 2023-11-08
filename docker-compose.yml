@@ -27,16 +27,6 @@ services:
     depends_on:
       - postgres
 
-  #api-documentation:
-    #image: swaggerapi/swagger-ui
-    #ports:
-      #- "8080:8080"
-    #environment:
-      #API_URL: http://api:3000/
-
-  tika:
-    image: apache/tika
-
   ingest:
     build: ingest
     command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/ingest -p="*.py" -R insight-ingest -- process-messages
@@ -49,8 +39,12 @@ services:
       - files:/insight/files
       - ./ingest/ingest:/usr/local/lib/python3.12/site-packages/ingest
     depends_on:
-      - postgres
+      - tika
       - elasticsearch
+      - postgres
+
+  tika:
+    image: apache/tika
 
   elasticsearch:
     image: elasticsearch:8.11.0
