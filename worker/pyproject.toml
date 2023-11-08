@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ingest"
+name = "worker"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
@@ -7,19 +7,12 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-asyncio = "^3.4.3"
 click = "^8.1.7"
-pikepdf = "^8.6.0"
-sqlalchemy = "^2.0.23"
-watchdog = "^3.0.0"
-ocrmypdf = "^15.4.0"
+asyncio = "^3.4.3"
 psycopg2 = "^2.9.9"
 
 [tool.poetry.scripts]
-insight-ingest = "ingest:cli"
-
-[tool.poetry.group.dev.dependencies]
-sqlacodegen = {version = "^3.0.0rc3", allow-prereleases = true}
+insight-worker = "worker:cli"
 
 [build-system]
 requires = ["poetry-core"]

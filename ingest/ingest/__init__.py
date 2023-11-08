@@ -4,7 +4,6 @@ import asyncio
 import os
 import logging
 import ocrmypdf
-from lxml import html
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
@@ -12,7 +11,6 @@ from pikepdf import Pdf
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 from .models import Pagestream, File
-from elasticsearch import Elasticsearch
 
 logging.basicConfig(level=logging.INFO)
 
@@ -98,9 +96,3 @@ def process_messages():
     loop = asyncio.get_event_loop()
     loop.add_reader(conn.connection, reader)
     loop.run_forever()
-
-
-@cli.command()
-def create_indices():
-    es = Elasticsearch(os.environ.get("ELASTICSEARCH_URI"))
-    es.indices.create(index="insight")
