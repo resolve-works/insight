@@ -60,6 +60,7 @@ create table insight.file (
 );
 grant all on insight.file to web_user;
 grant all on insight.file to :pg_ingest_user;
+grant all on insight.file to :pg_worker_user;
 
 create trigger notify_file
 after insert on insight.file for each row 
@@ -69,14 +70,13 @@ create table insight.page (
     id uuid not null default gen_random_uuid(),
     pagestream_id uuid not null,
     index integer not null,
-    content text,
+    contents text,
 
     primary key (id),
     foreign key(pagestream_id) references insight.pagestream (id) match simple on delete restrict not valid
 );
 grant all on insight.page to web_user;
 grant all on insight.page to :pg_ingest_user;
-grant all on insight.page to :pg_worker_user;
 
 create trigger notify_page
 after insert on insight.page for each row 

@@ -32,14 +32,15 @@ def process_pagestream(id, path, name):
         session.commit()
 
 
-def ocrmypdf_process(input_file, output_file, file_id):
+def ocrmypdf_process(input_file, output_file, pagestream_id, from_page):
     ocrmypdf.ocr(
         input_file,
         output_file,
         force_ocr=True,
         language="nld",
         plugins=["insight_ingest.plugin"],
-        file_id=file_id,
+        pagestream_id=pagestream_id,
+        from_page=from_page,
     )
 
 
@@ -66,7 +67,10 @@ def process_file(id, pagestream_id, from_page, to_page, name):
 
         # OCR & optimize new PDF
         output_file = Path(os.environ.get("INGEST_FILES_PATH")) / f"{id}.pdf"
-        process = Process(target=ocrmypdf_process, args=(temp_file, output_file, id))
+        process = Process(
+            target=ocrmypdf_process,
+            args=(temp_file, output_file, pagestream_id, from_page),
+        )
         process.start()
         process.join()
 

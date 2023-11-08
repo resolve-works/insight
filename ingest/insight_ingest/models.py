@@ -48,6 +48,6 @@ class Page(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text('gen_random_uuid()'))
     pagestream_id: Mapped[uuid.UUID] = mapped_column(Uuid)
     index: Mapped[int] = mapped_column(Integer)
-    content: Mapped[Optional[str]] = mapped_column(Text)
+    contents: Mapped[Optional[str]] = mapped_column(Text)
 
     pagestream: Mapped['Pagestream'] = relationship('Pagestream', back_populates='page')
