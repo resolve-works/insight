@@ -34,11 +34,15 @@ services:
     #environment:
       #API_URL: http://api:3000/
 
+  extract:
+    image: apache/tika
+
   ingest:
     build: ingest
     command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/ingest -p="*.py" -R insight-ingest -- process-messages
     environment:
-      PG_DB_URI: postgresql://${PG_INGEST_USER}:${PG_INGEST_PASSWORD}@database/insight
+      DATABASE_URI: postgresql://${PG_INGEST_USER}:${PG_INGEST_PASSWORD}@database/insight
+      EXTRACT_URI: http://extract:9998/tika
       INGEST_FILES_PATH: /insight/files
     volumes:
       - pagestreams:/insight/pagestreams:ro

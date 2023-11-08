@@ -46,8 +46,8 @@ execute function notify();
 create table insight.file (
     id uuid not null default gen_random_uuid(),
     pagestream_id uuid not null,
-    first_page integer not null,
-    last_page integer not null,
+    from_page integer not null,
+    to_page integer not null,
     name text not null,
 
     primary key (id),
