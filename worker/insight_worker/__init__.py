@@ -25,7 +25,7 @@ def process_page(id, pagestream_id):
 
 def reader():
     conn.poll()
-    for notification in conn.connection.notifies:
+    for notification in conn.notifies:
         object = json.loads(notification.payload)
 
         match notification.channel:
@@ -44,5 +44,5 @@ def cli():
 def process_messages():
     logging.info("Processing messages")
     loop = asyncio.get_event_loop()
-    loop.add_reader(conn.connection, reader)
+    loop.add_reader(conn, reader)
     loop.run_forever()

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "insight"
+name = "insight-cli"
 version = "0.1.0"
 description = "CLI for the insight system"
 authors = ["Johan <johan@ftm.nl>"]
@@ -13,7 +13,7 @@ keyring = "^24.2.0"
 tqdm = "^4.66.1"
 
 [tool.poetry.scripts]
-insight = "insight:cli"
+insight = "insight_cli:cli"
 
 [build-system]
 requires = ["poetry-core"]
