@@ -1,7 +1,14 @@
 
 # Insight
 
-Insight aims to turn data into information, by puttin it into context.
+Insight turns data into information, by puttin it into context.
+
+## What does it do?
+
+Insight ingests PDF documents and indexes them. In this process, it tries to
+strip away as much useless information as possbile. It does this by allowing
+users to label pages. These labels are then used to predict labels for unlabeled
+pages.
 
 
 ## Authentication
