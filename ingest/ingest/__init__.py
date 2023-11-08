@@ -29,13 +29,7 @@ def process_pagestream(id, path, name):
         to_page = len(pdf.pages)
 
     with Session(engine) as session:
-        file = File(
-            name=name,
-            from_page=0,
-            to_page=to_page,
-            pagestream_id=id,
-        )
-
+        file = File(name=name, from_page=0, to_page=to_page, pagestream_id=id)
         session.add(file)
         session.commit()
 
@@ -54,9 +48,7 @@ def extract_file(input_file, from_page, to_page, output_file):
 
 
 def process_file(id, pagestream_id, from_page, to_page, name):
-    logging.info(f"Ingesting file {id}")
-
-    output_file = Path(os.environ.get("INGEST_FILES_PATH")) / f"{id}.pdf"
+    logging.info(f"Saving pages {from_page}:{to_page} as file {id}")
 
     with Session(engine) as session:
         pagestream = session.query(Pagestream).get(pagestream_id)
@@ -65,15 +57,14 @@ def process_file(id, pagestream_id, from_page, to_page, name):
         temp_file = Path(directory) / "file.pdf"
 
         # Extract file from pagestream
-        logging.info(f"Saving pages {from_page}:{to_page} - {name}")
         extract_file(pagestream.path, from_page, to_page, temp_file)
 
         # OCR & optimize new PDF
-        p = Process(target=ocrmypdf_process, args=(temp_file, output_file))
-        p.start()
-        p.join()
+        output_file = Path(os.environ.get("INGEST_FILES_PATH")) / f"{id}.pdf"
+        process = Process(target=ocrmypdf_process, args=(temp_file, output_file))
+        process.start()
+        process.join()
 
-    logging.info(f"Extracting contents from {id}")
     headers = {
         "Accept": "text/html",
         "Content-Type": "application/pdf",
@@ -84,7 +75,7 @@ def process_file(id, pagestream_id, from_page, to_page, name):
 
     document = html.document_fromstring(res.text)
     for index, page in enumerate(document.find_class("page")):
-        logging.info(f"Extracted page {index}")
+        logging.info(f"Indexing page {index}")
 
 
 def reader():
