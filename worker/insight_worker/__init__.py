@@ -3,14 +3,17 @@ import click
 import logging
 import asyncio
 import json
-import psycopg2
+import requests
+from sqlalchemy import create_engine, text, select
+from sqlalchemy.orm import Session
 from urllib.parse import urlparse
+from .models import File
 
 logging.basicConfig(level=logging.INFO)
 
-conn = psycopg2.connect(os.environ.get("POSTGRES_URI"))
-cursor = conn.cursor()
-cursor.execute("LISTEN page;")
+engine = create_engine(os.environ.get("POSTGRES_URI"))
+conn = engine.connect()
+conn.execute(text("listen page;"))
 conn.commit()
 
 
@@ -19,20 +22,34 @@ def elasticsearch_url(path):
     return url._replace(path=path).geturl()
 
 
-def process_page(id, pagestream_id):
-    logging.info(f"{id}")
+def process_page(id, pagestream_id, index, contents):
+    logging.info(f"Indexing page {id}")
+
+    statement = (
+        select(File)
+        .where(File.pagestream_id == pagestream_id)
+        .where(File.from_page <= index)
+        .where(File.to_page > index)
+    )
+    with Session(engine) as session:
+        file = session.scalar(statement)
+
+    requests.put(
+        elasticsearch_url(f"/insight/_doc/{id}"),
+        json={"file_id": str(file.id), "file_name": file.name, "contents": contents},
+    )
 
 
 def reader():
-    conn.poll()
-    for notification in conn.notifies:
+    conn.connection.poll()
+    for notification in conn.connection.notifies:
         object = json.loads(notification.payload)
 
         match notification.channel:
             case "page":
                 process_page(**object)
 
-    conn.notifies.clear()
+    conn.connection.notifies.clear()
 
 
 @click.group()
@@ -44,5 +61,5 @@ def cli():
 def process_messages():
     logging.info("Processing messages")
     loop = asyncio.get_event_loop()
-    loop.add_reader(conn, reader)
+    loop.add_reader(conn.connection, reader)
     loop.run_forever()

@@ -29,26 +29,26 @@ services:
 
   worker:
     build: worker
-    command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/insight-worker -p="*.py" -R insight-worker -- process-messages
+    command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages
     environment:
       ELASTICSEARCH_URI: http://elasticsearch:9200
       POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres/insight
     volumes:
-      - ./worker/insight-worker:/usr/local/lib/python3.12/site-packages/insight-worker
+      - ./worker/insight_worker:/usr/local/lib/python3.12/site-packages/insight_worker
     depends_on:
       - elasticsearch
       - postgres
 
   ingest:
     build: ingest
-    command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/insight-ingest -p="*.py" -R insight-ingest -- process-messages
+    command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/insight_ingest -p="*.py" -R insight-ingest -- process-messages
     environment:
       POSTGRES_URI: postgresql://${PG_INGEST_USER}:${PG_INGEST_PASSWORD}@postgres/insight
       INGEST_FILES_PATH: /insight/files
     volumes:
       - pagestreams:/insight/pagestreams:ro
       - files:/insight/files
-      - ./ingest/insight-ingest:/usr/local/lib/python3.12/site-packages/insight-ingest
+      - ./ingest/insight_ingest:/usr/local/lib/python3.12/site-packages/insight_ingest
     depends_on:
       - postgres
 
