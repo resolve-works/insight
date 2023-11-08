@@ -32,7 +32,7 @@ services:
     command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/insight-worker -p="*.py" -R insight-worker -- process-messages
     environment:
       ELASTICSEARCH_URI: http://elasticsearch:9200
-      POSTGRES_URI: postgresql://${PG_INGEST_USER}:${PG_INGEST_PASSWORD}@postgres/insight
+      POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres/insight
     volumes:
       - ./worker/insight-worker:/usr/local/lib/python3.12/site-packages/insight-worker
     depends_on:

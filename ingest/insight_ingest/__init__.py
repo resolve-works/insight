@@ -38,7 +38,7 @@ def ocrmypdf_process(input_file, output_file, file_id):
         output_file,
         force_ocr=True,
         language="nld",
-        plugins=["insight-ingest.plugin"],
+        plugins=["insight_ingest.plugin"],
         file_id=file_id,
     )
 
