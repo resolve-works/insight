@@ -4,6 +4,8 @@ import asyncio
 import os
 import logging
 import ocrmypdf
+import requests
+from lxml import html
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
@@ -14,7 +16,7 @@ from .models import Pagestream, File
 
 logging.basicConfig(level=logging.INFO)
 
-engine = create_engine(os.environ.get("PG_DB_URI"))
+engine = create_engine(os.environ.get("DATABASE_URI"))
 conn = engine.connect()
 conn.execute(text("listen pagestream; listen file;"))
 conn.commit()
@@ -24,13 +26,13 @@ def process_pagestream(id, path, name):
     logging.info(f"Ingesting pagestream {id}")
 
     with Pdf.open(path) as pdf:
-        count = len(pdf.pages)
+        to_page = len(pdf.pages)
 
     with Session(engine) as session:
         file = File(
             name=name,
-            first_page=0,
-            last_page=count - 1,
+            from_page=0,
+            to_page=to_page,
             pagestream_id=id,
         )
 
@@ -42,8 +44,19 @@ def ocrmypdf_process(input_file, output_file):
     ocrmypdf.ocr(input_file, output_file, force_ocr=True, language="nld")
 
 
-def process_file(id, pagestream_id, first_page, last_page, name):
+def extract_file(input_file, from_page, to_page, output_file):
+    destination = Pdf.new()
+    with Pdf.open(input_file) as pdf:
+        for page in pdf.pages[from_page:to_page]:
+            destination.pages.append(page)
+        destination.copy_foreign(pdf.docinfo)
+        destination.save(output_file)
+
+
+def process_file(id, pagestream_id, from_page, to_page, name):
     logging.info(f"Ingesting file {id}")
+
+    output_file = Path(os.environ.get("INGEST_FILES_PATH")) / f"{id}.pdf"
 
     with Session(engine) as session:
         pagestream = session.query(Pagestream).get(pagestream_id)
@@ -51,21 +64,27 @@ def process_file(id, pagestream_id, first_page, last_page, name):
     with TemporaryDirectory() as directory:
         temp_file = Path(directory) / "file.pdf"
 
-        # Split PDF from pagestream
-        destination = Pdf.new()
-        logging.info(f"Saving pages {first_page}:{last_page} - {name}")
-        with Pdf.open(pagestream.path) as pdf:
-            for page in pdf.pages[first_page:last_page]:
-                destination.pages.append(page)
-            destination.copy_foreign(pdf.docinfo)
-            destination.save(temp_file)
+        # Extract file from pagestream
+        logging.info(f"Saving pages {from_page}:{to_page} - {name}")
+        extract_file(pagestream.path, from_page, to_page, temp_file)
 
         # OCR & optimize new PDF
-        output_file = Path(os.environ.get("INGEST_FILES_PATH")) / f"{id}.pdf"
-        ocrmypdf.ocr(temp_file, output_file, force_ocr=True)
         p = Process(target=ocrmypdf_process, args=(temp_file, output_file))
         p.start()
         p.join()
+
+    logging.info(f"Extracting contents from {id}")
+    headers = {
+        "Accept": "text/html",
+        "Content-Type": "application/pdf",
+    }
+    res = requests.put(
+        os.environ.get("EXTRACT_URI"), data=open(output_file, "rb"), headers=headers
+    )
+
+    document = html.document_fromstring(res.text)
+    for index, page in enumerate(document.find_class("page")):
+        logging.info(f"Extracted page {index}")
 
 
 def reader():
