@@ -38,6 +38,7 @@ services:
       - files:/insight
       - ./worker/insight_worker:/usr/local/lib/python3.12/site-packages/insight_worker
     depends_on:
+      - nginx
       - tika
       - elasticsearch
       - postgres

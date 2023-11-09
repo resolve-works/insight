@@ -1,6 +1,7 @@
 import click
 from tqdm import tqdm
 from pathlib import Path
+from .config import config
 from .oauth import OAuthSession
 
 
@@ -12,7 +13,7 @@ def pagestream():
 @pagestream.command()
 def list():
     session = OAuthSession()
-    res = session.get("http://localhost:8080/api/v1/pagestream")
+    res = session.get(f"{config['api']['endpoint']}/api/v1/pagestream")
     print(res.json())
 
 
@@ -37,7 +38,7 @@ def create(files):
     for path in files:
         headers = {"Content-Disposition": f'filename="{path.name}"'}
         res = session.post(
-            "http://localhost:8080/api/v1/pagestream",
+            f"{config['api']['endpoint']}/api/v1/pagestream",
             data=load_file(path),
             headers=headers,
         )
