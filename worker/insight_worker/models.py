@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import ForeignKeyConstraint, Integer, PrimaryKeyConstraint, Text, Uuid, text
+from sqlalchemy import Boolean, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, Text, Uuid, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import uuid
 
@@ -17,6 +17,7 @@ class Pagestream(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text('gen_random_uuid()'))
     path: Mapped[str] = mapped_column(Text)
     name: Mapped[str] = mapped_column(Text)
+    is_merged: Mapped[bool] = mapped_column(Boolean, server_default=text('false'))
 
     file: Mapped[List['File']] = relationship('File', back_populates='pagestream')
     page: Mapped[List['Page']] = relationship('Page', back_populates='pagestream')

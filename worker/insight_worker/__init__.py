@@ -5,6 +5,7 @@ import os
 import logging
 import ocrmypdf
 import requests
+from lxml import html
 from urllib.parse import urlparse
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
@@ -12,7 +13,7 @@ from pathlib import Path
 from pikepdf import Pdf
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
-from .models import Pagestream, File
+from .models import Pagestream, File, Page
 
 logging.basicConfig(level=logging.INFO)
 
@@ -22,7 +23,7 @@ conn.execute(text("listen pagestream; listen file;"))
 conn.commit()
 
 
-def process_pagestream(id, path, name):
+def process_pagestream(id, path, name, is_merged):
     logging.info(f"Ingesting pagestream {id}")
 
     with Pdf.open(path) as pdf:
@@ -34,15 +35,12 @@ def process_pagestream(id, path, name):
         session.commit()
 
 
-def ocrmypdf_process(input_file, output_file, pagestream_id, from_page):
+def ocrmypdf_process(input_file, output_file):
     ocrmypdf.ocr(
         input_file,
         output_file,
-        force_ocr=True,
         language="nld",
-        plugins=["insight_worker.plugin"],
-        pagestream_id=pagestream_id,
-        from_page=from_page,
+        # plugins=["insight_worker.plugin"],
     )
 
 
@@ -61,20 +59,45 @@ def process_file(id, pagestream_id, from_page, to_page, name):
     with Session(engine) as session:
         pagestream = session.query(Pagestream).get(pagestream_id)
 
-    with TemporaryDirectory() as directory:
-        temp_file = Path(directory) / "file.pdf"
+    files_path = Path(os.environ.get("INSIGHT_FILES_PATH"))
+    if not files_path.exists():
+        files_path.mkdir()
 
+    if pagestream.is_merged:
         # Extract file from pagestream
-        extract_file(pagestream.path, from_page, to_page, temp_file)
+        source_file = Path(TemporaryDirectory()) / "file.pdf"
+        extract_file(pagestream.path, from_page, to_page, source_file)
+    else:
+        source_file = pagestream.path
 
-        # OCR & optimize new PDF
-        output_file = Path(os.environ.get("INSIGHT_FILES_PATH")) / f"{id}.pdf"
-        process = Process(
-            target=ocrmypdf_process,
-            args=(temp_file, output_file, pagestream_id, from_page),
+    # OCR & optimize new PDF
+    output_file = files_path / f"{id}.pdf"
+    process = Process(target=ocrmypdf_process, args=(source_file, output_file))
+    process.start()
+    process.join()
+
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/pdf",
+    }
+    res = requests.put(
+        os.environ.get("TIKA_URI"), data=open(output_file, "rb"), headers=headers
+    )
+
+    body = res.json()
+    document = html.document_fromstring(body.pop("X-TIKA:content", None))
+    session = Session(engine)
+
+    for index, page in enumerate(document.find_class("page")):
+        logging.info(f"Indexing page {index}")
+        page = Page(
+            pagestream_id=pagestream_id,
+            index=index + from_page,
+            contents=page.text_content(),
         )
-        process.start()
-        process.join()
+        session.add(page)
+
+    session.commit()
 
 
 def elasticsearch_url(path):
