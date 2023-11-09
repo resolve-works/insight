@@ -8,8 +8,7 @@ services:
       - 8080:80
     volumes:
       - ./templates:/etc/nginx/templates
-      - pagestreams:/insight/pagestreams
-      - files:/insight/files:ro
+      - files:/insight
     depends_on:
       - postgrest
 
@@ -31,14 +30,15 @@ services:
     build: worker
     command: watchmedo auto-restart -d=/usr/local/lib/python3.12/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages
     environment:
+      TIKA_URI: http://tika:9998/tika
       POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres/insight
       ELASTICSEARCH_URI: http://elasticsearch:9200
       INSIGHT_FILES_PATH: /insight/files
     volumes:
-      - pagestreams:/insight/pagestreams:ro
-      - files:/insight/files
+      - files:/insight
       - ./worker/insight_worker:/usr/local/lib/python3.12/site-packages/insight_worker
     depends_on:
+      - tika
       - elasticsearch
       - postgres
 
@@ -81,8 +81,7 @@ secrets:
      file: .jwk
 
 volumes:
+  files: {}
   postgres-data: {}
   elasticsearch-data: {}
-  pagestreams: {}
-  files: {}
 
