@@ -28,27 +28,10 @@ begin
 end;
 $$;
 
-create table public.pagestream (
-    id uuid not null default gen_random_uuid(),
-    path text not null,
-    name text not null,
-    is_merged boolean not null default false,
-    primary key (id)
-);
-create trigger notify_pagestream after insert on public.pagestream for each row execute function notify();
+create type pagestream_status as enum ('uploading', 'ready');
 
-create table public.file (
-    id uuid not null default gen_random_uuid(),
-    pagestream_id uuid not null,
-    from_page integer not null,
-    to_page integer not null,
-    name text not null,
-
-    primary key (id),
-    foreign key(pagestream_id) references public.pagestream (id) match simple on delete restrict not valid
-);
-create trigger notify_file after insert on public.file for each row execute function notify();
-
+\ir model/pagestream.sql
+\ir model/file.sql
 \ir model/prompt.sql
 
 create table private.data_page (
@@ -67,6 +50,7 @@ alter table private.data_page add constraint data_page_pkey primary key (id);
 grant usage on schema public to web_user;
 grant all on all tables in schema public to web_user;
 grant usage, select on all sequences in schema public to web_user;
+grant usage on schema private to web_user;
 grant usage on schema public to :pg_worker_user;
 grant all on all tables in schema public to :pg_worker_user;
 grant usage, select on all sequences in schema public to :pg_worker_user;
