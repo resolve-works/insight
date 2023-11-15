@@ -36,12 +36,14 @@ def load_file(path):
 def create(files):
     session = OAuthSession()
     for path in files:
-        headers = {"Content-Disposition": f'filename="{path.name}"'}
         res = session.post(
-            f"{config['api']['endpoint']}/api/v1/pagestream",
-            data=load_file(path),
-            headers=headers,
+            f"{config['api']['endpoint']}/api/v1/rpc/create_pagestream",
+            json={"name": path.name},
+            headers={"Prefer": "return=representation"},
         )
 
         if res.status_code != 201:
+            print(res.text)
             exit(1)
+        else:
+            print(res.json())
