@@ -65,7 +65,7 @@ services:
       - elasticsearch-data:/usr/share/elasticsearch/data
 
   postgres:
-    image: ankane/pgvector
+    build: postgres
     environment:
       POSTGRES_USER: insight
       POSTGRES_PASSWORD: insight
