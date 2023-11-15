@@ -2,6 +2,7 @@ import click
 import requests
 from .config import config
 from .pagestream import pagestream
+from .prompt import prompt
 from .oauth import authorize_device, delete_tokens
 
 
@@ -11,6 +12,7 @@ def cli():
 
 
 cli.add_command(pagestream)
+cli.add_command(prompt)
 
 
 @cli.command()
