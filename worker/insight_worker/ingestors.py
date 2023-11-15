@@ -9,7 +9,7 @@ from pathlib import Path
 from pikepdf import Pdf
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-from .models import Pagestream, File, Page
+from .models import Pagestream, File
 from .vectorstore import store_embeddings
 
 engine = create_engine(os.environ.get("POSTGRES_URI"))
@@ -79,28 +79,12 @@ def ingest_file(id, pagestream_id, from_page, to_page, name):
     )
     body = res.json()
 
-    logging.info(f"Storing pages for file {id}")
-    document = html.document_fromstring(body.pop("X-TIKA:content", None))
-
-    # Store pages in Postgres
-    pages = [
-        Page(
-            pagestream_id=pagestream_id,
-            index=index + from_page,
-            contents=page.text_content(),
-        )
-        for index, page in enumerate(document.find_class("page"))
-    ]
-
-    session = Session(engine)
-    session.add_all(pages)
-    session.commit()
-
     logging.info(f"Generating embeddings for file {id}")
+    document = html.document_fromstring(body.pop("X-TIKA:content", None))
     # Pages relative to file (not pagestream containing file)
     pages = [
-        {"id": str(page.id), "contents": page.contents, "index": page.index - from_page}
-        for page in pages
+        {"file_id": id, "index": index, "contents": page.text_content()}
+        for index, page in enumerate(document.find_class("page"))
     ]
     store_embeddings(pages)
 

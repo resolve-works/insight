@@ -9,6 +9,7 @@ vector_store = PGVectorStore.from_params(
     connection_string=os.environ.get("POSTGRES_URI"),
     port=5432,
     schema_name="private",
+    table_name="page",
     perform_setup=False,
     embed_dim=1536,
 )
@@ -17,7 +18,10 @@ vector_store_index = VectorStoreIndex.from_vector_store(vector_store)
 
 
 def store_embeddings(pages):
-    nodes = [TextNode(text=page["contents"], id_=str(page["id"])) for page in pages]
+    nodes = [
+        TextNode(text=page["contents"], id_=f"{page['file_id']}_{page['index']}")
+        for page in pages
+    ]
     for previous, current in zip(nodes[0:-1], nodes[1:]):
         previous.relationships[NodeRelationship.NEXT] = RelatedNodeInfo(
             node_id=current.node_id
