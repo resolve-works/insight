@@ -63,18 +63,6 @@ create trigger notify_file
 after insert on insight.file for each row 
 execute function notify();
 
-create table insight.page (
-    id uuid not null default gen_random_uuid(),
-    pagestream_id uuid not null,
-    index integer not null,
-    contents text,
-
-    primary key (id),
-    foreign key(pagestream_id) references insight.pagestream (id) match simple on delete restrict not valid
-);
-grant all on insight.page to web_user;
-grant all on insight.page to :pg_worker_user;
-
 create table insight.prompt (
     id uuid not null default gen_random_uuid(),
     query text,
@@ -100,26 +88,26 @@ grant all on insight.response to web_user;
 grant all on insight.response to :pg_worker_user;
 
 
-create table private.data_llamaindex (
+create table private.page (
     id bigint not null,
     text character varying not null,
     metadata_ json,
     node_id character varying,
     embedding vector(1536)
 );
-grant all on private.data_llamaindex to :pg_worker_user;
+grant all on private.page to :pg_worker_user;
 
-create sequence private.data_llamaindex_id_seq
+create sequence private.page_id_seq
     start with 1
     increment by 1
     no minvalue
     no maxvalue
     cache 1;
 
-grant all on private.data_llamaindex_id_seq to :pg_worker_user;
+grant all on private.page_id_seq to :pg_worker_user;
 
-alter sequence private.data_llamaindex_id_seq owned by private.data_llamaindex.id;
-alter table private.data_llamaindex alter column id set default nextval('private.data_llamaindex_id_seq'::regclass);
-alter table private.data_llamaindex add constraint data_llamaindex_pkey primary key (id);
+alter sequence private.page_id_seq owned by private.page.id;
+alter table private.page alter column id set default nextval('private.page_id_seq'::regclass);
+alter table private.page add constraint page_pkey primary key (id);
 
 commit;
