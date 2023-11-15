@@ -19,7 +19,11 @@ vector_store_index = VectorStoreIndex.from_vector_store(vector_store)
 
 def store_embeddings(pages):
     nodes = [
-        TextNode(text=page["contents"], id_=f"{page['file_id']}_{page['index']}")
+        TextNode(
+            text=page["contents"],
+            id_=f"{page['file_id']}_{page['index']}",
+            metadata={"file_id": page["file_id"], "index": page["index"]},
+        )
         for page in pages
     ]
     for previous, current in zip(nodes[0:-1], nodes[1:]):
@@ -37,3 +41,4 @@ def answer_prompt(id, query):
     response = query_engine.query(query)
     logging.info(f"query: {query}")
     logging.info(f"response: {response}")
+    logging.info(f"nodes: {response.source_nodes}")

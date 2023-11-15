@@ -1,1 +1,6 @@
+asyncio==3.4.3
+asyncpg==0.29.0
 llama-index==0.8.69.post1
+pgvector==0.2.3
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.23

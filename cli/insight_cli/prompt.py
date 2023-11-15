@@ -22,7 +22,10 @@ def create(prompt):
     res = session.post(
         f"{config['api']['endpoint']}/api/v1/prompt",
         json={"query": prompt},
+        headers={"Prefer": "return=representation"},
     )
 
     if res.status_code != 201:
         exit(1)
+    else:
+        print(res.json())

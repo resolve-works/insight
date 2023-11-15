@@ -16,7 +16,7 @@ services:
     image: postgrest/postgrest
     environment:
       PGRST_DB_URI: postgresql://${PG_API_USER}:${PG_API_PASSWORD}@postgres:5432/insight
-      PGRST_DB_SCHEMAS: insight
+      PGRST_DB_SCHEMAS: public
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
       PGRST_JWT_ROLE_CLAIM_KEY: .realm_access.roles[2]
       PGRST_DB_ANON_ROLE: web_anon
@@ -73,6 +73,7 @@ services:
       PG_API_PASSWORD: ${PG_API_PASSWORD}
       PG_WORKER_USER: ${PG_WORKER_USER}
       PG_WORKER_PASSWORD: ${PG_WORKER_PASSWORD}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - 5432:5432
     volumes:
