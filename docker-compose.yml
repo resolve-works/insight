@@ -32,6 +32,11 @@ services:
       POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres:5432/insight
       ELASTICSEARCH_URI: http://elasticsearch:9200
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      STORAGE_BUCKET: ${STORAGE_BUCKET}
+      STORAGE_SECURE: ${STORAGE_SECURE}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
     volumes:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
     depends_on:
@@ -71,6 +76,11 @@ services:
       PG_WORKER_USER: ${PG_WORKER_USER}
       PG_WORKER_PASSWORD: ${PG_WORKER_PASSWORD}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      STORAGE_BUCKET: ${STORAGE_BUCKET}
+      STORAGE_SECURE: ${STORAGE_SECURE}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./database:/docker-entrypoint-initdb.d
@@ -79,11 +89,11 @@ services:
 
   minio:
     image: minio/minio
-    command: minio server /data
+    entrypoint: sh
+    command: -c 'mkdir /data/${STORAGE_BUCKET} && minio server /data'
     environment:
-      MINIO_ROOT_USER: minio_insight
-      MINIO_ROOT_PASSWORD: minio_insight
-      MINIO_DEFAULT_BUCKETS: insight
+      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
     volumes:
       - minio-data:/data
 
