@@ -2,8 +2,7 @@ import click
 import requests
 from .config import config
 from .pagestream import pagestream
-from .prompt import prompt
-from .oauth import authorize_device, delete_tokens
+from .oauth import OAuthSession, authorize_device, delete_tokens
 
 
 @click.group()
@@ -12,7 +11,6 @@ def cli():
 
 
 cli.add_command(pagestream)
-cli.add_command(prompt)
 
 
 @cli.command()
@@ -23,6 +21,22 @@ def login():
 @cli.command()
 def logout():
     delete_tokens()
+
+
+@cli.command()
+@click.argument("query")
+def prompt(query):
+    session = OAuthSession()
+    res = session.post(
+        f"{config['api']['endpoint']}/api/v1/prompt",
+        json={"query": query},
+        headers={"Prefer": "return=representation"},
+    )
+
+    if res.status_code != 201:
+        exit(1)
+    else:
+        print(res.json()[0]["response"])
 
 
 @cli.command()
