@@ -1,10 +1,13 @@
 import click
 import requests
+import logging
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 from pathlib import Path
 from .config import config
 from .oauth import OAuthSession
+
+logging.basicConfig(level=logging.INFO)
 
 
 @click.group()
@@ -16,7 +19,7 @@ def pagestream():
 def list():
     session = OAuthSession()
     res = session.get(f"{config['api']['endpoint']}/api/v1/pagestream")
-    print(res.json())
+    logging.info(res.json())
 
 
 def load_file(path):
@@ -44,7 +47,7 @@ def create(files):
         )
 
         if res.status_code != 200:
-            print(res.text)
+            logging.info(res.text)
             exit(1)
 
         pagestream = res.json()
@@ -61,7 +64,7 @@ def create(files):
                 res = requests.put(pagestream["url"], data=reader_wrapper)
 
             if res.status_code != 200:
-                print(res.text)
+                logging.info(res.text)
                 exit(1)
 
         res = session.post(
@@ -70,5 +73,5 @@ def create(files):
         )
 
         if res.status_code != 204:
-            print(res.text)
+            logging.info(res.text)
             exit(1)

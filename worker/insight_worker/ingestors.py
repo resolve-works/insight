@@ -10,7 +10,7 @@ from pathlib import Path
 from pikepdf import Pdf
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-from .models import Pagestream, File
+from .models import File
 from .vectorstore import store_embeddings
 
 engine = create_engine(env.get("POSTGRES_URI"))
@@ -58,7 +58,7 @@ def ingest_pagestream(id, name, is_merged):
     process.join()
     minio.fput_object(env.get("STORAGE_BUCKET"), str(file.id), file_path)
 
-    logging.info(f"Extracting metadata from file {id}")
+    logging.info(f"Extracting metadata from file {file.id}")
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/pdf",
@@ -66,21 +66,23 @@ def ingest_pagestream(id, name, is_merged):
     res = requests.put(env.get("TIKA_URI"), data=open(file_path, "rb"), headers=headers)
     body = res.json()
 
-    logging.info(f"Generating embeddings for file {id}")
+    logging.info(f"Generating embeddings for file {file.id}")
     document = html.document_fromstring(body.pop("X-TIKA:content", None))
     # Pages relative to file (not pagestream containing file)
     pages = [
-        {"file_id": id, "index": index, "contents": page.text_content()}
+        {"file_id": str(file.id), "index": index, "contents": page.text_content()}
         for index, page in enumerate(document.find_class("page"))
     ]
     store_embeddings(pages)
 
-    logging.info(f"Indexing file {id}")
-    body["insight:filename"] = name
+    logging.info(f"Indexing file {file.id}")
+    body["insight:filename"] = file.name
     body["insight:pages"] = pages
 
-    res = requests.put(f"{env.get('ELASTICSEARCH_URI')}/insight/_doc/{id}", json=body)
+    res = requests.put(
+        f"{env.get('ELASTICSEARCH_URI')}/insight/_doc/{file.id}", json=body
+    )
     if res.status_code != 201:
         raise Exception(res.text)
 
-    logging.info(f"Done processing of file {id}")
+    logging.info(f"Done processing of file {file.id}")
