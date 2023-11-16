@@ -5,7 +5,7 @@ import os
 import logging
 import requests
 from sqlalchemy import create_engine, text
-from .ingestors import ingest_file, ingest_pagestream
+from .ingestors import ingest_pagestream
 from .vectorstore import answer_prompt
 
 logging.basicConfig(level=logging.INFO)
@@ -41,10 +41,6 @@ def reader():
         match notification.channel:
             case "pagestream":
                 ingest_pagestream(**object)
-            case "file":
-                ingest_file(**object)
-            case "prompt":
-                answer_prompt(**object)
 
     conn.connection.notifies.clear()
 

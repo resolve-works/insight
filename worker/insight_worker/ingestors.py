@@ -1,7 +1,8 @@
-import os
 import logging
 import ocrmypdf
 import requests
+from os import environ as env
+from minio import Minio
 from lxml import html
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
@@ -12,19 +13,14 @@ from sqlalchemy import create_engine
 from .models import Pagestream, File
 from .vectorstore import store_embeddings
 
-engine = create_engine(os.environ.get("POSTGRES_URI"))
+engine = create_engine(env.get("POSTGRES_URI"))
 
-
-def ingest_pagestream(id, name, is_merged):
-    logging.info(f"Ingesting pagestream {id}")
-
-    with Pdf.open(path) as pdf:
-        to_page = len(pdf.pages)
-
-    with Session(engine) as session:
-        file = File(name=name, from_page=0, to_page=to_page, pagestream_id=id)
-        session.add(file)
-        session.commit()
+minio = Minio(
+    env.get("STORAGE_ENDPOINT"),
+    access_key=env.get("STORAGE_ACCESS_KEY"),
+    secret_key=env.get("STORAGE_SECRET_KEY"),
+    secure=env.get("STORAGE_SECURE").lower() == "true",
+)
 
 
 def ocrmypdf_process(input_file, output_file):
@@ -37,46 +33,37 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def extract_file(input_file, from_page, to_page, output_file):
-    destination = Pdf.new()
-    with Pdf.open(input_file) as pdf:
-        for page in pdf.pages[from_page:to_page]:
-            destination.pages.append(page)
-        destination.copy_foreign(pdf.docinfo)
-        destination.save(output_file)
+def ingest_pagestream(id, name, is_merged):
+    logging.info(f"Ingesting pagestream {id}")
 
+    temp_path = Path(TemporaryDirectory().name)
+    pagestream_path = temp_path / "pagestream.pdf"
+    file_path = temp_path / "file.pdf"
 
-def ingest_file(id, pagestream_id, from_page, to_page, name):
-    with Session(engine) as session:
-        pagestream = session.query(Pagestream).get(pagestream_id)
+    minio.fget_object(env.get("STORAGE_BUCKET"), id, pagestream_path)
 
-    files_path = Path(os.environ.get("INSIGHT_FILES_PATH"))
-    if not files_path.exists():
-        files_path.mkdir()
+    with Pdf.open(pagestream_path) as pdf:
+        to_page = len(pdf.pages)
 
-    if pagestream.is_merged:
-        logging.info(f"Saving pages {from_page}:{to_page} as file {id}")
-        # Extract file from pagestream
-        source_file = Path(TemporaryDirectory()) / "file.pdf"
-        extract_file(pagestream.path, from_page, to_page, source_file)
-    else:
-        logging.info(f"Saving pagestream {pagestream_id} as file {id}")
-        source_file = pagestream.path
+    session = Session(engine)
+    file = File(name=name, from_page=0, to_page=to_page, pagestream_id=id)
+    session.add(file)
+    session.commit()
+
+    logging.info(f"Saving pagestream {id} as file {file.id}")
 
     # OCR & optimize new PDF
-    output_file = files_path / f"{id}.pdf"
-    process = Process(target=ocrmypdf_process, args=(source_file, output_file))
+    process = Process(target=ocrmypdf_process, args=(pagestream_path, file_path))
     process.start()
     process.join()
+    minio.fput_object(env.get("STORAGE_BUCKET"), str(file.id), file_path)
 
     logging.info(f"Extracting metadata from file {id}")
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/pdf",
     }
-    res = requests.put(
-        os.environ.get("TIKA_URI"), data=open(output_file, "rb"), headers=headers
-    )
+    res = requests.put(env.get("TIKA_URI"), data=open(file_path, "rb"), headers=headers)
     body = res.json()
 
     logging.info(f"Generating embeddings for file {id}")
@@ -92,9 +79,7 @@ def ingest_file(id, pagestream_id, from_page, to_page, name):
     body["insight:filename"] = name
     body["insight:pages"] = pages
 
-    res = requests.put(
-        f"{os.environ.get('ELASTICSEARCH_URI')}/insight/_doc/{id}", json=body
-    )
+    res = requests.put(f"{env.get('ELASTICSEARCH_URI')}/insight/_doc/{id}", json=body)
     if res.status_code != 201:
         raise Exception(res.text)
 
