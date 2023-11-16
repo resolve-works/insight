@@ -28,8 +28,6 @@ begin
 end;
 $$;
 
-create type pagestream_status as enum ('uploading', 'ready');
-
 \ir model/pagestream.sql
 \ir model/file.sql
 \ir model/prompt.sql
