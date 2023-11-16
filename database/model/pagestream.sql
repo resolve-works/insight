@@ -7,13 +7,13 @@ create or replace function create_pagestream(name text) returns json language pl
     plan = plpy.prepare("insert into private.pagestream (name) values ($1) returning *", ["text"])
     results = plpy.execute(plan, [name])
 
-    client = Minio(
+    minio = Minio(
         env.get("STORAGE_ENDPOINT"), 
         access_key=env.get("STORAGE_ACCESS_KEY"), 
         secret_key=env.get("STORAGE_SECRET_KEY"),
         secure=env.get("STORAGE_SECURE").lower() == "true"
     )
-    results[0]["url"] = client.presigned_put_object(env.get("STORAGE_BUCKET"), results[0]["id"])
+    results[0]["url"] = minio.presigned_put_object(env.get("STORAGE_BUCKET"), results[0]["id"])
     return json.dumps(results[0])
 $$;
 

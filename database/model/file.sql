@@ -1,4 +1,5 @@
 
+
 create table private.file (
     id uuid not null default gen_random_uuid(),
     pagestream_id uuid not null,
@@ -9,5 +10,7 @@ create table private.file (
     primary key (id),
     foreign key(pagestream_id) references private.pagestream (id) match simple on delete restrict not valid
 );
-create trigger notify_file after insert on private.file for each row execute function notify();
 
+grant select, insert on private.file to web_user;
+
+create view public.file as select * from private.file;

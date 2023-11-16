@@ -19,15 +19,6 @@ grant web_user to :pg_api_user;
 
 create role :pg_worker_user noinherit login password :'pg_worker_password';
 
-create or replace function notify()
-returns trigger language plpgsql as
-$$
-begin
-    perform pg_notify(tg_table_name, to_json(new)::text);
-    return null;
-end;
-$$;
-
 \ir model/pagestream.sql
 \ir model/file.sql
 \ir model/prompt.sql
