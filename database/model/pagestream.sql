@@ -17,6 +17,15 @@ create or replace function create_pagestream(name text) returns json language pl
     return json.dumps(results[0])
 $$;
 
+create or replace function ingest_pagestream(id uuid) returns void language plpython3u as $$
+    import json
+    plan = plpy.prepare("select * from private.pagestream where id=$1", ["uuid"])
+    results = plpy.execute(plan, [id])
+
+    plan = plpy.prepare("notify pagestream, '{payload}'".format(payload=json.dumps(results[0])))
+    plpy.execute(plan)
+$$;
+
 create table if not exists private.pagestream (
     id uuid not null default gen_random_uuid(),
     name text not null,

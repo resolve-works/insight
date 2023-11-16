@@ -89,6 +89,8 @@ services:
 
   minio:
     image: minio/minio
+    ports:
+      - 9000:9000
     entrypoint: sh
     command: -c 'mkdir /data/${STORAGE_BUCKET} && minio server /data'
     environment:
