@@ -15,7 +15,7 @@ from .vectorstore import store_embeddings
 engine = create_engine(os.environ.get("POSTGRES_URI"))
 
 
-def ingest_pagestream(id, path, name, is_merged):
+def ingest_pagestream(id, name, is_merged):
     logging.info(f"Ingesting pagestream {id}")
 
     with Pdf.open(path) as pdf:

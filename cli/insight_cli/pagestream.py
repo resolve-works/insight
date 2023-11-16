@@ -1,5 +1,7 @@
 import click
+import requests
 from tqdm import tqdm
+from tqdm.utils import CallbackIOWrapper
 from pathlib import Path
 from .config import config
 from .oauth import OAuthSession
@@ -39,11 +41,34 @@ def create(files):
         res = session.post(
             f"{config['api']['endpoint']}/api/v1/rpc/create_pagestream",
             json={"name": path.name},
-            headers={"Prefer": "return=representation"},
         )
 
-        if res.status_code != 201:
+        if res.status_code != 200:
             print(res.text)
             exit(1)
-        else:
-            print(res.json())
+
+        pagestream = res.json()
+
+        with open(path, "rb") as f:
+            with tqdm(
+                desc=path.name,
+                total=path.stat().st_size,
+                unit="iB",
+                unit_scale=True,
+                unit_divisor=1024,
+            ) as t:
+                reader_wrapper = CallbackIOWrapper(t.update, f, "read")
+                res = requests.put(pagestream["url"], data=reader_wrapper)
+
+            if res.status_code != 200:
+                print(res.text)
+                exit(1)
+
+        res = session.post(
+            f"{config['api']['endpoint']}/api/v1/rpc/ingest_pagestream",
+            json={"id": pagestream["id"]},
+        )
+
+        if res.status_code != 204:
+            print(res.text)
+            exit(1)
