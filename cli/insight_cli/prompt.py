@@ -28,4 +28,4 @@ def create(prompt):
     if res.status_code != 201:
         exit(1)
     else:
-        print(res.json())
+        print(res.json()[0]["response"])
