@@ -45,7 +45,7 @@ def search(string):
         },
     }
 
-    res = requests.get(f"{config['api']['endpoint']}/api/v1/search", json=body)
+    res = requests.get(f"{config['api']['endpoint']}/api/v1/index/_search", json=body)
 
     for file in res.json()["hits"]["hits"]:
         click.echo("\033[1m" + file["_source"]["insight:filename"].upper() + "\033[0m")

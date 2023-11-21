@@ -8,12 +8,31 @@ from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from pikepdf import Pdf
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
-from .models import File
+from oauthlib.oauth2 import BackendApplicationClient
+from requests_oauthlib import OAuth2Session
 from .vectorstore import store_embeddings
 
-engine = create_engine(env.get("POSTGRES_URI"))
+client = BackendApplicationClient(client_id=env.get("AUTH_CLIENT_ID"))
+oauth = OAuth2Session(client=client)
+token = oauth.fetch_token(
+    token_url=env.get("AUTH_TOKEN_ENDPOINT"),
+    client_id=env.get("AUTH_CLIENT_ID"),
+    client_secret=env.get("AUTH_CLIENT_SECRET"),
+)
+
+TOKEN = None
+
+
+def save_token(token):
+    TOKEN = token
+
+
+client = OAuth2Session(
+    env.get("AUTH_CLIENT_ID"),
+    token=token,
+    auto_refresh_url=env.get("AUTH_TOKEN_ENDPOINT"),
+    token_updater=save_token,
+)
 
 minio = Minio(
     env.get("STORAGE_ENDPOINT"),
@@ -45,20 +64,22 @@ def ingest_pagestream(id, name, is_merged):
     with Pdf.open(pagestream_path) as pdf:
         to_page = len(pdf.pages)
 
-    session = Session(engine)
-    file = File(name=name, from_page=0, to_page=to_page, pagestream_id=id)
-    session.add(file)
-    session.commit()
+    res = client.post(
+        f"{env.get('API_ENDPOINT')}/api/v1/file",
+        json={"pagestream_id": id, "name": name, "from_page": 0, "to_page": to_page},
+        headers={"Prefer": "return=representation"},
+    )
+    file = res.json()[0]
 
-    logging.info(f"Saving pagestream {id} as file {file.id}")
+    logging.info(f"Saving pagestream {id} as file {file['id']}")
 
     # OCR & optimize new PDF
     process = Process(target=ocrmypdf_process, args=(pagestream_path, file_path))
     process.start()
     process.join()
-    minio.fput_object(env.get("STORAGE_BUCKET"), str(file.id), file_path)
+    minio.fput_object(env.get("STORAGE_BUCKET"), str(file["id"]), file_path)
 
-    logging.info(f"Extracting metadata from file {file.id}")
+    logging.info(f"Extracting metadata from file {file['id']}")
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/pdf",
@@ -66,29 +87,29 @@ def ingest_pagestream(id, name, is_merged):
     res = requests.put(env.get("TIKA_URI"), data=open(file_path, "rb"), headers=headers)
     body = res.json()
 
-    logging.info(f"Generating embeddings for file {file.id}")
+    logging.info(f"Generating embeddings for file {file['id']}")
     document = html.document_fromstring(body.pop("X-TIKA:content", None))
     pages = [
         {
             "pagestream_id": id,
-            "index": file.from_page + index,
+            "index": file["from_page"] + index,
             "contents": page.text_content(),
         }
         for index, page in enumerate(document.find_class("page"))
     ]
     store_embeddings(pages)
 
-    logging.info(f"Indexing file {file.id}")
-    body["insight:filename"] = file.name
+    logging.info(f"Indexing file {file['id']}")
+    body["insight:filename"] = file["name"]
     body["insight:pages"] = [
-        {"file_id": str(file.id), "index": index, "contents": page.text_content()}
+        {"file_id": file["id"], "index": index, "contents": page.text_content()}
         for index, page in enumerate(document.find_class("page"))
     ]
 
     res = requests.put(
-        f"{env.get('ELASTICSEARCH_URI')}/insight/_doc/{file.id}", json=body
+        f"{env.get('API_ENDPOINT')}/api/v1/index/_doc/{file['id']}", json=body
     )
     if res.status_code != 201:
         raise Exception(res.text)
 
-    logging.info(f"Done processing of file {file.id}")
+    logging.info(f"Done processing of file {file['id']}")
