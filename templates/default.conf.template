@@ -8,8 +8,8 @@ upstream elasticsearch {
 }
 
 server {
-    location /api/v1/search {
-        proxy_pass http://elasticsearch/insight/_search;
+    location /api/v1/index {
+        proxy_pass http://elasticsearch/insight;
     }
 
     location /api/v1/ {
