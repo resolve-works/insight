@@ -42,6 +42,7 @@ create table if not exists private.prompt (
 
     primary key (id)
 );
+grant select, update, insert on private.prompt to insight_user;
 
 create table if not exists private.source (
     prompt_id uuid not null,
@@ -52,11 +53,11 @@ create table if not exists private.source (
     constraint fk_prompt foreign key(prompt_id) references private.prompt(id) on delete cascade,
     constraint fk_pagestream foreign key(pagestream_id) references private.pagestream(id) on delete cascade
 );
+grant select, insert on private.source to insight_user;
 
 create or replace view source as select * from private.source;
-create or replace view prompt as select * from private.prompt;
-
-grant select, update, insert on private.prompt to insight_user;
-grant select, insert on private.source to insight_user;
 grant select, insert on public.prompt to insight_user;
+
+create or replace view prompt as select * from private.prompt;
 grant select, insert on public.source to insight_user;
+

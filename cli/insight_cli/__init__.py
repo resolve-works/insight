@@ -3,7 +3,7 @@ import requests
 from .config import config
 from .pagestream import pagestream
 from .prompt import prompt
-from .oauth import authorize_device, delete_tokens
+from .oauth import authorize_device, delete_token
 
 
 @click.group()
@@ -22,7 +22,7 @@ def login():
 
 @cli.command()
 def logout():
-    delete_tokens()
+    delete_token()
 
 
 @cli.command()

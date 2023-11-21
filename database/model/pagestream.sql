@@ -32,6 +32,7 @@ create table if not exists private.pagestream (
     is_merged boolean not null default false,
     primary key (id)
 );
-
 grant select, insert on private.pagestream to insight_user;
 
+create or replace view pagestream as select * from private.pagestream;
+grant select on pagestream to insight_user;
