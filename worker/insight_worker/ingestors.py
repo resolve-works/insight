@@ -28,7 +28,7 @@ def save_token(new_token):
 
 
 session = OAuth2Session(
-    env.get("AUTH_CLIENT_ID"),
+    client_id=env.get("AUTH_CLIENT_ID"),
     token=token,
     auto_refresh_url=env.get("AUTH_TOKEN_ENDPOINT"),
     token_updater=save_token,

@@ -51,8 +51,6 @@ def search(string):
         click.echo("\033[1m" + file["_source"]["insight:filename"].upper() + "\033[0m")
         for page in file["inner_hits"]["insight:pages"]["hits"]["hits"]:
             click.echo(f"Page {page['_source']['index'] + 1}")
-            for index, highlight in enumerate(
-                page["highlight"]["insight:pages.contents"]
-            ):
+            for highlight in page["highlight"]["insight:pages.contents"]:
                 highlight = highlight.replace("\n", "")
-                click.echo(f"\t{index} - {highlight}")
+                click.echo(f"\t{highlight}")

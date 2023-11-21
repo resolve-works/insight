@@ -25,9 +25,6 @@ def delete_token(token):
 client = OAuth2Session(
     client_id=config["auth"]["client-id"],
     token=get_token(),
-    auto_refresh_kwargs={
-        "client_id": config["auth"]["client-id"],
-    },
     auto_refresh_url=config["auth"]["token-endpoint"],
     token_updater=set_token,
 )

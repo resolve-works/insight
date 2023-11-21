@@ -1,5 +1,4 @@
 import os
-import logging
 from llama_index import VectorStoreIndex
 from llama_index.vector_stores import PGVectorStore
 from llama_index.schema import TextNode, NodeRelationship, RelatedNodeInfo
