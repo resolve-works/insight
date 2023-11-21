@@ -1,7 +1,7 @@
 
 
 create table private.file (
-    id uuid not null default gen_random_uuid(),
+    id uuid default gen_random_uuid(),
     pagestream_id uuid not null,
     from_page integer not null,
     to_page integer not null,

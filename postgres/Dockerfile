@@ -5,3 +5,6 @@ WORKDIR /home
 COPY requirements.txt .
 RUN pip install --break-system-packages -r requirements.txt
 RUN rm requirements.txt
+
+ENV NLTK_DATA=/tmp/llama_index
+RUN python3 -c 'import nltk; import os; nltk.download("punkt", download_dir=os.environ.get("NLTK_DATA"));'

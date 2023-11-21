@@ -1,6 +1,8 @@
 
-create or replace function answer_prompt() returns trigger language plpython3u as $$
+create or replace function create_prompt(query text) returns json language plpython3u as $$
     import os
+    import json
+    import logging
     from llama_index import VectorStoreIndex
     from llama_index.vector_stores import PGVectorStore
 
@@ -17,17 +19,33 @@ create or replace function answer_prompt() returns trigger language plpython3u a
     )
     vector_store_index = VectorStoreIndex.from_vector_store(vector_store)
     query_engine = vector_store_index.as_query_engine()
+    response = query_engine.query(query)
+    logging.info(response.source_nodes)
 
-    TD["new"]["response"] = query_engine.query(TD["new"]["query"])
-    return "MODIFY"
+    plan = plpy.prepare(
+        "insert into private.prompt (query, response) values ($1, $2) returning *",
+        ["text", "text"]
+    )
+    results = plpy.execute(plan, [query, response])
+    return json.dumps(results[0])
 $$;
 
-create table if not exists public.prompt (
-    id uuid not null default gen_random_uuid(),
+create table if not exists private.prompt (
+    id uuid default gen_random_uuid(),
     query text not null,
     response text,
 
     primary key (id)
 );
-create or replace trigger answer_prompt before insert on public.prompt for each row execute function answer_prompt();
 
+create table if not exists private.source (
+    prompt_id uuid not null,
+    pagestream_id uuid not null,
+    index integer not null,
+
+    constraint fk_prompt foreign key(prompt_id) references private.prompt(id) on delete cascade,
+    constraint fk_pagestream foreign key(pagestream_id) references private.pagestream(id) on delete cascade
+);
+
+grant select, insert on private.prompt to web_user;
+grant select, insert on private.source to web_user;
