@@ -28,15 +28,15 @@ def logout():
 def prompt(query):
     session = OAuthSession()
     res = session.post(
-        f"{config['api']['endpoint']}/api/v1/prompt",
+        f"{config['api']['endpoint']}/api/v1/rpc/create_prompt",
         json={"query": query},
         headers={"Prefer": "return=representation"},
     )
 
-    if res.status_code != 201:
+    if res.status_code != 200:
         exit(1)
     else:
-        print(res.json()[0]["response"])
+        print(res.json())
 
 
 @cli.command()

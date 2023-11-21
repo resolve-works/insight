@@ -27,7 +27,7 @@ create or replace function ingest_pagestream(id uuid) returns void language plpy
 $$;
 
 create table if not exists private.pagestream (
-    id uuid not null default gen_random_uuid(),
+    id uuid default gen_random_uuid(),
     name text not null,
     is_merged boolean not null default false,
     primary key (id)
