@@ -26,6 +26,11 @@ client = OAuth2Session(
     client_id=config["auth"]["client-id"],
     token=get_token(),
     auto_refresh_url=config["auth"]["token-endpoint"],
+    # Why is this kwarg necessary? Refresh errors without it while this is not
+    # needed in the worker oauth logic
+    auto_refresh_kwargs={
+        "client_id": config["auth"]["client-id"],
+    },
     token_updater=set_token,
 )
 

@@ -37,9 +37,10 @@ def create(query):
     )
 
     if res.status_code != 200:
+        print(res.text)
         exit(1)
 
     res = client.get(
-        f"{config['api']['endpoint']}/api/v1/prompt?select=query,response,source(index,...file(name))&id=eq.{res.json()[0]['id']}"
+        f"{config['api']['endpoint']}/api/v1/prompt?select=response,source(index,...file(name))&id=eq.{res.json()[0]['id']}"
     )
     print_prompts(res.json())

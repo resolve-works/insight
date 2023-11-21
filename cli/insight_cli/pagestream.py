@@ -43,7 +43,7 @@ def create(files):
         )
 
         if res.status_code != 200:
-            logging.info(res.text)
+            print(res.text)
             exit(1)
 
     pagestream = res.json()
