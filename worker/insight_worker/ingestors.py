@@ -68,16 +68,22 @@ def ingest_pagestream(id, name, is_merged):
 
     logging.info(f"Generating embeddings for file {file.id}")
     document = html.document_fromstring(body.pop("X-TIKA:content", None))
-    # Pages relative to file (not pagestream containing file)
     pages = [
-        {"file_id": str(file.id), "index": index, "contents": page.text_content()}
+        {
+            "pagestream_id": id,
+            "index": file.from_page + index,
+            "contents": page.text_content(),
+        }
         for index, page in enumerate(document.find_class("page"))
     ]
     store_embeddings(pages)
 
     logging.info(f"Indexing file {file.id}")
     body["insight:filename"] = file.name
-    body["insight:pages"] = pages
+    body["insight:pages"] = [
+        {"file_id": str(file.id), "index": index, "contents": page.text_content()}
+        for index, page in enumerate(document.find_class("page"))
+    ]
 
     res = requests.put(
         f"{env.get('ELASTICSEARCH_URI')}/insight/_doc/{file.id}", json=body

@@ -2,6 +2,7 @@ import click
 import requests
 from .config import config
 from .pagestream import pagestream
+from .prompt import prompt
 from .oauth import OAuthSession, authorize_device, delete_tokens
 
 
@@ -11,6 +12,7 @@ def cli():
 
 
 cli.add_command(pagestream)
+cli.add_command(prompt)
 
 
 @cli.command()
@@ -21,22 +23,6 @@ def login():
 @cli.command()
 def logout():
     delete_tokens()
-
-
-@cli.command()
-@click.argument("query")
-def prompt(query):
-    session = OAuthSession()
-    res = session.post(
-        f"{config['api']['endpoint']}/api/v1/rpc/create_prompt",
-        json={"query": query},
-        headers={"Prefer": "return=representation"},
-    )
-
-    if res.status_code != 200:
-        exit(1)
-    else:
-        print(res.json())
 
 
 @cli.command()

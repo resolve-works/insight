@@ -6,7 +6,6 @@ import logging
 import requests
 from sqlalchemy import create_engine, text
 from .ingestors import ingest_pagestream
-from .vectorstore import answer_prompt
 
 logging.basicConfig(level=logging.INFO)
 

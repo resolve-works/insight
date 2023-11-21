@@ -21,8 +21,8 @@ def store_embeddings(pages):
     nodes = [
         TextNode(
             text=page["contents"],
-            id_=f"{page['file_id']}_{page['index']}",
-            metadata={"file_id": page["file_id"], "index": page["index"]},
+            id_=f"{page['pagestream_id']}_{page['index']}",
+            metadata={"pagestream_id": page["pagestream_id"], "index": page["index"]},
         )
         for page in pages
     ]
@@ -34,11 +34,3 @@ def store_embeddings(pages):
             node_id=previous.node_id
         )
     vector_store_index.insert_nodes(nodes)
-
-
-def answer_prompt(id, query):
-    query_engine = vector_store_index.as_query_engine()
-    response = query_engine.query(query)
-    logging.info(f"query: {query}")
-    logging.info(f"response: {response}")
-    logging.info(f"nodes: {response.source_nodes}")
