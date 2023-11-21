@@ -18,8 +18,8 @@ can be provided by most oAuth providers. For example, to use
 [Keycloak](https://www.keycloak.org/), you'd have to:
 
 - Create a realm `insight`
-- Create a client `insight-cli`
-- Add the `web_user` as a realm role
+- Create a client `insight_user` with device auth flow enabled
+- Create a client `insight_worker` with service account flow enabled
 
 You'll need to pass a Json Web Key (JWK) to Postgrest so it can decode the
 tokens. You can get the key from your oAuth provider. For example, for a

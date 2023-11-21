@@ -18,8 +18,8 @@ services:
       PGRST_DB_URI: postgresql://${PG_API_USER}:${PG_API_PASSWORD}@postgres:5432/insight
       PGRST_DB_SCHEMAS: public
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
-      PGRST_JWT_ROLE_CLAIM_KEY: .realm_access.roles[2]
-      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_JWT_ROLE_CLAIM_KEY: .azp
+      PGRST_DB_ANON_ROLE: insight_anon
     secrets:
       - jwk
     depends_on:

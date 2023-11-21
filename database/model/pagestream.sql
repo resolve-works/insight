@@ -33,5 +33,5 @@ create table if not exists private.pagestream (
     primary key (id)
 );
 
-grant select, insert on private.pagestream to web_user;
+grant select, insert on private.pagestream to insight_user;
 

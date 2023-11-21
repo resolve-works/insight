@@ -12,22 +12,22 @@ from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from .vectorstore import store_embeddings
 
+
 client = BackendApplicationClient(client_id=env.get("AUTH_CLIENT_ID"))
-oauth = OAuth2Session(client=client)
-token = oauth.fetch_token(
-    token_url=env.get("AUTH_TOKEN_ENDPOINT"),
+token = OAuth2Session(client=client).fetch_token(
     client_id=env.get("AUTH_CLIENT_ID"),
+    token_url=env.get("AUTH_TOKEN_ENDPOINT"),
     client_secret=env.get("AUTH_CLIENT_SECRET"),
 )
 
-TOKEN = None
+
+def save_token(new_token):
+    global token
+    logging.info("Storing token")
+    token = new_token
 
 
-def save_token(token):
-    TOKEN = token
-
-
-client = OAuth2Session(
+session = OAuth2Session(
     env.get("AUTH_CLIENT_ID"),
     token=token,
     auto_refresh_url=env.get("AUTH_TOKEN_ENDPOINT"),
@@ -64,7 +64,7 @@ def ingest_pagestream(id, name, is_merged):
     with Pdf.open(pagestream_path) as pdf:
         to_page = len(pdf.pages)
 
-    res = client.post(
+    res = session.post(
         f"{env.get('API_ENDPOINT')}/api/v1/file",
         json={"pagestream_id": id, "name": name, "from_page": 0, "to_page": to_page},
         headers={"Prefer": "return=representation"},

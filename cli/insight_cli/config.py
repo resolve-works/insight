@@ -13,7 +13,7 @@ if not config_file.exists():
     config["auth"] = {
         "device-endpoint": "https://secure.ftm.nl/realms/insight/protocol/openid-connect/auth/device",
         "token-endpoint": "https://secure.ftm.nl/realms/insight/protocol/openid-connect/token",
-        "client-id": "insight-cli",
+        "client-id": "insight_user",
     }
     config.write(open(config_file, "w"))
 else:

@@ -10,7 +10,9 @@ create table private.file (
     primary key (id),
     foreign key(pagestream_id) references private.pagestream (id) match simple on delete restrict not valid
 );
-
-grant select, insert on private.file to web_user;
+grant select on private.file to insight_user;
+grant select, insert on private.file to insight_worker;
 
 create view public.file as select * from private.file;
+grant select on public.file to insight_user;
+grant select, insert on public.file to insight_worker;

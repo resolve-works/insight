@@ -56,7 +56,7 @@ create table if not exists private.source (
 create or replace view source as select * from private.source;
 create or replace view prompt as select * from private.prompt;
 
-grant select, update, insert on private.prompt to web_user;
-grant select, insert on private.source to web_user;
-grant select, insert on public.prompt to web_user;
-grant select, insert on public.source to web_user;
+grant select, update, insert on private.prompt to insight_user;
+grant select, insert on private.source to insight_user;
+grant select, insert on public.prompt to insight_user;
+grant select, insert on public.source to insight_user;

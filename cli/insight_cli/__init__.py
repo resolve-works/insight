@@ -3,7 +3,7 @@ import requests
 from .config import config
 from .pagestream import pagestream
 from .prompt import prompt
-from .oauth import OAuthSession, authorize_device, delete_tokens
+from .oauth import authorize_device, delete_tokens
 
 
 @click.group()
