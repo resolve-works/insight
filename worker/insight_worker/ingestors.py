@@ -36,6 +36,7 @@ session = OAuth2Session(
     auto_refresh_url=env.get("AUTH_TOKEN_ENDPOINT"),
     auto_refresh_kwargs={
         "client_id": env.get("AUTH_CLIENT_ID"),
+        "client_secret": env.get("AUTH_CLIENT_SECRET"),
     },
     token_updater=save_token,
 )
