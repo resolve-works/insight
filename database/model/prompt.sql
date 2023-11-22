@@ -17,7 +17,7 @@ create or replace function create_prompt(query text) returns json language plpyt
         embed_dim=1536,
     )
     vector_store_index = VectorStoreIndex.from_vector_store(vector_store)
-    query_engine = vector_store_index.as_query_engine()
+    query_engine = vector_store_index.as_query_engine(similarity_top_k=3)
     response = query_engine.query(query)
 
     plan = plpy.prepare("insert into private.prompt (query, response) values ($1, $2) returning id", ["text", "text"])

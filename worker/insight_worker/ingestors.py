@@ -13,6 +13,8 @@ from requests_oauthlib import OAuth2Session
 from .vectorstore import store_embeddings
 
 
+logging.basicConfig(level=logging.INFO)
+
 client = BackendApplicationClient(client_id=env.get("AUTH_CLIENT_ID"))
 token = OAuth2Session(client=client).fetch_token(
     client_id=env.get("AUTH_CLIENT_ID"),
@@ -24,6 +26,7 @@ token = OAuth2Session(client=client).fetch_token(
 def save_token(new_token):
     global token
     logging.info("Storing token")
+    logging.info(new_token.keys())
     token = new_token
 
 
@@ -70,7 +73,7 @@ def ingest_pagestream(id, name, is_merged):
 
     res = session.post(
         f"{env.get('API_ENDPOINT')}/api/v1/file",
-        json={"pagestream_id": id, "name": name, "from_page": 0, "to_page": to_page},
+        data={"pagestream_id": id, "name": name, "from_page": 0, "to_page": to_page},
         headers={"Prefer": "return=representation"},
     )
     file = res.json()[0]

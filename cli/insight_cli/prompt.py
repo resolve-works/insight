@@ -11,7 +11,8 @@ def print_prompts(prompts):
         click.echo(f"Response: {prompt['response']}")
         for file_name, pages in groupby(prompt["source"], lambda x: x.pop("name")):
             click.echo(f"\033[1m" + file_name.upper() + "\033[0m")
-            click.echo(", ".join(map(lambda page: f"Page {page['index'] + 1}", pages)))
+            for page in pages:
+                click.echo(f"{page['score']}\t- Page {page['index'] + 1}")
 
 
 @click.group()
@@ -41,6 +42,6 @@ def create(query):
         exit(1)
 
     res = client.get(
-        f"{config['api']['endpoint']}/api/v1/prompt?select=response,source(index,...file(name))&id=eq.{res.json()[0]['id']}"
+        f"{config['api']['endpoint']}/api/v1/prompt?select=response,source(score, index,...file(name))&source.order=score.desc&id=eq.{res.json()[0]['id']}"
     )
     print_prompts(res.json())
