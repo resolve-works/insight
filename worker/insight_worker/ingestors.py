@@ -15,32 +15,6 @@ from .vectorstore import store_embeddings
 
 logging.basicConfig(level=logging.INFO)
 
-client = BackendApplicationClient(client_id=env.get("AUTH_CLIENT_ID"))
-token = OAuth2Session(client=client).fetch_token(
-    client_id=env.get("AUTH_CLIENT_ID"),
-    token_url=env.get("AUTH_TOKEN_ENDPOINT"),
-    client_secret=env.get("AUTH_CLIENT_SECRET"),
-)
-
-
-def save_token(new_token):
-    global token
-    logging.info("Storing token")
-    logging.info(new_token.keys())
-    token = new_token
-
-
-session = OAuth2Session(
-    client_id=env.get("AUTH_CLIENT_ID"),
-    token=token,
-    auto_refresh_url=env.get("AUTH_TOKEN_ENDPOINT"),
-    auto_refresh_kwargs={
-        "client_id": env.get("AUTH_CLIENT_ID"),
-        "client_secret": env.get("AUTH_CLIENT_SECRET"),
-    },
-    token_updater=save_token,
-)
-
 minio = Minio(
     env.get("STORAGE_ENDPOINT"),
     access_key=env.get("STORAGE_ACCESS_KEY"),
@@ -72,7 +46,13 @@ def ingest_pagestream(id, name, is_merged):
     with Pdf.open(pagestream_path) as pdf:
         to_page = len(pdf.pages)
 
-    res = session.post(
+    client = BackendApplicationClient(client_id=env.get("AUTH_CLIENT_ID"))
+    token = OAuth2Session(client=client).fetch_token(
+        token_url=env.get("AUTH_TOKEN_ENDPOINT"),
+        client_secret=env.get("AUTH_CLIENT_SECRET"),
+    )
+
+    res = OAuth2Session(token=token).post(
         f"{env.get('API_ENDPOINT')}/api/v1/file",
         data={"pagestream_id": id, "name": name, "from_page": 0, "to_page": to_page},
         headers={"Prefer": "return=representation"},
