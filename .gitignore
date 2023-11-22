@@ -2,4 +2,5 @@
 *.pyo
 .jwk
 .env
+.DS_Store
 /data
