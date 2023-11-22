@@ -32,7 +32,7 @@ services:
     command: watchmedo auto-restart -d=/usr/local/lib/python3.11/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages
     environment:
       API_ENDPOINT: http://nginx
-      OAUTHLIB_INSECURE_TRANSPORT: True
+      OAUTHLIB_INSECURE_TRANSPORT: 1
       AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
@@ -107,7 +107,7 @@ services:
   cli:
     build: cli
     environment:
-      OAUTHLIB_INSECURE_TRANSPORT: True
+      OAUTHLIB_INSECURE_TRANSPORT: 1
     volumes:
       - ./cli/insight_cli:/usr/local/lib/python3.11/site-packages/insight_cli
       - ./data:/root/data

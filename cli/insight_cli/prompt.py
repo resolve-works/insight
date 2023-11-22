@@ -10,7 +10,7 @@ def print_prompts(prompts):
             click.echo(f"Query:    {prompt['query'].capitalize().rstrip('?')}?")
         click.echo(f"Response: {prompt['response']}")
         for file_name, pages in groupby(prompt["source"], lambda x: x.pop("name")):
-            click.echo(f"\033[1m" + file_name.upper() + "\033[0m")
+            click.echo("\033[1m" + file_name.upper() + "\033[0m")
             for page in pages:
                 click.echo(f"{page['score']}\t- Page {page['index'] + 1}")
 
@@ -30,10 +30,16 @@ def list():
 
 @prompt.command()
 @click.argument("query")
-def create(query):
+@click.option(
+    "--similarity-top-k",
+    default=3,
+    help="Number of pages that will be taken into the LLM context window.",
+)
+def create(query, similarity_top_k):
+    """Prompt LLM about pages similar to the query"""
     res = client.post(
         f"{config['api']['endpoint']}/api/v1/rpc/create_prompt",
-        data={"query": query},
+        data={"query": query, "similarity_top_k": similarity_top_k},
         headers={"Prefer": "return=representation"},
     )
 
