@@ -10,11 +10,13 @@ from .oauth import client
 
 @click.group()
 def pagestream():
+    """Manage PDF pagestreams."""
     pass
 
 
 @pagestream.command()
 def list():
+    """List uploaded PDF pagestreams."""
     res = client.get(f"{config['api']['endpoint']}/api/v1/pagestream")
     print(res.text)
 
@@ -36,6 +38,7 @@ def load_file(path):
 @pagestream.command()
 @click.argument("files", nargs=-1, type=click.Path(path_type=Path))
 def create(files):
+    """Ingest PDF pagestreams"""
     for path in files:
         res = client.post(
             f"{config['api']['endpoint']}/api/v1/rpc/create_pagestream",
