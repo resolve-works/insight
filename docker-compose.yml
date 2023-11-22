@@ -97,7 +97,7 @@ services:
   minio:
     image: minio/minio
     entrypoint: sh
-    command: -c 'mkdir /data/${STORAGE_BUCKET} && minio server /data'
+    command: -c 'mkdir -p /data/${STORAGE_BUCKET} && minio server /data'
     environment:
       MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
