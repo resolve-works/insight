@@ -6,9 +6,11 @@ services:
     image: nginx
     ports:
       - 8080:80
+      - 9000:9000
     volumes:
       - ./templates:/etc/nginx/templates
     depends_on:
+      - minio
       - postgrest
       - elasticsearch
 
@@ -94,8 +96,6 @@ services:
 
   minio:
     image: minio/minio
-    ports:
-      - 9000:9000
     entrypoint: sh
     command: -c 'mkdir /data/${STORAGE_BUCKET} && minio server /data'
     environment:
@@ -103,6 +103,14 @@ services:
       MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
     volumes:
       - minio-data:/data
+
+  cli:
+    build: cli
+    environment:
+      OAUTHLIB_INSECURE_TRANSPORT: True
+    volumes:
+      - ./cli/insight_cli:/usr/local/lib/python3.11/site-packages/insight_cli
+      - ./data:/root/data
 
 secrets:
    jwk:
