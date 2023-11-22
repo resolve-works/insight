@@ -36,6 +36,8 @@ with this token you can store it in a `.jwk` file:
 curl https://secure.ftm.nl/realms/insight/protocol/openid-connect/certs | jq -r ".keys[0]" > ./.jwk
 ```
 
+You'll also want to create a user for yourself in the `insight` realm.
+
 ### LLM configuration
 
 You'll need to add a [OpenAI api key](https://platform.openai.com/api-keys) to

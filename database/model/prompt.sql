@@ -1,5 +1,5 @@
 
-create or replace function create_prompt(query text) returns json language plpython3u as $$
+create or replace function create_prompt(query text, similarity_top_k integer) returns json language plpython3u as $$
     import os
     import json
     from llama_index import VectorStoreIndex
@@ -17,7 +17,7 @@ create or replace function create_prompt(query text) returns json language plpyt
         embed_dim=1536,
     )
     vector_store_index = VectorStoreIndex.from_vector_store(vector_store)
-    query_engine = vector_store_index.as_query_engine(similarity_top_k=3)
+    query_engine = vector_store_index.as_query_engine(similarity_top_k=similarity_top_k)
     response = query_engine.query(query)
 
     plan = plpy.prepare("insert into private.prompt (query, response) values ($1, $2) returning id", ["text", "text"])
