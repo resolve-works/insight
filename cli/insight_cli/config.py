@@ -8,7 +8,7 @@ config_file = xdg_config_home / "insight.conf"
 config = ConfigParser()
 if not config_file.exists():
     config["api"] = {
-        "endpoint": "http://localhost:8080",
+        "endpoint": "http://nginx",
     }
     config["auth"] = {
         "device-endpoint": "https://secure.ftm.nl/realms/insight/protocol/openid-connect/auth/device",

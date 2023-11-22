@@ -31,6 +31,9 @@ session = OAuth2Session(
     client_id=env.get("AUTH_CLIENT_ID"),
     token=token,
     auto_refresh_url=env.get("AUTH_TOKEN_ENDPOINT"),
+    auto_refresh_kwargs={
+        "client_id": env.get("AUTH_CLIENT_ID"),
+    },
     token_updater=save_token,
 )
 
@@ -47,7 +50,8 @@ def ocrmypdf_process(input_file, output_file):
         input_file,
         output_file,
         language="nld",
-        redo_ocr=True,
+        force_ocr=True,
+        color_conversion_strategy="RGB",
         # plugins=["insight_worker.plugin"],
     )
 

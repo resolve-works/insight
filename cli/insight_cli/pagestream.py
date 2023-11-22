@@ -46,28 +46,28 @@ def create(files):
             print(res.text)
             exit(1)
 
-    pagestream = res.json()
+        pagestream = res.json()
 
-    with open(path, "rb") as f:
-        with tqdm(
-            desc=path.name,
-            total=path.stat().st_size,
-            unit="iB",
-            unit_scale=True,
-            unit_divisor=1024,
-        ) as t:
-            reader_wrapper = CallbackIOWrapper(t.update, f, "read")
-            res = requests.put(pagestream["url"], data=reader_wrapper)
+        with open(path, "rb") as f:
+            with tqdm(
+                desc=path.name,
+                total=path.stat().st_size,
+                unit="iB",
+                unit_scale=True,
+                unit_divisor=1024,
+            ) as t:
+                reader_wrapper = CallbackIOWrapper(t.update, f, "read")
+                res = requests.put(pagestream["url"], data=reader_wrapper)
 
-            if res.status_code != 200:
-                logging.info(res.text)
-                exit(1)
+                if res.status_code != 200:
+                    logging.info(res.text)
+                    exit(1)
 
-            res = client.post(
-                f"{config['api']['endpoint']}/api/v1/rpc/ingest_pagestream",
-                data={"id": pagestream["id"]},
-            )
+                res = client.post(
+                    f"{config['api']['endpoint']}/api/v1/rpc/ingest_pagestream",
+                    data={"id": pagestream["id"]},
+                )
 
-            if res.status_code != 204:
-                logging.info(res.text)
-                exit(1)
+                if res.status_code != 204:
+                    logging.info(res.text)
+                    exit(1)

@@ -56,10 +56,10 @@ create table if not exists private.source (
 grant select, insert on private.source to insight_user;
 
 create or replace view source as select * from private.source;
-grant select, insert on public.prompt to insight_user;
+grant select, insert on public.source to insight_user;
 
 create or replace view prompt as select * from private.prompt;
-grant select, insert on public.source to insight_user;
+grant select, insert on public.prompt to insight_user;
 
 create or replace function file(source) returns setof file rows 1 as $$
   select * from file where pagestream_id = $1.pagestream_id and from_page <= $1.index and to_page > $1.index
