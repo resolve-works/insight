@@ -72,7 +72,7 @@ docker-compose down --volumes
 The easiest way to use the CLI in your development environment is by using the
 `cli` container:
 ```
-docker-compose run cli bash
+docker-compose run cli
 ```
 
 In this container you can run the `insight` tool.

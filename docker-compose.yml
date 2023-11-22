@@ -12,7 +12,7 @@ services:
     depends_on:
       - minio
       - postgrest
-      - elasticsearch
+      - opensearch
 
   postgrest:
     image: postgrest/postgrest
@@ -48,30 +48,26 @@ services:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
     depends_on:
       - tika
-      - elasticsearch
+      - opensearch
       - postgres
       - minio
 
   tika:
     image: apache/tika
 
-  elasticsearch:
-    image: elasticsearch:8.11.0
+  opensearch:
+    image: opensearchproject/opensearch
     ports:
       - 9200:9200
-    deploy:
-      resources:
-        limits:
-          memory: 1G
     ulimits:
       memlock:
         soft: -1
         hard: -1
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
+      - plugins.security.disabled=true
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - opensearch-data:/usr/share/opensearch/data
 
   postgres:
     build: postgres
@@ -119,5 +115,5 @@ secrets:
 volumes:
   minio-data: {}
   postgres-data: {}
-  elasticsearch-data: {}
+  opensearch-data: {}
 
