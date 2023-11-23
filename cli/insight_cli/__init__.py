@@ -49,6 +49,9 @@ def search(query):
     }
 
     res = requests.get(f"{config['api']['endpoint']}/api/v1/index/_search", json=body)
+    if res.status_code != 200:
+        click.echo(res.status_code)
+        exit(1)
 
     for file in res.json()["hits"]["hits"]:
         click.echo("\033[1m" + file["_source"]["insight:filename"].upper() + "\033[0m")

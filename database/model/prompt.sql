@@ -42,7 +42,7 @@ create table if not exists private.prompt (
 
     primary key (id)
 );
-grant select, update, insert on private.prompt to insight_user;
+grant select, update, insert on private.prompt to external_user;
 
 create table if not exists private.source (
     prompt_id uuid not null,
@@ -53,13 +53,13 @@ create table if not exists private.source (
     constraint fk_prompt foreign key(prompt_id) references private.prompt(id) on delete cascade,
     constraint fk_pagestream foreign key(pagestream_id) references private.pagestream(id) on delete cascade
 );
-grant select, insert on private.source to insight_user;
+grant select, insert on private.source to external_user;
 
 create or replace view source as select * from private.source;
-grant select, insert on public.source to insight_user;
+grant select, insert on public.source to external_user;
 
 create or replace view prompt as select * from private.prompt;
-grant select, insert on public.prompt to insight_user;
+grant select, insert on public.prompt to external_user;
 
 create or replace function file(source) returns setof file rows 1 as $$
   select * from file where pagestream_id = $1.pagestream_id and from_page <= $1.index and to_page > $1.index

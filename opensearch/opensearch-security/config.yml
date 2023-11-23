@@ -1,0 +1,27 @@
+---
+
+_meta:
+  type: "config"
+  config_version: 2
+
+config:
+  dynamic:
+    http:
+      anonymous_auth_enabled: false
+      xff:
+        enabled: false
+    authc:
+      openid_auth_domain:
+        http_enabled: true
+        transport_enabled: true
+        order: 0
+        http_authenticator:
+          type: openid
+          challenge: false
+          config:
+            subject_key: sub
+            roles_key: realm_access.roles
+            openid_connect_url: https://keycloak.example.com:8080/auth/realms/master/.well-known/openid-configuration
+        authentication_backend:
+          type: noop
+
