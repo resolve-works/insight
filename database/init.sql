@@ -10,14 +10,14 @@ create schema if not exists private;
 create extension if not exists vector;
 create extension if not exists plpython3u;
 
-create role insight_anon nologin;
-create role insight_user nologin;
-create role insight_worker nologin;
+create role external_anonymous nologin;
+create role external_user nologin;
+create role internal_worker nologin;
 
 create role :pg_api_user noinherit login password :'pg_api_password';
-grant insight_anon to :pg_api_user;
-grant insight_user to :pg_api_user;
-grant insight_worker to :pg_api_user;
+grant external_anonymous to :pg_api_user;
+grant external_user to :pg_api_user;
+grant internal_worker to :pg_api_user;
 
 create role :pg_worker_user noinherit login password :'pg_worker_password';
 
@@ -38,10 +38,10 @@ alter sequence private.data_page_id_seq owned by private.data_page.id;
 alter table private.data_page alter column id set default nextval('private.data_page_id_seq'::regclass);
 alter table private.data_page add constraint data_page_pkey primary key (id);
 
-grant usage on schema public to insight_user;
-grant usage on schema private to insight_user;
-grant usage on schema public to insight_worker;
-grant usage on schema private to insight_worker;
+grant usage on schema public to external_user;
+grant usage on schema private to external_user;
+grant usage on schema public to internal_worker;
+grant usage on schema private to internal_worker;
 
 grant usage on schema public to :pg_worker_user;
 grant usage on schema private to :pg_worker_user;

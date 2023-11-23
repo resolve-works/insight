@@ -8,7 +8,7 @@ services:
       - 8080:80
       - 9000:9000
     volumes:
-      - ./templates:/etc/nginx/templates
+      - ./nginx:/etc/nginx/templates
     depends_on:
       - minio
       - postgrest
@@ -20,8 +20,8 @@ services:
       PGRST_DB_URI: postgresql://${PG_API_USER}:${PG_API_PASSWORD}@postgres:5432/insight
       PGRST_DB_SCHEMAS: public
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
-      PGRST_JWT_ROLE_CLAIM_KEY: .azp
-      PGRST_DB_ANON_ROLE: insight_anon
+      PGRST_JWT_ROLE_CLAIM_KEY: .resource_access.insight_user.roles[0]
+      PGRST_DB_ANON_ROLE: external_anonymous
     secrets:
       - jwk
     depends_on:
@@ -48,9 +48,8 @@ services:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
     depends_on:
       - tika
-      - opensearch
       - postgres
-      - minio
+      - nginx
 
   tika:
     image: apache/tika
@@ -68,6 +67,7 @@ services:
       - plugins.security.disabled=true
     volumes:
       - opensearch-data:/usr/share/opensearch/data
+      #- ./opensearch/security.yml:/usr/share/opensearch/config/opensearch-security/config.yml
 
   postgres:
     build: postgres
