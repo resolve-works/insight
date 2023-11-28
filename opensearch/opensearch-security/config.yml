@@ -20,8 +20,8 @@ config:
           challenge: false
           config:
             subject_key: sub
-            roles_key: realm_access.roles
-            openid_connect_url: https://keycloak.example.com:8080/auth/realms/master/.well-known/openid-configuration
+            roles_key: roles
+            openid_connect_url: https://secure.ftm.nl/realms/insight/.well-known/openid-configuration
         authentication_backend:
           type: noop
 

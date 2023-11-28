@@ -20,7 +20,7 @@ services:
       PGRST_DB_URI: postgresql://${PG_API_USER}:${PG_API_PASSWORD}@postgres:5432/insight
       PGRST_DB_SCHEMAS: public
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
-      PGRST_JWT_ROLE_CLAIM_KEY: .resource_access.insight_user.roles[0]
+      PGRST_JWT_ROLE_CLAIM_KEY: .roles[0]
       PGRST_DB_ANON_ROLE: external_anonymous
     secrets:
       - jwk
@@ -64,10 +64,11 @@ services:
         hard: -1
     environment:
       - discovery.type=single-node
-      - plugins.security.disabled=true
     volumes:
       - opensearch-data:/usr/share/opensearch/data
-      #- ./opensearch/security.yml:/usr/share/opensearch/config/opensearch-security/config.yml
+      - ./opensearch/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
+      - ./opensearch/opensearch-security/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
+      - ./opensearch/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
 
   postgres:
     build: postgres

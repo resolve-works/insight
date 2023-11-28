@@ -1,0 +1,15 @@
+---
+
+_meta:
+  type: "rolesmapping"
+  config_version: 2
+
+external_user:
+  reserved: false
+  backend_roles:
+  - "external_user"
+
+internal_worker:
+  reserved: false
+  backend_roles:
+  - "internal_worker"

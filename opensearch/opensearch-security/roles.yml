@@ -1,0 +1,23 @@
+---
+_meta:
+  type: "roles"
+  config_version: 2
+
+external_user:
+  index_permissions:
+    - index_patterns:
+        - "insight"
+      allowed_actions:
+        - "indices:data/read"
+        - "indices:data/read/search"
+
+internal_worker:
+  cluster_permissions:
+    - "indices:data/write/bulk"
+  index_permissions:
+    - index_patterns:
+        - "insight"
+      allowed_actions:
+        - "write"
+        - "indices:admin/create"
+
