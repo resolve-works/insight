@@ -1,5 +1,4 @@
 import click
-import requests
 from itertools import groupby
 from .config import config
 from .pagestream import pagestream
@@ -48,7 +47,7 @@ def search(query):
         },
     }
 
-    res = requests.get(f"{config['api']['endpoint']}/api/v1/index/_search", json=body)
+    res = client.get(f"{config['api']['endpoint']}/api/v1/index/_search", json=body)
     if res.status_code != 200:
         click.echo(res.status_code)
         exit(1)

@@ -8,9 +8,8 @@ from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from pikepdf import Pdf
-from oauthlib.oauth2 import BackendApplicationClient
-from requests_oauthlib import OAuth2Session
 from .vectorstore import store_embeddings
+from .oauth import OAuth2Session
 
 
 logging.basicConfig(level=logging.INFO)
@@ -46,13 +45,7 @@ def ingest_pagestream(id, name, is_merged):
     with Pdf.open(pagestream_path) as pdf:
         to_page = len(pdf.pages)
 
-    client = BackendApplicationClient(client_id=env.get("AUTH_CLIENT_ID"))
-    token = OAuth2Session(client=client).fetch_token(
-        token_url=env.get("AUTH_TOKEN_ENDPOINT"),
-        client_secret=env.get("AUTH_CLIENT_SECRET"),
-    )
-
-    res = OAuth2Session(token=token).post(
+    res = OAuth2Session().post(
         f"{env.get('API_ENDPOINT')}/api/v1/file",
         data={"pagestream_id": id, "name": name, "from_page": 0, "to_page": to_page},
         headers={"Prefer": "return=representation"},
@@ -94,7 +87,7 @@ def ingest_pagestream(id, name, is_merged):
         for index, page in enumerate(document.find_class("page"))
     ]
 
-    res = requests.put(
+    res = OAuth2Session().put(
         f"{env.get('API_ENDPOINT')}/api/v1/index/_doc/{file['id']}", json=body
     )
     if res.status_code != 201:

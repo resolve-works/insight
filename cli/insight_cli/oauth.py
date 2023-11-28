@@ -35,7 +35,7 @@ def get_token():
             return None
 
 
-def delete_token(token):
+def delete_token():
     try:
         keyring.delete_password("insight", "token")
     except:

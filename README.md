@@ -23,16 +23,17 @@ OpenID Connect is used as the authentication standard that all parts of insight
 use to communicate. We use [Keycloak](https://www.keycloak.org/). If Keycloak
 hasn't been configured yet:
 - Create a realm `insight`.
-- Create a client `insight_api` with device auth flow enabled. Under this
-  client, create the roles: `external_user` and `internal_worker`.
-- Create a client `insight_search` with all flows disabled. Under this client,
-  create the roles: `view_indices` and `create_documents`.
+- Create a client `insight` with device auth flow enabled. Under this client,
+  create the roles: `external_user` and `internal_worker`.
 - Create a client `insight_worker` with service account flow enabled. Under this
-  clients "Service account role" menu, assign the roles:
-  `insight_api:internal_worker` and `insight_search:create_documents`.
-- Under the realm settings, assign the `insight_api:external_user` and
-  `insight_search:view_indices` role to the "Default roles" under "User
-  registration".
+  clients "Service account role" menu, assign `insight:internal_worker`.
+- Under the realm settings, assign the `insight:external_user` role to the
+  "Default roles" under "User registration".
+- Under "Client scopes", edit the `roles` client scope. Remove the 3 mappers
+  that are already there (`audience resolve`, `realm roles` and `client roles`).
+  Instead, add the "Predefined Mapper": `client roles`. Edit it, choose
+  `insight` for the client and use `roles` for the "Token Claim Name". Make sure
+  "Multivalued" and "Add to access token" are enabled.
 
 When keycloak has been configured you should save the "client credentials" of the
 `insight_worker` client to your `.env` file as `AUTH_CLIENT_SECRET`.
