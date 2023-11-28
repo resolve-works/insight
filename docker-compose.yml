@@ -55,7 +55,7 @@ services:
     image: apache/tika
 
   opensearch:
-    image: opensearchproject/opensearch
+    build: opensearch
     ports:
       - 9200:9200
     ulimits:
@@ -66,9 +66,6 @@ services:
       - discovery.type=single-node
     volumes:
       - opensearch-data:/usr/share/opensearch/data
-      - ./opensearch/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
-      - ./opensearch/opensearch-security/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
-      - ./opensearch/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
 
   postgres:
     build: postgres
