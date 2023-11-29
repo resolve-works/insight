@@ -96,6 +96,7 @@ services:
     volumes:
       - minio-data:/data
 
+  # Minio client, runs once, sets up the buckets and policies
   mc:
     image: minio/mc
     working_dir: /root/minio
@@ -109,6 +110,7 @@ services:
     depends_on:
       - minio
 
+  # Insight CLI, runs in container so it can reach minio in development
   cli:
     build: cli
     environment:
