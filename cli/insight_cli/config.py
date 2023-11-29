@@ -18,6 +18,7 @@ if not config_file.exists():
     config["storage"] = {
         "endpoint": "nginx:9000",
         "bucket": "insight",
+        "secure": False,
     }
     config.write(open(config_file, "w"))
 else:

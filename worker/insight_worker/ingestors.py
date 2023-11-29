@@ -3,6 +3,7 @@ import ocrmypdf
 import requests
 from os import environ as env
 from minio import Minio
+from xml.etree import ElementTree
 from lxml import html
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
@@ -13,13 +14,6 @@ from .oauth import OAuth2Session
 
 
 logging.basicConfig(level=logging.INFO)
-
-minio = Minio(
-    env.get("STORAGE_ENDPOINT"),
-    access_key=env.get("STORAGE_ACCESS_KEY"),
-    secret_key=env.get("STORAGE_SECRET_KEY"),
-    secure=env.get("STORAGE_SECURE").lower() == "true",
-)
 
 
 def ocrmypdf_process(input_file, output_file):
@@ -39,13 +33,36 @@ def ingest_pagestream(id, name, is_merged):
     temp_path = Path(TemporaryDirectory().name)
     pagestream_path = temp_path / "pagestream.pdf"
     file_path = temp_path / "file.pdf"
+    session = OAuth2Session()
 
-    minio.fget_object(env.get("STORAGE_BUCKET"), id, pagestream_path)
+    res = requests.post(
+        f"http://{env.get('STORAGE_ENDPOINT')}",
+        data={
+            "Action": "AssumeRoleWithWebIdentity",
+            "Version": "2011-06-15",
+            "DurationSeconds": "3600",
+            "WebIdentityToken": session.token["access_token"],
+        },
+    )
+    tree = ElementTree.fromstring(res.content)
+    ns = {"s3": "https://sts.amazonaws.com/doc/2011-06-15/"}
+    credentials = tree.find("./s3:AssumeRoleWithWebIdentityResult/s3:Credentials", ns)
+
+    minio = Minio(
+        env.get("STORAGE_ENDPOINT"),
+        access_key=credentials.find("s3:AccessKeyId", ns).text,
+        secret_key=credentials.find("s3:SecretAccessKey", ns).text,
+        session_token=credentials.find("s3:SessionToken", ns).text,
+        region="insight",
+        secure=env.get("STORAGE_SECURE").lower() == "true",
+    )
+
+    minio.fget_object(env.get("STORAGE_BUCKET"), f"pagestream/{id}", pagestream_path)
 
     with Pdf.open(pagestream_path) as pdf:
         to_page = len(pdf.pages)
 
-    res = OAuth2Session().post(
+    res = session.post(
         f"{env.get('API_ENDPOINT')}/api/v1/file",
         data={"pagestream_id": id, "name": name, "from_page": 0, "to_page": to_page},
         headers={"Prefer": "return=representation"},
@@ -58,7 +75,7 @@ def ingest_pagestream(id, name, is_merged):
     process = Process(target=ocrmypdf_process, args=(pagestream_path, file_path))
     process.start()
     process.join()
-    minio.fput_object(env.get("STORAGE_BUCKET"), str(file["id"]), file_path)
+    minio.fput_object(env.get("STORAGE_BUCKET"), f"file/{str(file['id'])}", file_path)
 
     logging.info(f"Extracting metadata from file {file['id']}")
     headers = {

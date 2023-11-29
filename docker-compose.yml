@@ -42,8 +42,6 @@ services:
       STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
       STORAGE_BUCKET: ${STORAGE_BUCKET}
       STORAGE_SECURE: ${STORAGE_SECURE}
-      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
-      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
     volumes:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
     depends_on:

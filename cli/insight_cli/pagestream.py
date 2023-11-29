@@ -87,7 +87,7 @@ def create(files):
                     secret_key=credentials.find("s3:SecretAccessKey", ns).text,
                     session_token=credentials.find("s3:SessionToken", ns).text,
                     region="insight",
-                    secure=False,
+                    secure=config["storage"]["secure"].lower() == "true",
                 )
 
                 minio.put_object(
