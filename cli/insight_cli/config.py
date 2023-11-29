@@ -15,6 +15,10 @@ if not config_file.exists():
         "token-endpoint": "https://secure.ftm.nl/realms/insight/protocol/openid-connect/token",
         "client-id": "insight",
     }
+    config["storage"] = {
+        "endpoint": "nginx:9000",
+        "bucket": "insight",
+    }
     config.write(open(config_file, "w"))
 else:
     config.read(config_file)

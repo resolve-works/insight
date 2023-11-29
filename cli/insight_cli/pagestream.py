@@ -1,11 +1,13 @@
 import click
 import requests
 import logging
+from minio import Minio
+from xml.etree import ElementTree
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 from pathlib import Path
 from .config import config
-from .oauth import client
+from .oauth import client, get_token
 
 
 @click.group()
@@ -39,32 +41,62 @@ def load_file(path):
 @click.argument("files", nargs=-1, type=click.Path(path_type=Path))
 def create(files):
     """Ingest PDF pagestreams"""
+
     for path in files:
         res = client.post(
-            f"{config['api']['endpoint']}/api/v1/rpc/create_pagestream",
+            f"{config['api']['endpoint']}/api/v1/pagestream",
             data={"name": path.name},
+            headers={"Prefer": "return=representation"},
         )
 
-        if res.status_code != 200:
-            print(res.text)
+        if res.status_code != 201:
+            logging.error(res.text)
             exit(1)
 
-        pagestream = res.json()
+        pagestream = res.json()[0]
+        size = path.stat().st_size
 
         with open(path, "rb") as f:
             with tqdm(
                 desc=path.name,
-                total=path.stat().st_size,
+                total=size,
                 unit="iB",
                 unit_scale=True,
                 unit_divisor=1024,
             ) as t:
                 reader_wrapper = CallbackIOWrapper(t.update, f, "read")
-                res = requests.put(pagestream["url"], data=reader_wrapper)
 
-                if res.status_code != 200:
-                    logging.info(res.text)
-                    exit(1)
+                res = requests.post(
+                    f"http://{config['storage']['endpoint']}",
+                    data={
+                        "Action": "AssumeRoleWithWebIdentity",
+                        "Version": "2011-06-15",
+                        "DurationSeconds": "3600",
+                        "WebIdentityToken": get_token()["access_token"],
+                    },
+                )
+                tree = ElementTree.fromstring(res.content)
+                ns = {"s3": "https://sts.amazonaws.com/doc/2011-06-15/"}
+                credentials = tree.find(
+                    "./s3:AssumeRoleWithWebIdentityResult/s3:Credentials", ns
+                )
+
+                minio = Minio(
+                    config["storage"]["endpoint"],
+                    access_key=credentials.find("s3:AccessKeyId", ns).text,
+                    secret_key=credentials.find("s3:SecretAccessKey", ns).text,
+                    session_token=credentials.find("s3:SessionToken", ns).text,
+                    region="insight",
+                    secure=False,
+                )
+
+                minio.put_object(
+                    config["storage"]["bucket"],
+                    f"pagestream/{pagestream['id']}",
+                    reader_wrapper,
+                    size,
+                    content_type="application/pdf",
+                )
 
                 res = client.post(
                     f"{config['api']['endpoint']}/api/v1/rpc/ingest_pagestream",
@@ -72,5 +104,5 @@ def create(files):
                 )
 
                 if res.status_code != 204:
-                    logging.info(res.text)
+                    logging.error(res.text)
                     exit(1)

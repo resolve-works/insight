@@ -11,6 +11,9 @@ from oauthlib.oauth2.rfc6749.errors import CustomOAuth2Error
 from requests_oauthlib import OAuth2Session
 
 
+logging.basicConfig(level=logging.ERROR)
+
+
 def set_token(token):
     try:
         keyring.set_password("insight", "token", json.dumps(token))

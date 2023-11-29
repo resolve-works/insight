@@ -29,11 +29,11 @@ hasn't been configured yet:
   clients "Service account role" menu, assign `insight:internal_worker`.
 - Under the realm settings, assign the `insight:external_user` role to the
   "Default roles" under "User registration".
-- Under "Client scopes", edit the `roles` client scope. Remove the 3 mappers
-  that are already there (`audience resolve`, `realm roles` and `client roles`).
-  Instead, add the "Predefined Mapper": `client roles`. Edit it, choose
-  `insight` for the client and use `roles` for the "Token Claim Name". Make sure
-  "Multivalued" and "Add to access token" are enabled.
+- Under "Client scopes", edit the `roles` client scope. Remove `realm roles` and
+  `client roles` mappers that are already there. Instead, add the "Predefined
+  Mapper": `client roles`. Edit it, choose `insight` for the client and use
+  `roles` for the "Token Claim Name". Make sure "Multivalued" and "Add to access
+  token" are enabled.
 
 When keycloak has been configured you should save the "client credentials" of the
 `insight_worker` client to your `.env` file as `AUTH_CLIENT_SECRET`.
