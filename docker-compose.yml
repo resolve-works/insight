@@ -54,8 +54,6 @@ services:
 
   opensearch:
     build: opensearch
-    ports:
-      - 9200:9200
     ulimits:
       memlock:
         soft: -1
