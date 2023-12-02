@@ -1,8 +1,8 @@
 
 # Insight
 
-Insight turns data into information, by puttin it into context. It allows you to
-search through a set of documents by keyword, and to prompt a
+Insight turns data into information, by putting it into context. It allows you
+to search through a set of documents by keyword, and to prompt a
 [LLM](https://en.wikipedia.org/wiki/Large_language_model) about sets documents
 through the use of
 [RAG](https://research.ibm.com/blog/retrieval-augmented-generation-RAG).
