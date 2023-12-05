@@ -2,7 +2,9 @@
 
 create table private.file (
     id uuid default gen_random_uuid(),
+    owner_id uuid not null,
     pagestream_id uuid not null,
+    path text generated always as (owner_id::text || '/' || pagestream_id::text || '/' || id::text || '.pdf') stored,
     from_page integer not null,
     to_page integer not null,
     name text not null,
