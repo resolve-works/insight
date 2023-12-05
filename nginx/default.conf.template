@@ -35,6 +35,7 @@ server {
 
 server {
     location /api/v1/index {
+        client_max_body_size 0;
         proxy_buffering off;
         proxy_request_buffering off;
         proxy_pass https://opensearch/insight;
