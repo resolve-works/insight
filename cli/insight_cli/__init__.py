@@ -27,6 +27,24 @@ def logout():
 
 
 @cli.command()
+def user_info():
+    res = client.get(
+        "https://secure.ftm.nl/realms/insight/account",
+        headers={"Accept": "application/json"},
+    )
+    print(res.text)
+
+
+@cli.command()
+def user_groups():
+    res = client.get(
+        "https://secure.ftm.nl/realms/insight/account/groups",
+        headers={"Accept": "application/json"},
+    )
+    print(res.text)
+
+
+@cli.command()
 @click.argument("query")
 def search(query):
     """Search pages for text."""

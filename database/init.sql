@@ -21,7 +21,6 @@ grant internal_worker to :pg_api_user;
 
 create role :pg_worker_user noinherit login password :'pg_worker_password';
 
-\ir include/auth.sql
 \ir include/pagestream.sql
 \ir include/file.sql
 \ir include/prompt.sql
