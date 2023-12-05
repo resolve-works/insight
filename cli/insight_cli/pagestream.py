@@ -92,7 +92,7 @@ def create(files):
 
                 minio.put_object(
                     config["storage"]["bucket"],
-                    f"pagestream/{pagestream['id']}",
+                    pagestream["path"],
                     reader_wrapper,
                     size,
                     content_type="application/pdf",
