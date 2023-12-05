@@ -51,7 +51,7 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def ingest_pagestream(id, name, is_merged):
+def ingest_pagestream(id, owner_id, path, name, is_merged):
     logging.info(f"Ingesting pagestream {id}")
 
     temp_path = Path(TemporaryDirectory().name)
@@ -60,14 +60,20 @@ def ingest_pagestream(id, name, is_merged):
 
     session = OAuth2Session()
     minio = get_minio(session.token["access_token"])
-    minio.fget_object(env.get("STORAGE_BUCKET"), f"pagestream/{id}", pagestream_path)
+    minio.fget_object(env.get("STORAGE_BUCKET"), path, pagestream_path)
 
     with Pdf.open(pagestream_path) as pdf:
         to_page = len(pdf.pages)
 
     res = session.post(
         f"{env.get('API_ENDPOINT')}/api/v1/file",
-        data={"pagestream_id": id, "name": name, "from_page": 0, "to_page": to_page},
+        data={
+            "owner_id": owner_id,
+            "pagestream_id": id,
+            "name": name,
+            "from_page": 0,
+            "to_page": to_page,
+        },
         headers={"Prefer": "return=representation"},
     )
     file = res.json()[0]
@@ -81,7 +87,7 @@ def ingest_pagestream(id, name, is_merged):
 
     session = OAuth2Session()
     minio = get_minio(session.token["access_token"])
-    minio.fput_object(env.get("STORAGE_BUCKET"), f"file/{str(file['id'])}", file_path)
+    minio.fput_object(env.get("STORAGE_BUCKET"), file["path"], file_path)
 
     logging.info(f"Extracting metadata from file {file['id']}")
     headers = {
