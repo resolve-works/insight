@@ -22,7 +22,6 @@ services:
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
       PGRST_JWT_ROLE_CLAIM_KEY: .roles[0]
       PGRST_DB_ANON_ROLE: external_anonymous
-      PGRST_DB_PRE_REQUEST: private.upsert_user
     secrets:
       - jwk
     depends_on:

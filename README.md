@@ -25,15 +25,14 @@ hasn't been configured yet:
 - Create a realm `insight`.
 - Create a client `insight` with device auth flow enabled. Under this client,
   create the roles: `external_user` and `internal_worker`.
+- Edit the "Client Scope" `roles`, add a "User Client Role" mapper to it "by
+  configuration". Name the mapper `insight roles`, select the `insight` client.
+  Set `roles` for "Token Claim Name" and make sure "Multivalued" and "Add to
+  access token" are enabled.
 - Create a client `insight_worker` with service account flow enabled. Under this
   clients "Service account role" menu, assign `insight:internal_worker`.
-- Under the realm settings, assign the `insight:external_user` role to the
-  "Default roles" under "User registration".
-- Under "Client scopes", edit the `roles` client scope. Remove `realm roles` and
-  `client roles` mappers that are already there. Instead, add the "Predefined
-  Mapper": `client roles`. Edit it, choose `insight` for the client and use
-  `roles` for the "Token Claim Name". Make sure "Multivalued" and "Add to access
-  token" are enabled.
+- Under the realm settings, assign the `insight:external_user` and
+  `account:view-groups` roles to the "Default roles" under "User registration".
 
 When keycloak has been configured you should save the "client credentials" of the
 `insight_worker` client to your `.env` file as `AUTH_CLIENT_SECRET`.
