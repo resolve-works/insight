@@ -34,10 +34,12 @@
 </div>
 
 
-<style lang="scss">
-    $header-height: 5rem;
-    $gap: 2.5rem;
-
+<style>
+    :root {
+        --header-height: 5rem;
+        --gap: 2.5rem;
+        --half-gap: 1.25rem;
+    }
     .container {
         display: grid;
 
@@ -48,56 +50,54 @@
 
         grid-template-columns: 1fr 3fr 2fr;
         grid-template-rows: auto 1fr auto;
-        gap: $gap;
+        gap: var(--gap);
 
         height: 100vh;
     }
 
     header {
-        padding-right: $gap;
+        padding-right: var(--gap);
         grid-area: header;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
-        height: $header-height;
+        height: var(--header-height);
         align-items: center;
-        
-        p {
-            grid-column: 3 / 4;
-            text-align: right;
-        }
+    }
+    header p {
+        grid-column: 3 / 4;
+        text-align: right;
     }
 
     nav {
         grid-area: nav;
         background: #494582;
         color: #F9FAFB;
+    }
 
+    nav header {
+        height: var(--header-height);
+        border-bottom: 1px solid #38325D;
+        display: grid;
+        align-items: center;
+    }
 
-        header {
-            height: $header-height;
-            border-bottom: 1px solid #38325D;
-            display: grid;
-            align-items: center;
+    nav header h1 {
+        font-size: 1.5rem;
+        padding: 0 var(--half-gap);
+    }
 
-            h1 {
-                font-size: 1.5rem;
-                padding: 0 $gap / 2;
-            }
-        }
+    nav section {
+        border-top: 1px solid #5756A6;
+    }
 
-        section {
-            border-top: 1px solid #5756A6;
+    nav section ul {
+        padding: 1rem 0;
+    }
 
-            ul {
-                padding: 1rem 0;
-
-                a {
-                    display: block;
-                    padding: 0.5rem $gap / 2;
-                    color: inherit;
-                }
-            }
-        }
+    nav section ul a {
+        display: block;
+        padding: 0.5rem var(--half-gap);
+        color: inherit;
     }
 
     main {
