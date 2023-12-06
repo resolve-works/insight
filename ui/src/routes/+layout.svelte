@@ -1,5 +1,7 @@
 <script>
     import Navigation from "./Navigation.svelte";
+    import Breadcrumbs from "./Breadcrumbs.svelte";
+    import Profile from "./Profile.svelte";
 </script>
 
 <div class="container">
@@ -8,14 +10,9 @@
     </nav>
 
     <header>
-        <ul>
-            <li><a href="/">Link</a></li>
-            <li><a href="/">Link</a></li>
-            <li><a href="/">Link</a></li>
-            <li><a href="/">Link</a></li>
-        </ul>
+        <Breadcrumbs />
         
-        <p>Username</p>
+        <Profile />
     </header>
 
     <main>
@@ -38,7 +35,7 @@
             "nav footer";
 
         grid-template-columns: 1fr 4fr;
-        grid-template-rows: 8rem 1fr 8rem;
+        grid-template-rows: 6rem 1fr 6rem;
 
         height: 100vh;
     }
@@ -48,15 +45,14 @@
         display: grid;
         grid-template-columns: 3fr 1fr;
         align-items: center;
-    }
-    header p {
-        text-align: right;
+        padding: 0 var(--gap);
+        background: #F9FAFB;
     }
 
     nav {
         grid-area: nav;
         background: #494582;
-        color: #F9FAFB;
+        color: var(--text-color-light);
         display: grid;
         grid-template-rows: subgrid;
         box-shadow: -1rem 0 1rem -1rem #38325D inset;
@@ -64,11 +60,14 @@
 
     main {
         grid-area: content;
+        padding: 0 var(--gap);
+        box-shadow: 0 1rem 1rem -1rem #D0D5DC inset;
     }
 
     footer {
         grid-area: footer;
         display: grid;
         align-items: center;
+        padding: 0 var(--gap);
     }
 </style>

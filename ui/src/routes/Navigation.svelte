@@ -4,10 +4,9 @@
 
 <section>
     <ul>
-        <li><a href="/">Link</a></li>
-        <li><a href="/">Link</a></li>
-        <li><a href="/">Link</a></li>
-        <li><a href="/">Link</a></li>
+        <li><a href="/">Search</a></li>
+        <li><a href="/">Conversations</a></li>
+        <li><a href="/">Files</a></li>
     </ul>
 </section>
 
