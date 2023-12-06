@@ -92,11 +92,11 @@
         align-items: center;
         padding: 0 var(--gap);
         background: #F9FAFB;
-        border-bottom: 1px solid #D0D5DC;
+        border-bottom: var(--border-size) solid #D0D5DC;
     }
 
     main {
-        border-top: 1px solid #F9FAFB;
+        border-top: var(--border-size) solid #F9FAFB;
         padding: 0 var(--gap);
     }
 

@@ -8,21 +8,50 @@
 </header>
 
 <main>
-    <h3>Filters</h3>
-
-    <h4>Document type</h4>
+    <h4>File type:</h4>
     <ul>
         <li>
             <label>
-                <input type="checkbox"> Email
+                <input type="checkbox"> 
+                Document
             </label>
         </li>
         <li>
             <label>
-                <input type="checkbox"> Presentatie
+                <input type="checkbox"> 
+                Email
+            </label>
+        </li>
+        <li>
+            <label>
+                <input type="checkbox"> 
+                Presentation
             </label>
         </li>
     </ul>
+
+    <h4>File type:</h4>
+    <ul>
+        <li>
+            <label>
+                <input type="checkbox"> 
+                Document
+            </label>
+        </li>
+        <li>
+            <label>
+                <input type="checkbox"> 
+                Email
+            </label>
+        </li>
+        <li>
+            <label>
+                <input type="checkbox"> 
+                Presentation
+            </label>
+        </li>
+    </ul>
+
 </main>
 
 <style>
@@ -32,7 +61,8 @@
     }
 
     ul {
-        margin: 0;
+        margin: 0 0 2rem 0;
+        padding: 0 2rem;
         list-style-type: none;
     }
 </style>
