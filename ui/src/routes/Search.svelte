@@ -1,22 +1,25 @@
-<form>
-    <input type="text" placeholder="Kwartiermaker" value="Kwartiermaker" />
+<form method="get">
+    <input name="query" type="text" placeholder="Kwartiermaker" value="Kwartiermaker" />
 
-    <input type="submit" value="Search">
+    <input type="submit" value="🔍">
 </form>
 
 <style>
     form {
         display: grid;
-        grid-template-columns: 3fr 1fr;
+        grid-template-columns: 5fr 4em;
     }
 
     input[type=text] {
-        border-right: none;
-        border-radius: var(--input-border-radius) 0 0 var(--input-border-radius);
+        grid-column: 1 / 3;
+        grid-row: 1;
     }
 
     input[type=submit] {
-        border-left: none;
-        border-radius: 0 var(--input-border-radius) var(--input-border-radius) 0;
+        grid-column: 2 / 3;
+        grid-row: 1;
+        background: none;
+        border: none;
+        cursor: pointer;
     }
 </style>

@@ -1,15 +1,14 @@
 
-<header>
-    <h1>Results for "Kwartiermaker"</h1>
+<script>
+    import Search from './Search.svelte';
+    import Layout from './Layout.svelte';
+</script>
 
-    <button>Start conversation</button>
-</header>
 
-<style>
-    header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+<Layout>
+    <main>
+        <h1>Insight FOIA search</h1>
+        <Search />
+    </main>
+</Layout>
 
-</style>
