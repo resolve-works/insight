@@ -35,7 +35,7 @@
 
 <style>
     :root {
-        --box-shadow: 0 0 1rem 0 rgba(56, 50, 93, 0.8);
+        --box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.5);
     }
 
     .container {
@@ -61,20 +61,19 @@
 
     .mainnav {
         grid-area: nav;
-        background: var(--color-primary);
+        background: #4C4C4C;
         color: var(--text-color-light);
         display: grid;
         grid-template-rows: subgrid;
-        box-shadow: var(--box-shadow);
-        z-index: 2;
     }
 
     .subnav {
         grid-area: subnav;
-        background: #494582;
         padding: 0 var(--gap);
+        background: var(--color-subnavigation);
         color: var(--text-color-light);
         display: grid;
+        box-shadow: var(--box-shadow);
         grid-template-rows: subgrid;
     }
 
@@ -83,7 +82,7 @@
         grid-area: content;
         grid-template-rows: subgrid;
         box-shadow: var(--box-shadow);
-        background: var(--color-background);
+        background: #ECEEF1;
         z-index: 3;
     }
 

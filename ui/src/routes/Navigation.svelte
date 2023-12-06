@@ -20,7 +20,7 @@
 
 <style>
     header {
-        border-bottom: 1px solid var(--color-primary-darker);
+        border-bottom: 1px solid var(--color-navigation-darker);
         display: grid;
         align-items: center;
     }
@@ -44,17 +44,17 @@
     li a {
         display: block;
         color: inherit;
-        border-top: 1px solid var(--color-primary-lighter);
-        border-bottom: 1px solid var(--color-primary-darker);
+        border-top: 1px solid var(--color-navigation-lighter);
+        border-bottom: 1px solid #303943;
         padding: 1.5rem var(--gap);
         text-decoration: none;
         font-weight: bold;
     }
 
     li.active a {
-        background: var(--color-primary-darker);
-        border-top: 1px solid #38325D;
-        border-bottom: 1px solid var(--color-primary-darker);
+        background: var(--color-subnavigation);
+        border-top: 1px solid transparent;
+        border-bottom: 1px solid var(--color-navigation-darker);
         position: relative;
     }
 
@@ -65,6 +65,6 @@
         bottom: 0;
         right: -1rem;
         width: 1rem;
-        background: var(--color-primary-darker);
+        background: var(--color-subnavigation);
     }
 </style>
