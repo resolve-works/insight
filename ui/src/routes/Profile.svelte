@@ -16,8 +16,10 @@
         height: var(--size);
         width: var(--size);
         border-radius: calc(var(--size) / 2);
+        box-sizing: border-box;
         margin-left: 1rem;
-        background: #E26352;
+        background: var(--color-profile);
+        border: 1px solid var(--color-profile-darker);
         display: flex;
         align-items: center;
         justify-content: center;
