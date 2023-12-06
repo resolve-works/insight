@@ -1,12 +1,12 @@
 <ul>
-    <li><a href="/">Insight</a></li>
+    <li><a href="/">Home</a></li>
     <li><a href="/">Search</a></li>
 </ul>
 
 <style>
     ul {
         margin: 0;
-        padding: 0;
+        padding: 1.5rem 0;
         list-style-type: none;
         display: flex;
     }
@@ -17,7 +17,7 @@
 
     li:after {
         margin-left: 1rem;
-        content: ">"
+        content: "›"
     }
 
     li:last-child a {

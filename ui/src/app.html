@@ -16,6 +16,8 @@
         --gap: 2rem;
         --text-color-dark: #383838;
         --text-color-light: #F9FAFB;
+        --color-primary: #494582;
+        --input-border-radius: 0.5rem;
     }
 
     body {
@@ -29,9 +31,22 @@
         font-family: serif;
     }
 
-    input {
-        padding: 0.5rem 1rem;
+    input[type=submit],
+    a.button,
+    button {
         font-size: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--input-border-radius);
+        background: var(--color-primary);
+        color: var(--text-color-light);
+        border: 1px solid var(--color-primary);
+    }
+
+    input {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border-radius: var(--input-border-radius);
+        border: 1px solid #7D8C9F;
     }
 
     p {

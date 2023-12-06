@@ -1,6 +1,7 @@
 <script>
     import Navigation from "./Navigation.svelte";
     import Breadcrumbs from "./Breadcrumbs.svelte";
+    import Search from "./Search.svelte";
     import Profile from "./Profile.svelte";
 </script>
 
@@ -12,6 +13,8 @@
     <header>
         <Breadcrumbs />
         
+        <Search />
+
         <Profile />
     </header>
 
@@ -34,7 +37,7 @@
             "nav content"
             "nav footer";
 
-        grid-template-columns: 1fr 4fr;
+        grid-template-columns: 1fr 5fr;
         grid-template-rows: 6rem 1fr 6rem;
 
         height: 100vh;
@@ -43,7 +46,7 @@
     header {
         grid-area: header;
         display: grid;
-        grid-template-columns: 3fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         align-items: center;
         padding: 0 var(--gap);
         background: #F9FAFB;
@@ -51,7 +54,7 @@
 
     nav {
         grid-area: nav;
-        background: #494582;
+        background: var(--color-primary);
         color: var(--text-color-light);
         display: grid;
         grid-template-rows: subgrid;
