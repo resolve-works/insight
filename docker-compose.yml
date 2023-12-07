@@ -13,6 +13,13 @@ services:
       - minio
       - postgrest
       - opensearch
+      - ui
+
+  ui:
+    build: ui
+    command: npm run dev -- --port=3000 --host=0.0.0.0
+    volumes:
+      - ./ui:/insight-ui
 
   postgrest:
     image: postgrest/postgrest
@@ -47,6 +54,7 @@ services:
     depends_on:
       - tika
       - postgres
+      - opensearch
       - nginx
 
   tika:
@@ -79,8 +87,6 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./database:/docker-entrypoint-initdb.d
-    depends_on:
-      - minio
 
   minio:
     image: minio/minio
