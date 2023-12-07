@@ -1,0 +1,22 @@
+network.host: 0.0.0.0
+http.cors.enabled : true
+http.cors.allow-origin: "*"
+
+plugins.security.ssl.transport.pemcert_filepath: opensearch.pem
+plugins.security.ssl.transport.pemkey_filepath: opensearch-key.pem
+plugins.security.ssl.transport.pemtrustedcas_filepath: rootCA.pem
+plugins.security.ssl.transport.enforce_hostname_verification: false
+plugins.security.ssl.http.enabled: true
+plugins.security.ssl.http.pemcert_filepath: opensearch.pem
+plugins.security.ssl.http.pemkey_filepath: opensearch-key.pem
+plugins.security.ssl.http.pemtrustedcas_filepath: rootCA.pem
+plugins.security.allow_unsafe_democertificates: false
+plugins.security.allow_default_init_securityindex: true
+plugins.security.authcz.admin_dn:
+  - CN=insight,OU=insight,O=insight,L=amsterdam,C=nl
+
+plugins.security.audit.type: internal_opensearch
+plugins.security.enable_snapshot_restore_privilege: true
+plugins.security.check_snapshot_restore_write_privileges: true
+plugins.security.cache.ttl_minutes: 60
+plugins.security.system_indices.enabled: false
