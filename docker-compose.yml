@@ -72,12 +72,13 @@ services:
         soft: -1
         hard: -1
     environment:
-      - discovery.type=single-node
+      discovery.type: single-node
+      DISABLE_INSTALL_DEMO_CONFIG: True
     volumes:
       - opensearch-data:/usr/share/opensearch/data
-      - ./opensearch/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
-      - ./opensearch/opensearch-security/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
-      - ./opensearch/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
+      - ./certs/rootCA.pem:/usr/share/opensearch/config/rootCA.pem
+      - ./certs/opensearch.pem:/usr/share/opensearch/config/opensearch.pem
+      - ./certs/opensearch-key.pem:/usr/share/opensearch/config/opensearch-key.pem
 
   postgres:
     build: postgres

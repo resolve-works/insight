@@ -2,8 +2,8 @@
 import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 
 export async function load({ fetch }) {
-	const res = await fetch(PUBLIC_API_ENDPOINT + '/pagestream');
-	const item = await res.json();
+	const pagestreams = await fetch(PUBLIC_API_ENDPOINT + '/pagestream');
+	const results = await fetch(PUBLIC_API_ENDPOINT + '/index');
 
-	return { item };
+	return { pagestreams: await pagestreams.json(), results: await results.json() };
 }

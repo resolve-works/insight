@@ -52,6 +52,20 @@ You'll need to add a [OpenAI api key](https://platform.openai.com/api-keys) to
 the `.env` file as `OPENAI_API_KEY`.
 
 
+### Certificates
+
+To encrypt traffic, we'll need some cerificates. In our development environment,
+we will be using self-signed certificates. You can easily generate those with
+[`mkcert`](https://github.com/FiloSottile/mkcert). Make sure the root CA is
+installed and generate development certificates:
+```
+mkcert -install
+mkdir certs
+cp `mkcert -CAROOT`/rootCA.pem ./certs
+mkcert -cert-file ./certs/opensearch.pem -key-file ./certs/opensearch-key.pem opensearch 
+```
+
+
 ## Running
 
 After configuration, you can run the development environment:
