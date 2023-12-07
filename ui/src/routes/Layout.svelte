@@ -6,7 +6,7 @@
 
 <div class="container" class:with-subnav={$$slots.subnav}>
     <nav class="mainnav">
-        <Navigation />
+        <Navigation collapsed={$$slots.subnav} />
     </nav>
 
 	{#if $$slots.subnav}
@@ -45,7 +45,7 @@
             "nav content"
             "nav content"
             "nav content";
-        grid-template-columns: 2fr 11fr;
+        grid-template-columns: auto 22fr;
         grid-template-rows: 6rem 1fr 6rem;
 
         height: 100vh;
@@ -56,7 +56,7 @@
             "nav subnav content"
             "nav subnav content"
             "nav subnav content";
-        grid-template-columns: 2fr 3fr 8fr;
+        grid-template-columns: auto 2fr 4fr;
     }
 
     .mainnav {

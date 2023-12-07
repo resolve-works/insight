@@ -2,6 +2,8 @@
     import { page } from '$app/stores';
     import Icon from './Icon.svelte';
 
+    export let collapsed = false;
+
     const items = [
         { href: "/search", name: "Search", class: "gg-search" },
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
@@ -9,29 +11,46 @@
     ]
 </script>
 
-<a class="logo" href="/">
-    <h1>
-        Insight
-    </h1>
-    <Icon class="gg-menu" />
-</a>
+<div class="container" class:collapsed={collapsed}>
+    <a class="logo" href="/">
+        <h1>Insight</h1>
+        <Icon class="gg-menu" />
+    </a>
 
-<ul>
-    {#each items as item}
-        <li class:active={$page.url.pathname == item.href}>
-            <a href={item.href}>
-                {item.name}
-                <Icon class={item.class} />
-            </a>
-        </li>
-    {/each}
-</ul>
+    <ul>
+        {#each items as item}
+            <li class:active={$page.url.pathname == item.href}>
+                <a href={item.href}>
+                    <span>{item.name}</span>
+                    <Icon class={item.class} />
+                </a>
+            </li>
+        {/each}
+    </ul>
+</div>
 
 <style>
+    .container {
+        display: grid;
+        grid-template-rows: subgrid;
+        grid-row: 1 / 4;
+        min-width: 20rem;
+    }
+
+    .container.collapsed {
+        min-width: 0;
+    }
+
+    .container.collapsed h1,
+    .container.collapsed span {
+        display: none;
+    }
+
     a.logo {
         border-bottom: 1px solid var(--color-navigation-darker);
         display: grid;
-        grid-template-columns: auto 1.5rem;
+        grid-template-columns: auto auto;
+        justify-content: space-between;
         align-items: center;
         color: inherit;
         text-decoration: none;
@@ -49,14 +68,14 @@
 
     li a {
         display: grid;
-        grid-template-columns: auto 1.5rem;
-        align-items: end;
+        grid-template-columns: auto auto;
+        justify-content: space-between;
+        align-items: center;
         color: inherit;
         border-top: 1px solid var(--color-navigation-lighter);
         border-bottom: 1px solid #303943;
         padding: 1.5rem var(--gap);
         text-decoration: none;
-        font-weight: bold;
     }
 
     li.active a {
@@ -71,7 +90,7 @@
         position: absolute;
         top: 0;
         bottom: 0;
-        right: -1rem;
+        right: 0;
         width: 1rem;
         background: var(--color-subnavigation);
     }
