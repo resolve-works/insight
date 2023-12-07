@@ -1,6 +1,7 @@
 <script>
     import Filters from './Filters.svelte';
     import Layout from '../Layout.svelte';
+    export let data;
 </script>
 
 <Layout>
@@ -11,5 +12,9 @@
 
         <button>Start conversation</button>
     </header>
+
+    <div>
+        {JSON.stringify(data)}
+    </div>
 </Layout>
 

@@ -1,13 +1,16 @@
 
 import { AUTH_CLIENT_ID, AUTH_AUTHORIZATION_ENDPOINT, AUTH_TOKEN_ENDPOINT } from '$env/static/private';
+import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 import { redirect } from '@sveltejs/kit';
 
 export async function handle({event, resolve}) {
+    // No token, no access
     if(event.cookies.get('access_token') === undefined) {
         const code = event.url.searchParams.get('code')
         const redirect_uri = event.url.origin + event.url.pathname
 
         if(code !== null) {
+            // Code granted, get tokens
             const data = new FormData()
             data.set('grant_type', 'authorization_code')
             data.set('redirect_uri', redirect_uri)
@@ -19,19 +22,19 @@ export async function handle({event, resolve}) {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams(data).toString(),
             })
-
             if(res.status !== 200) {
                 throw redirect(307, redirect_uri)
             }
 
+            // Store tokens
             const token = await res.json()
-            console.log(token)
-
-            event.cookies.set('access_token', token.access_token)
-            event.cookies.set('refresh_token', token.refresh_token)
+            for(const key of ['access_token', 'refresh_token']) {
+                event.cookies.set(key, token[key], { secure: true, httpOnly: true })
+            }
 
             throw redirect(307, redirect_uri)
         } else {
+            // Request auth code
             const url = new URL(AUTH_AUTHORIZATION_ENDPOINT)
             url.searchParams.set('scope', 'profile email')
             url.searchParams.set('response_type', 'code')
@@ -45,12 +48,11 @@ export async function handle({event, resolve}) {
     return resolve(event)
 }
 
-//export async function handleFetch({ event, request, fetch }) {
-    //console.log(event.url)
-    //console.log(request)
-	//if (request.url.startsWith('https://api.my-domain.com/')) {
-		//request.headers.set('cookie', event.request.headers.get('cookie'));
-	//}
+export async function handleFetch({ event, request, fetch }) {
+    // Requests to self should be authed
+    if (request.url.startsWith(PUBLIC_API_ENDPOINT)) {
+        request.headers.set('Authorization', `Bearer ${event.cookies.get('access_token')}`);
+    }
 
-	//return fetch(request);
-//}
+    return fetch(request);
+}
