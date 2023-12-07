@@ -13,16 +13,16 @@ services:
       - minio
       - postgrest
       - opensearch
+      - ui
 
   ui:
     build: ui
     command: npm run dev -- --port=3000 --host=0.0.0.0
     environment:
+      PUBLIC_API_ENDPOINT: http://nginx:8080/api/v1
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_AUTHORIZATION_ENDPOINT: ${AUTH_AUTHORIZATION_ENDPOINT}
       AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
-    extra_hosts:
-      - host.docker.internal:host-gateway
     volumes:
       - ./ui:/insight-ui
 
