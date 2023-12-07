@@ -12,6 +12,9 @@
 </html>
 
 <style global>
+    @import '../node_modules/@fontsource-variable/rubik/index.css';
+    @import '../node_modules/@fontsource-variable/roboto-slab/index.css';
+
     :root {
         --gap: 2rem;
         --border-size: 0.0625rem;
@@ -46,11 +49,11 @@
     body {
         color: var(--text-color-dark);
         margin: 0;
-        font-family: sans-serif;
+        font-family: 'Rubik Variable', sans-serif;
     }
 
     h1, h2, h3, h4, h5, h6 {
-        font-family: serif;
+        font-family: 'Roboto Slab Variable', sans-serif;
     }
 
     a {
@@ -88,10 +91,10 @@
         margin: 0;
         padding: 0;
 
-        background: currentColor;
+        background: var(--text-color-light);
         width: 1.2rem;
         height: 1.2rem;
-        border: var(--input-border-size) solid currentColor;
+        border: var(--input-border-size) solid var(--text-color-light);
         border-radius: calc(var(--input-border-radius) * 0.8);
 
         display: grid;
@@ -110,7 +113,7 @@
     }
 
     input[type="checkbox"]:focus {
-        outline: 0.125rem solid currentColor;
+        outline: 0.125rem solid var(--text-color-light);
         outline-offset: 0.125rem;
     }
 
