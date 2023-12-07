@@ -2,6 +2,22 @@
 import { AUTH_CLIENT_ID, AUTH_AUTHORIZATION_ENDPOINT, AUTH_TOKEN_ENDPOINT } from '$env/static/private';
 import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 import { redirect } from '@sveltejs/kit';
+import type { Cookies, Request } from '@sveltejs/kit';
+
+type Token = {
+  access_token: string;
+  refresh_token: string;
+};
+
+function store_tokens(cookies: Cookies, token: Token) {
+    const config = { secure: true, httpOnly: true }
+    cookies.set('access_token', token.access_token, config)
+    cookies.set('refresh_token', token.refresh_token, config)
+}
+
+function authorize_request(cookies: Cookies, request: Request) {
+    request.headers.set('Authorization', `Bearer ${cookies.get('access_token')}`);
+}
 
 export async function handle({event, resolve}) {
     // No token, no access
@@ -26,11 +42,7 @@ export async function handle({event, resolve}) {
                 throw redirect(307, redirect_uri)
             }
 
-            // Store tokens
-            const token = await res.json()
-            for(const key of ['access_token', 'refresh_token']) {
-                event.cookies.set(key, token[key], { secure: true, httpOnly: true })
-            }
+            store_tokens(event.cookies, await res.json()) 
 
             throw redirect(307, redirect_uri)
         } else {
@@ -51,8 +63,35 @@ export async function handle({event, resolve}) {
 export async function handleFetch({ event, request, fetch }) {
     // Requests to self should be authed
     if (request.url.startsWith(PUBLIC_API_ENDPOINT)) {
-        request.headers.set('Authorization', `Bearer ${event.cookies.get('access_token')}`);
+        authorize_request(event.cookies, request)
+
+        const response = await fetch(request);
+        if(response.status === 401) {
+            // Token expired? Try refresh
+            const data = new FormData()
+            data.set('grant_type', 'refresh_token')
+            data.set('client_id', AUTH_CLIENT_ID)
+            data.set('refresh_token', `${event.cookies.get('refresh_token')}`)
+            data.set('scope', 'profile email')
+
+            const res = await fetch(AUTH_TOKEN_ENDPOINT, {
+                method: 'post',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(data).toString(),
+            })
+            
+            // Refresh token failed, remove & re-login
+            if(res.status !== 200) {
+                event.cookies.delete('acccess_token');
+                event.cookies.delete('refresh_token');
+                throw redirect(307, event.url.href)
+            }
+
+            store_tokens(event.cookies, await res.json())
+            authorize_request(event.cookies, request)
+        }
+        return response
     }
 
-    return fetch(request);
+    return fetch(request)
 }
