@@ -62,7 +62,7 @@
 
     ul {
         margin: 0 0 2rem 0;
-        padding: 0 2rem;
+        padding: 0;
         list-style-type: none;
     }
 </style>
