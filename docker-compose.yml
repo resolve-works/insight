@@ -2,13 +2,16 @@
 version: '3'
 
 services:
-  nginx:
+  insight:
     image: nginx
     ports:
       - 8080:8080
       - 9000:9000
     volumes:
       - ./nginx:/etc/nginx/templates
+      - ./certs/insight.pem:/etc/ssl/private/insight.pem
+      - ./certs/insight-key.pem:/etc/ssl/private/insight-key.pem
+
     depends_on:
       - minio
       - postgrest
@@ -19,12 +22,13 @@ services:
     build: ui
     command: npm run dev -- --port=3000 --host=0.0.0.0
     environment:
-      PUBLIC_API_ENDPOINT: http://nginx:8080/api/v1
+      NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_AUTHORIZATION_ENDPOINT: ${AUTH_AUTHORIZATION_ENDPOINT}
       AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
     volumes:
       - ./ui:/insight-ui
+      - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
 
   postgrest:
     image: postgrest/postgrest
@@ -41,26 +45,26 @@ services:
 
   worker:
     build: worker
-    command: watchmedo auto-restart -d=/usr/local/lib/python3.11/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages
+    command: bash -c 'update-ca-certificates && watchmedo auto-restart -d=/usr/local/lib/python3.11/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages'
     environment:
-      OAUTHLIB_INSECURE_TRANSPORT: 1
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
       AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
       AUTH_CLIENT_ID: ${AUTH_WORKER_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_WORKER_CLIENT_SECRET}
       TIKA_URI: http://tika:9998/tika
       POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      API_ENDPOINT: http://nginx:8080
-      STORAGE_ENDPOINT: nginx:9000
+      API_ENDPOINT: https://insight:8080
+      STORAGE_ENDPOINT: insight:9000
       STORAGE_SECURE: False
       STORAGE_BUCKET: insight
     volumes:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
+      - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
     depends_on:
       - tika
       - postgres
-      - opensearch
-      - nginx
+      - insight
 
   tika:
     image: apache/tika
@@ -112,7 +116,7 @@ services:
     working_dir: /root/minio
     entrypoint: ./mc.sh
     environment:
-      MINIO_ENDPOINT: http://nginx:9000
+      MINIO_ENDPOINT: http://insight:9000
       MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
     volumes:
@@ -123,11 +127,13 @@ services:
   # Insight CLI, runs in container so it can reach minio in development
   cli:
     build: cli
+    command: bash -c 'update-ca-certificates && bash'
     environment:
-      OAUTHLIB_INSECURE_TRANSPORT: 1
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
     volumes:
       - ./cli/insight_cli:/usr/local/lib/python3.11/site-packages/insight_cli
       - ./data:/root/data
+      - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
 
 secrets:
    jwk:
