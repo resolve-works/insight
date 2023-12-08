@@ -97,7 +97,6 @@
 
     main {
         border-top: var(--border-size) solid #F9FAFB;
-        padding: 0 var(--gap);
     }
 
     footer {

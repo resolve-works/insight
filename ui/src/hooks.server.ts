@@ -65,7 +65,7 @@ export async function handleFetch({ event, request, fetch }) {
     if (request.url.startsWith(PUBLIC_API_ENDPOINT)) {
         authorize_request(event.cookies, request)
 
-        const response = await fetch(request);
+        const response = await fetch(request.clone());
         if(response.status === 401) {
             // Token expired? Try refresh
             const data = new FormData()
@@ -89,6 +89,9 @@ export async function handleFetch({ event, request, fetch }) {
 
             store_tokens(event.cookies, await res.json())
             authorize_request(event.cookies, request)
+
+            // Re-fetch with new tokens
+            return fetch(request)
         }
         return response
     }
