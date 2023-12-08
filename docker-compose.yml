@@ -2,8 +2,9 @@
 version: '3'
 
 services:
-  insight:
+  nginx:
     image: nginx
+    hostname: insight
     ports:
       - 8080:8080
       - 9000:9000
@@ -11,7 +12,6 @@ services:
       - ./nginx:/etc/nginx/templates
       - ./certs/insight.pem:/etc/ssl/private/insight.pem
       - ./certs/insight-key.pem:/etc/ssl/private/insight-key.pem
-
     depends_on:
       - minio
       - postgrest
@@ -47,6 +47,7 @@ services:
     build: worker
     command: bash -c 'update-ca-certificates && watchmedo auto-restart -d=/usr/local/lib/python3.11/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages'
     environment:
+      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
       AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
       AUTH_CLIENT_ID: ${AUTH_WORKER_CLIENT_ID}
@@ -56,7 +57,6 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       API_ENDPOINT: https://insight:8080
       STORAGE_ENDPOINT: insight:9000
-      STORAGE_SECURE: False
       STORAGE_BUCKET: insight
     volumes:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
@@ -64,7 +64,7 @@ services:
     depends_on:
       - tika
       - postgres
-      - insight
+      - nginx
 
   tika:
     image: apache/tika
@@ -116,11 +116,12 @@ services:
     working_dir: /root/minio
     entrypoint: ./mc.sh
     environment:
-      MINIO_ENDPOINT: http://insight:9000
+      MINIO_ENDPOINT: https://insight:9000
       MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
     volumes:
       - ./minio:/root/minio
+      - ./certs/rootCA.pem:/root/.mc/certs/CAs/insight.pem
     depends_on:
       - minio
 
@@ -129,6 +130,7 @@ services:
     build: cli
     command: bash -c 'update-ca-certificates && bash'
     environment:
+      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
     volumes:
       - ./cli/insight_cli:/usr/local/lib/python3.11/site-packages/insight_cli
