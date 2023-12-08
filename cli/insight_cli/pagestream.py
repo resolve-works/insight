@@ -67,7 +67,7 @@ def create(files):
                 reader_wrapper = CallbackIOWrapper(t.update, f, "read")
 
                 res = requests.post(
-                    f"http://{config['storage']['endpoint']}",
+                    f"https://{config['storage']['endpoint']}",
                     data={
                         "Action": "AssumeRoleWithWebIdentity",
                         "Version": "2011-06-15",
@@ -87,7 +87,6 @@ def create(files):
                     secret_key=credentials.find("s3:SecretAccessKey", ns).text,
                     session_token=credentials.find("s3:SessionToken", ns).text,
                     region="insight",
-                    secure=config["storage"]["secure"].lower() == "true",
                 )
 
                 minio.put_object(

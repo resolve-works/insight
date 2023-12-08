@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 
 def get_minio(token):
     res = requests.post(
-        f"http://{env.get('STORAGE_ENDPOINT')}",
+        f"https://{env.get('STORAGE_ENDPOINT')}",
         data={
             "Action": "AssumeRoleWithWebIdentity",
             "Version": "2011-06-15",
@@ -36,7 +36,6 @@ def get_minio(token):
         secret_key=credentials.find("s3:SecretAccessKey", ns).text,
         session_token=credentials.find("s3:SessionToken", ns).text,
         region="insight",
-        secure=env.get("STORAGE_SECURE").lower() == "true",
     )
 
 

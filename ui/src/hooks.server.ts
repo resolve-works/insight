@@ -1,5 +1,5 @@
 
-import { AUTH_CLIENT_ID, AUTH_AUTHORIZATION_ENDPOINT, AUTH_TOKEN_ENDPOINT } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { redirect } from '@sveltejs/kit';
 import type { Cookies, Request } from '@sveltejs/kit';
 
@@ -29,10 +29,10 @@ export async function handle({event, resolve}) {
             const data = new FormData()
             data.set('grant_type', 'authorization_code')
             data.set('redirect_uri', redirect_uri)
-            data.set('client_id', AUTH_CLIENT_ID)
+            data.set('client_id', env.AUTH_CLIENT_ID)
             data.set('code', code)
 
-            const res = await fetch(AUTH_TOKEN_ENDPOINT, {
+            const res = await fetch(env.AUTH_TOKEN_ENDPOINT, {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams(data).toString(),
@@ -46,10 +46,10 @@ export async function handle({event, resolve}) {
             throw redirect(307, redirect_uri)
         } else {
             // Request auth code
-            const url = new URL(AUTH_AUTHORIZATION_ENDPOINT)
+            const url = new URL(env.AUTH_AUTHORIZATION_ENDPOINT)
             url.searchParams.set('scope', 'profile email')
             url.searchParams.set('response_type', 'code')
-            url.searchParams.set('client_id', AUTH_CLIENT_ID)
+            url.searchParams.set('client_id', env.AUTH_CLIENT_ID)
             url.searchParams.set('redirect_uri', redirect_uri)
 
             throw redirect(307, url)
@@ -70,11 +70,11 @@ export async function handleFetch({ event, request, fetch }) {
             // Token expired? Try refresh
             const data = new FormData()
             data.set('grant_type', 'refresh_token')
-            data.set('client_id', AUTH_CLIENT_ID)
+            data.set('client_id', env.AUTH_CLIENT_ID)
             data.set('refresh_token', `${event.cookies.get('refresh_token')}`)
             data.set('scope', 'profile email')
 
-            const res = await fetch(AUTH_TOKEN_ENDPOINT, {
+            const res = await fetch(env.AUTH_TOKEN_ENDPOINT, {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams(data).toString(),
