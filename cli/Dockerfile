@@ -8,4 +8,4 @@ WORKDIR /root
 RUN rm -rf /root/insight
 RUN mkdir /root/.config
 
-ENTRYPOINT /bin/bash
+CMD /bin/bash

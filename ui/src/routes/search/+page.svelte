@@ -3,24 +3,19 @@
     import Hit from './Hit.svelte'
     import Layout from '../Layout.svelte'
 
-    import { page } from '$app/stores';
-
     export let data
-    const total = data['hits']['total']['value']
-    const hits = data.hits.hits
-    const query = $page.url.searchParams.get('query')
 </script>
 
 <Layout>
     <Filters slot="subnav" />
 
     <header>
-        <h2>{total} result{total > 1 ? 's' : ''} for "{query}"</h2>
+        <h2>{data.total} result{data.total > 1 ? 's' : ''} for "{data.query}"</h2>
 
         <button>Start conversation</button>
     </header>
 
-    {#each hits as hit }
+    {#each data.hits as hit }
         <Hit hit={hit} />
     {/each}
 </Layout>

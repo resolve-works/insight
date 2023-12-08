@@ -38,7 +38,11 @@ server {
 }
 
 server {
-    listen 8080;
+    listen 8080 ssl;
+    ssl_certificate /etc/ssl/private/insight.pem;
+    ssl_certificate_key /etc/ssl/private/insight-key.pem;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
 
     location /api/v1/index {
         client_max_body_size 0;
@@ -68,7 +72,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        proxy_pass http://ui;
+        proxy_pass https://ui;
     }
 }
 

@@ -4,7 +4,7 @@
     const query = $page.url.searchParams.get('query')
 </script>
 
-<form method="get">
+<form method="get" action="/search">
     <input name="query" type="text" placeholder="Search files by keyword" value={query} />
 
     <button>

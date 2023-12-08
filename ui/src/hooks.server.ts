@@ -1,6 +1,5 @@
 
 import { AUTH_CLIENT_ID, AUTH_AUTHORIZATION_ENDPOINT, AUTH_TOKEN_ENDPOINT } from '$env/static/private';
-import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 import { redirect } from '@sveltejs/kit';
 import type { Cookies, Request } from '@sveltejs/kit';
 
@@ -62,7 +61,8 @@ export async function handle({event, resolve}) {
 
 export async function handleFetch({ event, request, fetch }) {
     // Requests to self should be authed
-    if (request.url.startsWith(PUBLIC_API_ENDPOINT)) {
+    const url = new URL(request.url)
+    if (url.host === event.url.host) {
         authorize_request(event.cookies, request)
 
         const response = await fetch(request.clone());
