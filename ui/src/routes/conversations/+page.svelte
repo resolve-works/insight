@@ -6,7 +6,7 @@
 
 <Layout>
     <main>
-        <h1>Conversations</h1>
+        <h2>Conversations</h2>
     </main>
 </Layout>
 

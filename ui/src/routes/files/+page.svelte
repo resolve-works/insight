@@ -6,7 +6,7 @@
 
 <Layout>
     <main>
-        <h1>Files</h1>
+        <h2>Files</h2>
     </main>
 </Layout>
 

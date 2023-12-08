@@ -26,6 +26,6 @@
         grid-template-columns: auto auto;
         justify-content: space-between;
         align-items: center;
-        padding: var(--gap) 0;
+        padding-bottom: var(--gap);
     }
 </style>
