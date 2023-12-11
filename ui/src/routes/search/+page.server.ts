@@ -1,5 +1,5 @@
 
-export async function load({ url, fetch }) {
+export async function load({ locals, url, fetch }) {
     const query = url.searchParams.get('query')
     const body = {
         "_source": {"excludes": ["insight:pages"]},
@@ -22,7 +22,7 @@ export async function load({ url, fetch }) {
         body: JSON.stringify(body),
     })
 
-	const data = await res.json()
+    const data = await res.json()
     return {
         query,
         total: data['hits']['total']['value'],
