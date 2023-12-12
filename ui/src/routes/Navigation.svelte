@@ -19,7 +19,7 @@
 
     <ul>
         {#each items as item}
-            <li class:active={$page.url.pathname == new URL(item.href, $page.url.origin).pathname}>
+            <li class:active={$page.url.pathname.startsWith(new URL(item.href, $page.url.origin).pathname)}>
                 <a href={item.href}>
                     <span>{item.name}</span>
                     <Icon class={item.class} />

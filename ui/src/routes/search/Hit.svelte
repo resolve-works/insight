@@ -1,8 +1,9 @@
 
-<script>
+<script lang="ts">
+    import { page } from '$app/stores';
     import Icon from '../Icon.svelte';
-    export let filename;
-    export let pages;
+    export let filename: string;
+    export let pages: { index: number, url: URL, highlights: string[] }[];
 </script>
 
 <article>
@@ -11,7 +12,7 @@
     </header>
 
     {#each pages as page}
-        <section>
+        <a href="{page.url}">
             <span>
                 <Icon class="gg-file" />
                 {page.index}
@@ -22,7 +23,7 @@
                     <li>{@html highlight}</li>
                 {/each}
             </ul>
-        </section>
+        </a>
     {/each}
 </article>
 
@@ -42,11 +43,18 @@
         align-items: center;
     }
 
-    section {
+    a {
         display: grid;
         grid-template-columns: 3rem auto;
         align-items: top;
         line-height: 2rem;
+        text-decoration: none;
+        color: currentColor;
+    }
+
+    a:hover span {
+        text-decoration: underline;
+        color: var(--color-primary);
     }
 
     ul {
