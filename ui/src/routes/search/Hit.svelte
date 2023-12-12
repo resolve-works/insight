@@ -1,23 +1,24 @@
 
 <script>
     import Icon from '../Icon.svelte';
-    export let hit;
+    export let filename;
+    export let pages;
 </script>
 
 <article>
     <header>
-        <h3>{hit["_source"]["insight:filename"]}</h3>
+        <h3>{filename}</h3>
     </header>
 
-    {#each hit["inner_hits"]["insight:pages"]["hits"]["hits"] as page}
+    {#each pages as page}
         <section>
             <span>
                 <Icon class="gg-file" />
-                {page['_source']['index'] + 1}
+                {page.index}
             </span>
 
             <ul>
-                {#each page["highlight"]["insight:pages.contents"] as highlight}
+                {#each page.highlights as highlight}
                     <li>{@html highlight}</li>
                 {/each}
             </ul>

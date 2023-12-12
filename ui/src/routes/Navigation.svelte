@@ -5,7 +5,7 @@
     export let collapsed = false;
 
     const items = [
-        { href: "/search", name: "Search", class: "gg-search" },
+        { href: "/search?query=*", name: "Search", class: "gg-search" },
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
         { href: "/files", name: "Files", class: "gg-file-document"},
     ]
@@ -19,7 +19,7 @@
 
     <ul>
         {#each items as item}
-            <li class:active={$page.url.pathname == item.href}>
+            <li class:active={$page.url.pathname == new URL(item.href, $page.url.origin).pathname}>
                 <a href={item.href}>
                     <span>{item.name}</span>
                     <Icon class={item.class} />

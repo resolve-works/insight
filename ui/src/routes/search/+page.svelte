@@ -16,7 +16,7 @@
     </header>
 
     {#each data.hits as hit }
-        <Hit hit={hit} />
+        <Hit {...hit} />
     {/each}
 </Layout>
 
