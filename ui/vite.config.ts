@@ -3,5 +3,10 @@ import { defineConfig } from 'vite';
 import basicSsl from '@vitejs/plugin-basic-ssl'
 
 export default defineConfig({
-	plugins: [sveltekit(), basicSsl()]
+	plugins: [sveltekit(), basicSsl()],
+    optimizeDeps: {
+        esbuildOptions: {
+            target: "esnext",
+        }
+    }
 });
