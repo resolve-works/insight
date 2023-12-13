@@ -1,6 +1,16 @@
+
+<script lang="ts">
+    import { page } from '$app/stores';
+
+    const href = $page.url.pathname;
+    const title = href.slice(1).charAt(0).toUpperCase() + href.slice(2);
+</script>
+
 <ul>
     <li><a href="/">Home</a></li>
-    <li><a href="/">Search</a></li>
+    {#if href !== '/' }
+        <li><a {href}>{title}</a></li>
+    {/if}
 </ul>
 
 <style>

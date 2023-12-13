@@ -1,7 +1,6 @@
 <script>
     import Navigation from './Navigation.svelte';
     import Breadcrumbs from "./Breadcrumbs.svelte";
-    import Profile from "./Profile.svelte";
 </script>
 
 <div class="container" class:with-subnav={$$slots.subnav}>

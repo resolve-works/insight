@@ -53,19 +53,28 @@ def search(query):
         "query": {
             "nested": {
                 "path": "insight:pages",
-                "query": {"match": {"insight:pages.contents": query}},
+                "query": {
+                    "query_string": {
+                        "query": query,
+                        "default_field": "insight:pages.contents",
+                    }
+                },
                 "inner_hits": {
                     "highlight": {
                         "pre_tags": ["\033[1m"],
                         "post_tags": ["\033[0m"],
-                        "fields": {"insight:pages.contents": {}},
+                        "fields": {
+                            "insight:pages.contents": {
+                                "fragment_size": 200,
+                            }
+                        },
                     },
                 },
             },
         },
     }
 
-    res = client.get(f"{config['api']['endpoint']}/api/v1/index/_search", json=body)
+    res = client.post(f"{config['api']['endpoint']}/api/v1/index/_search", json=body)
     if res.status_code != 200:
         click.echo(res.status_code)
         exit(1)

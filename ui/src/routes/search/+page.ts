@@ -22,9 +22,11 @@ export async function load({ url, parent, data, fetch }) {
                     },
                     "inner_hits": {
                         "highlight": {
-                            "fields": {"insight:pages.contents": {
-                                fragment_size: 200,
-                            }},
+                            "fields": {
+                                "insight:pages.contents": {
+                                    fragment_size: 200,
+                                }
+                            },
                         },
                     },
                 },
