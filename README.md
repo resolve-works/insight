@@ -106,4 +106,5 @@ The easiest way to use the CLI in your development environment is by using the
 docker-compose run cli
 ```
 
-In this container you can run the `insight` tool.
+In this container you can run the `insight` tool. The `data` directory is
+mounted in the container, which you can use to upload files.
