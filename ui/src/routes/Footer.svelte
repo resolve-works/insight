@@ -6,6 +6,6 @@
     footer {
         display: grid;
         align-items: center;
-        padding: 0 var(--gap);
+        padding: 0 var(--padding-x);
     }
 </style>

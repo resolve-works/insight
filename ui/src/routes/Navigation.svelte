@@ -5,7 +5,7 @@
     export let collapsed = false;
 
     const items = [
-        { href: "/search?query=*", name: "Search", class: "gg-search" },
+        { href: "/search", name: "Search", class: "gg-search" },
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
         { href: "/files", name: "Files", class: "gg-file-document"},
     ]
@@ -19,22 +19,29 @@
 
     <ul>
         {#each items as item}
-            <li class:active={$page.url.pathname.startsWith(new URL(item.href, $page.url.origin).pathname)}>
-                <a href={item.href}>
+            <li>
+                <a href={item.href} class:active={$page.url.pathname.startsWith(new URL(item.href, $page.url.origin).pathname)}>
                     <span>{item.name}</span>
                     <Icon class={item.class} />
                 </a>
             </li>
         {/each}
     </ul>
+
+    <a class="profile" href="/profile">
+        <span>Sign out</span>
+        <Icon class="gg-log-out" />
+    </a>
 </div>
 
 <style>
     .container {
         display: grid;
-        grid-template-rows: subgrid;
-        grid-row: 1 / 4;
-        min-width: 20rem;
+        grid-template-rows: var(--header-height) 1fr var(--footer-height);
+        min-width: 18rem;
+        position: sticky;
+        top: 0;
+        height: 100vh;
     }
 
     .container.collapsed {
@@ -46,52 +53,36 @@
         display: none;
     }
 
-    a.logo {
-        border-bottom: 1px solid var(--color-navigation-darker);
-        display: grid;
+    a {
         grid-template-columns: auto auto;
         justify-content: space-between;
+        display: grid;
         align-items: center;
         color: inherit;
         text-decoration: none;
-        color: inherit;
-        padding: 0 var(--gap);
+        padding: 1.5rem var(--padding-x);
+    }
+
+    a.active {
+        background: var(--color-subnavigation);
+        border-top: 1px solid transparent;
+        border-bottom: 1px solid var(--color-navigation-darker);
+    }
+
+    a.logo {
+        border-bottom: 1px solid var(--color-navigation-darker);
     }
     a.logo h1 {
         font-size: 1.5rem;
+        margin: 0;
     }
 
     ul {
         padding: 0;
         margin: 0;
     }
-
     li a {
-        display: grid;
-        grid-template-columns: auto auto;
-        justify-content: space-between;
-        align-items: center;
-        color: inherit;
         border-top: 1px solid var(--color-navigation-lighter);
-        border-bottom: 1px solid #303943;
-        padding: 1.5rem var(--gap);
-        text-decoration: none;
-    }
-
-    li.active a {
-        background: var(--color-subnavigation);
-        border-top: 1px solid transparent;
         border-bottom: 1px solid var(--color-navigation-darker);
-        position: relative;
-    }
-
-    li.active a:after {
-        content: "";
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: 1rem;
-        background: var(--color-subnavigation);
     }
 </style>

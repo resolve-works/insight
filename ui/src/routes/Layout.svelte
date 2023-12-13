@@ -6,7 +6,7 @@
 
 <div class="container" class:with-subnav={$$slots.subnav}>
     <nav class="mainnav">
-        <Navigation collapsed={$$slots.subnav} />
+        <Navigation />
     </nav>
 
 	{#if $$slots.subnav}
@@ -18,8 +18,6 @@
     <div class="page">
         <header>
             <Breadcrumbs />
-            
-            <Profile />
         </header>
 
         <main>
@@ -27,7 +25,8 @@
         </main>
 
         <footer>
-            <h3>Footer</h3>
+            <p>Thank you for using Insight.</p> 
+            <p>Do you want to <a href="https://www.discourse.org/">ask for help</a> or <a href="https://github.com/followthemoney/insight/">report a problem</a>?</p>
         </footer>
     </div>
 </div>
@@ -46,7 +45,7 @@
             "nav content"
             "nav content";
         grid-template-columns: auto 22fr;
-        grid-template-rows: 6rem 1fr 6rem;
+        grid-template-rows: var(--header-height) 1fr var(--footer-height);
 
         height: 100vh;
     }
@@ -63,18 +62,14 @@
         grid-area: nav;
         background: #4C4C4C;
         color: var(--text-color-light);
-        display: grid;
-        grid-template-rows: subgrid;
     }
 
     .subnav {
         grid-area: subnav;
-        padding: 0 var(--gap);
+        padding: 0 var(--padding-x);
         background: var(--color-subnavigation);
         color: var(--text-color-light);
-        display: grid;
         box-shadow: var(--box-shadow);
-        grid-template-rows: subgrid;
     }
 
     .page {
@@ -82,27 +77,25 @@
         grid-area: content;
         grid-template-rows: subgrid;
         box-shadow: var(--box-shadow);
-        background: #ECEEF1;
+        background: var(--color-page);
         z-index: 3;
+        padding: 0 calc(var(--padding-x) * 1.5);
     }
 
     header {
         display: grid;
-        grid-template-columns: 1fr 1fr;
         align-items: center;
-        padding: 0 var(--gap);
-        background: #F9FAFB;
-        border-bottom: var(--border-size) solid #D0D5DC;
     }
 
     main {
-        border-top: var(--border-size) solid #F9FAFB;
-        padding: calc(var(--gap) * 2) calc(var(--gap) * 3);
+        padding: 0 calc(var(--padding-x) * 1.5);
     }
 
     footer {
         display: grid;
         align-items: center;
-        padding: 0 var(--gap);
+        color: #BDBDBD;
+        grid-template-columns: auto auto;
+        justify-content: space-between;
     }
 </style>

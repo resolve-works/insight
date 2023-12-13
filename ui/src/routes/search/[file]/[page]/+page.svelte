@@ -20,6 +20,6 @@
         grid-template-columns: auto auto;
         justify-content: space-between;
         align-items: center;
-        padding-bottom: var(--gap);
+        padding-bottom: var(--padding-y);
     }
 </style>

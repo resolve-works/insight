@@ -7,25 +7,9 @@
 </script>
 
 <Layout>
-    <Filters slot="subnav" />
-
-    <header>
-        <h2>{data.total} result{data.total > 1 ? 's' : ''} for "{data.query}"</h2>
-
-        <button>Start conversation</button>
-    </header>
+    <Filters {...data} slot="subnav" />
 
     {#each data.hits as hit }
         <Hit {...hit} />
     {/each}
 </Layout>
-
-<style>
-    header {
-        display: grid;
-        grid-template-columns: auto auto;
-        justify-content: space-between;
-        align-items: center;
-        padding-bottom: var(--gap);
-    }
-</style>

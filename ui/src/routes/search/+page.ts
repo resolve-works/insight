@@ -16,13 +16,15 @@ export async function load({ url, parent, data, fetch }) {
                     "path": "insight:pages",
                     "query": {
                         "query_string": {
-                            "query": `${query}`,
+                            "query": `${query ? query : '*'}`,
                             "default_field": "insight:pages.contents"
                         }
                     },
                     "inner_hits": {
                         "highlight": {
-                            "fields": {"insight:pages.contents": {}},
+                            "fields": {"insight:pages.contents": {
+                                fragment_size: 200,
+                            }},
                         },
                     },
                 },

@@ -24,7 +24,6 @@ export async function handle({event, resolve}) {
     // Did the authentication platform just redirect to us with a new code?
     const code = event.url.searchParams.get('code')
     if(code !== null) {
-        console.log('Authenticating with authorization_code')
         // Code granted, get tokens
         const data = { 
             grant_type: 'authorization_code',
@@ -44,8 +43,7 @@ export async function handle({event, resolve}) {
         }
 
         const tokens = await token_response.json();
-        console.log('Storing refresh_token and redirecting')
-        event.cookies.set('refresh_token', tokens.refresh_token)
+        event.cookies.set('refresh_token', tokens.refresh_token, { path: '/' })
 
         // redirect
         event.url.searchParams.delete('code');
@@ -56,7 +54,6 @@ export async function handle({event, resolve}) {
     // No code, do we have a refresh token?
     const refresh_token = event.cookies.get('refresh_token')
     if(refresh_token !== undefined) {
-        console.log('Refreshing token')
         const data = { 
             grant_type: 'refresh_token', 
             client_id: private_env.AUTH_CLIENT_ID, 
@@ -72,15 +69,13 @@ export async function handle({event, resolve}) {
 
         // Refresh token failed, remove & re-login
         if(token_response.status === 400) {
-            console.log('Token refresh failed, redirecting to auth')
             event.cookies.delete('refresh_token')
             throw auth_redirect(event)
         }
 
         // Everything good, store access token for access to API & search index
         const tokens = await token_response.json();
-        console.log('Storing refresh_token, access_token and resolving')
-        event.cookies.set('refresh_token', tokens.refresh_token)
+        event.cookies.set('refresh_token', tokens.refresh_token, { path: '/' })
         event.locals.access_token = tokens.access_token;
 
         // Fetch timed S3 credentials
@@ -100,7 +95,6 @@ export async function handle({event, resolve}) {
         return resolve(event)
     }
 
-    console.log('Unauthenticated, redirecting')
     throw auth_redirect(event)
 }
 

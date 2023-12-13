@@ -16,12 +16,18 @@
     @import '/node_modules/@fontsource-variable/roboto-slab/index.css';
 
     :root {
-        --gap: 2rem;
-        --double-gap: calc(var(--gap) * 2);
+        --header-height: 6rem;
+        --footer-height: 6rem;
+
+        --padding-x: 2rem;
+        --padding-y: 2rem;
+
         --border-size: 0.0625rem;
 
         --color-primary: #B85143;
         --color-white: #F9FAFB;
+
+        --color-page: #ECEEF1;
 
         --text-color-dark: #383838;
         --text-color-light: var(--color-white);
@@ -33,10 +39,6 @@
         --color-subnavigation: #B85143;
         --color-subnavigation-lighter: #E26352;
         --color-subnavigation-darker: #9C4438;
-
-        --color-profile: #B85143;
-        --color-profile-lighter: #E26352;
-        --color-profile-darker: #9C4438;
 
         --input-border-size: 0.125rem;
         --input-border-radius: 0.5rem;
@@ -70,7 +72,9 @@
         border-radius: var(--input-border-radius);
         background: var(--color-primary);
         color: var(--text-color-light);
-        border: var(--input-border-size) solid var(--color-primary);
+        border: none;
+        text-decoration: none;
+        text-align: center;
     }
 
     textarea,

@@ -1,11 +1,10 @@
-<script>
+<script lang="ts">
     import Icon from './Icon.svelte';
-    import { page } from '$app/stores';
-    const query = $page.url.searchParams.get('query')
+    export let value = '';
 </script>
 
 <form method="get" action="/search">
-    <input name="query" type="text" placeholder="Search files by keyword" value={query} />
+    <input name="query" type="text" placeholder="Search files by keyword" value={value} />
 
     <button>
         <Icon class="gg-search" />

@@ -30,8 +30,8 @@
 <style>
     article {
         background: var(--color-white);
-        padding: calc(var(--gap)) calc(var(--gap) * 1.5);
-        margin: 0 calc(var(--gap) * -1.5);
+        padding: var(--padding-y) calc(var(--padding-x) * 1.5);
+        margin: 0 calc(var(--padding-x) * -1.5);
         margin-bottom: 1rem;
         border-bottom: var(--border-size) solid #D0D5DC;
     }
@@ -61,6 +61,16 @@
         list-style-type: none;
         margin: 0 0 1rem 0;
         padding: none;
+    }
+
+    li {
+        border-top: 1px solid var(--color-page);
+        padding: 0.5rem 0;
+    }
+
+    li:first-child {
+        padding-top: 0;
+        border-top: none;
     }
 
     li :global(em) {
