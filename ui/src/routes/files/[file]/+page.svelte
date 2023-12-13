@@ -1,6 +1,6 @@
 
 <script>
-    import Layout from '../../../Layout.svelte';
+    import Layout from '../../Layout.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import { page } from '$app/stores';
     export let data;
@@ -8,7 +8,7 @@
 
 <Layout>
     <article>
-        <PDFViewer url={data.url} index={$page.params.page} />
+        <PDFViewer url={data.url} index={$page.url.searchParams.get('page') ?? '1'} />
     </article>
 </Layout>
 

@@ -46,7 +46,8 @@ export async function load({ url, parent, data, fetch }) {
                     .map(page => {
                         const page_url = new URL(url);
                         const index = page['_source']['index'] + 1;
-                        page_url.pathname += `/${hit['_id']}/${index}`;
+                        page_url.pathname = `/files/${hit['_id']}`;
+                        page_url.searchParams.set('page', index)
 
                         return {
                             index,
