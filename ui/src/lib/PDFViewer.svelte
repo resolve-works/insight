@@ -1,5 +1,4 @@
 <script lang="ts">
-    import * as pdfjs from "pdfjs-dist";
     import { onMount } from 'svelte';
 
     export let url: URL;
@@ -8,9 +7,11 @@
     let canvas: HTMLCanvasElement;
 
     onMount(async () => {
-        pdfjs.GlobalWorkerOptions.workerSrc = '/pdf-worker';
+        const { getDocument, GlobalWorkerOptions } = await import('pdfjs-dist');
 
-        const pdf = await pdfjs.getDocument(url).promise;
+        GlobalWorkerOptions.workerSrc = '/pdf-worker';
+
+        const pdf = await getDocument(url).promise;
         const page = await pdf.getPage(parseInt(index))
 
         const scale = 1.5;

@@ -4,6 +4,9 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 
 export default defineConfig({
 	plugins: [sveltekit(), basicSsl()],
+    build: {
+        target: 'esnext',
+    },
     optimizeDeps: {
         esbuildOptions: {
             target: "esnext",
