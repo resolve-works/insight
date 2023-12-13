@@ -7,11 +7,7 @@
 </script>
 
 <Layout>
-    <header>
-        <h2>Document</h2>
-    </header>
-
-    <PDFViewer url={data.url} page={$page.params.page} />
+    <PDFViewer url={data.url} index={$page.params.page} />
 </Layout>
 
 <style>

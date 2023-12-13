@@ -3,40 +3,38 @@
     import { onMount } from 'svelte';
 
     export let url: URL;
-    export let page: string;
+    export let index: string;
 
     let canvas: HTMLCanvasElement;
 
-    onMount(() => {
+    onMount(async () => {
         pdfjs.GlobalWorkerOptions.workerSrc = '/pdf-worker';
 
-        const loadingTask = pdfjs.getDocument(url);
-        loadingTask.promise.then(function(pdf) {
-            pdf.getPage(parseInt(page)).then(function(page) {
-                var scale = 1.5;
-                var viewport = page.getViewport({ scale: scale, });
-                // Support HiDPI-screens.
-                var outputScale = window.devicePixelRatio || 1;
+        const pdf = await pdfjs.getDocument(url).promise;
+        const page = await pdf.getPage(parseInt(index))
 
-                var context = canvas.getContext('2d');
+        const scale = 1.5;
+        const viewport = page.getViewport({ scale: scale, });
+        // Support HiDPI-screens.
+        const outputScale = window.devicePixelRatio || 1;
 
-                canvas.width = Math.floor(viewport.width * outputScale);
-                canvas.height = Math.floor(viewport.height * outputScale);
-                canvas.style.width = Math.floor(viewport.width) + "px";
-                canvas.style.height =  Math.floor(viewport.height) + "px";
+        const context = canvas.getContext('2d');
 
-                var transform = outputScale !== 1
-                  ? [outputScale, 0, 0, outputScale, 0, 0]
-                  : null;
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        canvas.style.width = Math.floor(viewport.width) + "px";
+        canvas.style.height =  Math.floor(viewport.height) + "px";
 
-                var renderContext = {
-                  canvasContext: context,
-                  transform: transform,
-                  viewport: viewport
-                };
-                page.render(renderContext);
-            });
-        });
+        const transform = outputScale !== 1
+          ? [outputScale, 0, 0, outputScale, 0, 0]
+          : null;
+
+        const renderContext = {
+          canvasContext: context,
+          transform: transform,
+          viewport: viewport
+        };
+        page.render(renderContext);
     })
 </script>
 
