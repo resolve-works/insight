@@ -7,15 +7,14 @@
 </script>
 
 <Layout>
-    <PDFViewer url={data.url} index={$page.params.page} />
+    <article>
+        <PDFViewer url={data.url} index={$page.params.page} />
+    </article>
 </Layout>
 
 <style>
-    header {
+    article {
         display: grid;
-        grid-template-columns: auto auto;
-        justify-content: space-between;
-        align-items: center;
-        padding-bottom: var(--padding-y);
+        justify-content: center;
     }
 </style>

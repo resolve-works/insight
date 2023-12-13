@@ -7,7 +7,7 @@
     const items = [
         { href: "/search", name: "Search", class: "gg-search" },
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
-        { href: "/files", name: "Files", class: "gg-file-document"},
+        { href: "/files", name: "Files", class: "gg-folder"},
     ]
 </script>
 
