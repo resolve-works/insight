@@ -1,6 +1,7 @@
 import logging
 import ocrmypdf
 import requests
+from urllib.parse import urlparse
 from os import environ as env
 from minio import Minio
 from xml.etree import ElementTree
@@ -18,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 
 def get_minio(token):
     res = requests.post(
-        f"https://{env.get('STORAGE_ENDPOINT')}",
+        env.get("STORAGE_ENDPOINT"),
         data={
             "Action": "AssumeRoleWithWebIdentity",
             "Version": "2011-06-15",
@@ -31,7 +32,7 @@ def get_minio(token):
     credentials = tree.find("./s3:AssumeRoleWithWebIdentityResult/s3:Credentials", ns)
 
     return Minio(
-        env.get("STORAGE_ENDPOINT"),
+        urlparse(env.get("STORAGE_ENDPOINT")).netloc,
         access_key=credentials.find("s3:AccessKeyId", ns).text,
         secret_key=credentials.find("s3:SecretAccessKey", ns).text,
         session_token=credentials.find("s3:SessionToken", ns).text,

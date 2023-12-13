@@ -3,6 +3,7 @@
     import { onMount } from 'svelte';
 
     export let url: URL;
+    export let page: string;
 
     let canvas: HTMLCanvasElement;
 
@@ -11,7 +12,7 @@
 
         const loadingTask = pdfjs.getDocument(url);
         loadingTask.promise.then(function(pdf) {
-            pdf.getPage(1).then(function(page) {
+            pdf.getPage(parseInt(page)).then(function(page) {
                 var scale = 1.5;
                 var viewport = page.getViewport({ scale: scale, });
                 // Support HiDPI-screens.

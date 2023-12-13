@@ -4,7 +4,10 @@ declare global {
     namespace App {
 		// interface Error {}
         interface Locals {
-            access_token: String;
+            access_token: string;
+            access_key_id: string;
+            secret_access_key: string;
+            session_token: string;
         }
 		// interface PageData {}
 		// interface Platform {}

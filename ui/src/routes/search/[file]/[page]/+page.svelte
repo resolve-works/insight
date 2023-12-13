@@ -3,7 +3,7 @@
     import Layout from '../../../Layout.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import { page } from '$app/stores';
-    console.log($page.params)
+    export let data;
 </script>
 
 <Layout>
@@ -11,7 +11,7 @@
         <h2>Document</h2>
     </header>
 
-    <PDFViewer url={'https://blog.mozilla.org/wp-content/uploads/2017/12/test.pdf'} />
+    <PDFViewer url={data.url} page={$page.params.page} />
 </Layout>
 
 <style>

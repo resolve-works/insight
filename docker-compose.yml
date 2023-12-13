@@ -26,6 +26,8 @@ services:
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_AUTHORIZATION_ENDPOINT: ${AUTH_AUTHORIZATION_ENDPOINT}
       AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
+      PUBLIC_STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      PUBLIC_STORAGE_BUCKET: ${STORAGE_BUCKET}
     volumes:
       - ./ui:/insight-ui
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
@@ -56,8 +58,8 @@ services:
       POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       API_ENDPOINT: https://insight:8080
-      STORAGE_ENDPOINT: insight:9000
-      STORAGE_BUCKET: insight
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      STORAGE_BUCKET: ${STORAGE_BUCKET}
     volumes:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
@@ -116,7 +118,7 @@ services:
     working_dir: /root/minio
     entrypoint: ./mc.sh
     environment:
-      MINIO_ENDPOINT: https://insight:9000
+      MINIO_ENDPOINT: ${STORAGE_ENDPOINT}
       MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
     volumes:
