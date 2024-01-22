@@ -2,10 +2,12 @@
 <script lang=ts>
     import Card from '../Card.svelte';
 
+    export let name: string;
     export let id: string;
+    export let files: [];
 </script>
 
 <Card>
-    {id}
+    <h3>{name}</h3>
 </Card>
 

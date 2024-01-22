@@ -1,18 +1,31 @@
 
-<script>
+<script lang=ts>
     import Icon from '../Icon.svelte';
+
+    let input: HTMLInputElement;
+
+    function upload(e: Event) {
+        for(const pagestream of e.target.files) {
+            console.log(pagestream)
+            // TODO - POST pagestream
+            // TODO - Get signed write url
+            // TODO - POST actual file to S3 signed url
+        }
+    }
 </script>
 
-<div>
+<input type="file" accept=".pdf" multiple bind:this={input} on:change={upload} />
+
+<button on:click={() => input.click()}>
     <span>
         <Icon class="gg-software-upload" />
     </span>
 
     <h2>Drop files here to upload</h2>
-</div>
+</button>
 
 <style>
-    div {
+    button {
         padding: 1.5rem;
         margin-bottom: 1rem;
         border: 3px dashed var(--color-page-border);
@@ -21,6 +34,13 @@
         color: var(--text-color-page);
         align-items: center;
         justify-content: center;
+        background: transparent;
+        width: 100%;
+    }
+
+    button:hover {
+        color: var(--color-primary);
+        cursor: pointer;
     }
 
     span {
@@ -28,6 +48,6 @@
     }
 
     span :global(.gg-software-upload) {
-        --ggs: 2;
+        --ggs: 1.8;
     }
 </style>

@@ -7,9 +7,7 @@
 </script>
 
 <Card>
-    <header>
-        <h3>{filename}</h3>
-    </header>
+    <h3>{filename}</h3>
 
     {#each pages as page}
         <a href="{page.url}">
