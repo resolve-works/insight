@@ -1,12 +1,12 @@
 
 <script lang="ts">
-    import { page } from '$app/stores';
     import Icon from '../Icon.svelte';
+    import Card from '../Card.svelte';
     export let filename: string;
     export let pages: { index: number, url: URL, highlights: string[] }[];
 </script>
 
-<article>
+<Card>
     <header>
         <h3>{filename}</h3>
     </header>
@@ -25,17 +25,9 @@
             </ul>
         </a>
     {/each}
-</article>
+</Card>
 
 <style>
-    article {
-        background: var(--color-white);
-        padding: var(--padding-y) calc(var(--padding-x) * 1.5);
-        margin: 0 calc(var(--padding-x) * -1.5);
-        margin-bottom: 1rem;
-        border-bottom: var(--border-size) solid #D0D5DC;
-    }
-
     span {
         display: grid;
         height: 2rem;

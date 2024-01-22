@@ -1,12 +1,22 @@
 
 <script>
     import Layout from '../Layout.svelte';
+    import Pagestream from './Pagestream.svelte';
+    import Uploader from './Uploader.svelte'
+
+    export let data;
 </script>
 
 
 <Layout>
     <main>
-        <h2>Files</h2>
+        <Uploader />
+
+        {#each data.pagestreams as pagestream }
+            <Pagestream {...pagestream} />
+        {/each}
     </main>
 </Layout>
 
+<style>
+</style>

@@ -51,7 +51,7 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def ingest_pagestream(id, owner_id, path, name, is_merged):
+def ingest_pagestream(id, owner_id, path, name):
     logging.info(f"Ingesting pagestream {id}")
 
     temp_path = Path(TemporaryDirectory().name)

@@ -22,7 +22,6 @@ create table if not exists private.pagestream (
     owner_id uuid not null,
     path text generated always as (owner_id::text || '/' || id::text || '.pdf') stored,
     name text not null,
-    is_merged boolean not null default false,
     primary key (id)
 );
 grant select, insert on private.pagestream to external_user;

@@ -86,14 +86,10 @@
         align-items: center;
     }
 
-    main {
-        padding: 0 calc(var(--padding-x) * 1.5);
-    }
-
     footer {
         display: grid;
         align-items: center;
-        color: #BDBDBD;
+        color: var(--text-color-page);
         grid-template-columns: auto auto;
         justify-content: space-between;
     }
