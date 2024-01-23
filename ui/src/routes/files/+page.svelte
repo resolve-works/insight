@@ -3,6 +3,7 @@
     import Layout from '../Layout.svelte';
     import Pagestream from './Pagestream.svelte';
     import Uploader from './Uploader.svelte';
+    import Upload from './Upload.svelte';
     import { uploads } from './stores.ts';
 
     export let data;
@@ -14,7 +15,7 @@
         <Uploader />
 
         {#each $uploads as upload }
-            <div>{upload.file.name}</div>
+            <Upload upload={upload} />
         {/each}
 
         {#each data.pagestreams as pagestream }

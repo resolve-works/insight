@@ -12,7 +12,7 @@
 <script lang="ts">
     import Card from '../Card.svelte';
 
-    let upload: Upload;
+    export let upload: Upload;
 </script>
 
 <Card>
@@ -20,3 +20,10 @@
     <p>Uploading...</p>
     <progress value="70" max="100"></progress>
 </Card>
+
+<style>
+    progress {
+        width: 100%;
+        accent-color: var(--color-primary);
+    }
+</style>

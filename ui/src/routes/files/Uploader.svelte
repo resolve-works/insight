@@ -87,8 +87,4 @@
         --ggs: 1.8;
     }
 
-    progress {
-        width: 100%;
-        accent-color: var(--color-primary);
-    }
 </style>
