@@ -1,6 +1,8 @@
 
 import { env } from '$env/dynamic/public';
-import * as Minio from 'minio';
+import { presignSignatureV4 } from 'minio/dist/esm/signing.mjs'
+
+const REGION = 'insight';
 
 export async function load({ parent, params, fetch }) {
     const { access_token, access_key_id, secret_access_key, session_token } = await parent();
@@ -12,18 +14,19 @@ export async function load({ parent, params, fetch }) {
     const file = files[0]
 
     const url = new URL(env.PUBLIC_STORAGE_ENDPOINT)
-    const minio = new Minio.Client({
-        endPoint: url.hostname,
+
+    const request = {
+        protocol: url.protocol,
         port: parseInt(url.port),
-        useSSL: url.protocol === 'https:',
-        accessKey: access_key_id,
-        secretKey: secret_access_key,
-        sessionToken: session_token,
-        region: 'insight',
-    })
+        method: 'GET',
+        path: '/' + env.PUBLIC_STORAGE_BUCKET + '/' + file.path,
+        headers: {
+            host: url.host
+        },
+    }
 
     return {
         ...file,
-        url: minio.presignedGetObject(env.PUBLIC_STORAGE_BUCKET, file.path, 60 * 60),
+        url: presignSignatureV4(request, access_key_id, secret_access_key, session_token, REGION, new Date(), 60 * 60),
     }
 }
