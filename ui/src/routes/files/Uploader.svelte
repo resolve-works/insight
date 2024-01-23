@@ -1,53 +1,54 @@
 
 <script lang=ts>
     import Icon from '../Icon.svelte';
+    import { Upload } from './Upload.svelte';
+    import { uploads } from './stores.ts';
 
     let is_dragover = false;
-
     let input: HTMLInputElement;
-    let files: File[];
-    $: files = [];
+
+    function upload(file: File) {
+        uploads.update(uploads => [...uploads, new Upload(file)])
+    }
 
     function drop(e: DragEvent) {
+        is_dragover = false;
+    
         if( ! e.dataTransfer) {
             return
         }
 
         for(const file of e.dataTransfer.files) {
-            input.files.push(file)
+            if(file.type != 'application/pdf') {
+                alert(`Unsupported file type: ${file.type}`);
+            }
+
+            upload(file)
         }
     }
 
-    function upload() {
+    function select() {
         if( ! input.files ) {
             return;
         }
 
         for(const file of input.files) {
-            files = [...files, file]
-            // TODO - Create pagestream in DB
-            // TODO - Get signed write url
-            // TODO - POST actual file to S3 signed url
+            upload(file)
         }
 
         input.value = '';
     }
 </script>
 
-<input type="file" accept=".pdf" multiple bind:this={input} on:change={upload} />
+<input type="file" accept=".pdf" multiple bind:this={input} on:change={select} />
 
 <button on:click={() => input.click()} on:drop|preventDefault={drop} on:dragover|preventDefault on:dragenter|preventDefault={() => is_dragover = true} on:dragexit|preventDefault={() => is_dragover = false} class:dragover={is_dragover}>
     <span>
         <Icon class="gg-software-upload" />
     </span>
 
-    <h2>Drop files here to upload</h2>
+    <h2><b>Choose PDF files</b> or drop them here</h2>
 </button>
-
-
-{#each files as file}
-    <div>{file.name}</div>
-{/each}
 
 <style>
     input {
@@ -55,7 +56,7 @@
     }
 
     button {
-        padding: 1.5rem;
+        padding: 3rem 1.5rem;
         margin-bottom: 1rem;
         border: 3px dashed var(--color-page-border);
         display: grid;
@@ -70,7 +71,12 @@
     button.dragover,
     button:hover {
         color: var(--color-primary);
+        border-color: var(--color-primary);
         cursor: pointer;
+    }
+
+    h2 {
+        font-weight: normal;
     }
 
     span {
@@ -79,5 +85,10 @@
 
     span :global(.gg-software-upload) {
         --ggs: 1.8;
+    }
+
+    progress {
+        width: 100%;
+        accent-color: var(--color-primary);
     }
 </style>
