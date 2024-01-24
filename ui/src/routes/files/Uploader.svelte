@@ -1,14 +1,13 @@
 
 <script lang=ts>
     import Icon from '$lib/Icon.svelte';
-    import { Upload } from './Upload.svelte';
     import { uploads } from '$lib/stores.ts';
 
     let is_dragover = false;
     let input: HTMLInputElement;
 
     function upload(file: File) {
-        uploads.update(uploads => [...uploads, new Upload(file)])
+        uploads.update(uploads => [...uploads, file])
     }
 
     function drop(e: DragEvent) {

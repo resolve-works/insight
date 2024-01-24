@@ -14,12 +14,12 @@
     <main>
         <Uploader />
 
-        {#each $uploads as upload }
-            <Upload upload={upload} />
+        {#each $uploads as file }
+            <Upload file={file} />
         {/each}
 
         {#each data.pagestreams as pagestream }
-            <Pagestream {...pagestream} />
+            <Pagestream name={pagestream.name} />
         {/each}
     </main>
 </Layout>

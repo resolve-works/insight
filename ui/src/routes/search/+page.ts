@@ -1,5 +1,5 @@
 
-export async function load({ url, parent, data, fetch }) {
+export async function load({ url, parent, fetch }) {
     const { access_token } = await parent();
     const query = url.searchParams.get('query');
 
