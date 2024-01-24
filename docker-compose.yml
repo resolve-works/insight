@@ -116,7 +116,8 @@ services:
   mc:
     image: minio/mc
     working_dir: /root/minio
-    entrypoint: ./mc.sh
+    command: ./mc.sh
+    entrypoint: /bin/bash
     environment:
       MINIO_ENDPOINT: ${STORAGE_ENDPOINT}
       MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
