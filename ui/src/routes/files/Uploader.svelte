@@ -1,8 +1,8 @@
 
 <script lang=ts>
-    import Icon from '../Icon.svelte';
+    import Icon from '$lib/Icon.svelte';
     import { Upload } from './Upload.svelte';
-    import { uploads } from './stores.ts';
+    import { uploads } from '$lib/stores.ts';
 
     let is_dragover = false;
     let input: HTMLInputElement;

@@ -1,6 +1,6 @@
 
 import { env } from '$env/dynamic/public';
-import { presignSignatureV4 } from 'minio/dist/esm/signing.mjs'
+import { presignSignatureV4 } from '../../../../node_modules/minio/src/signing.ts'
 
 const REGION = 'insight';
 

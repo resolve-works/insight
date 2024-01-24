@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-    import Card from '../Card.svelte';
+    import Card from '$lib/Card.svelte';
 
     export let upload: Upload;
 </script>

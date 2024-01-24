@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Icon from './Icon.svelte';
+    import Icon from '$lib/Icon.svelte';
     export let value = '';
 </script>
 

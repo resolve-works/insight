@@ -1,6 +1,6 @@
 <script>
     import { page } from '$app/stores';
-    import Icon from './Icon.svelte';
+    import Icon from '$lib/Icon.svelte';
 
     export let collapsed = false;
 

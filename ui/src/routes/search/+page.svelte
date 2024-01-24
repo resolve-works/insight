@@ -7,7 +7,7 @@
 </script>
 
 <Layout>
-    <Filters {...data} slot="subnav" />
+    <Filters total={data.total} slot="subnav" />
 
     {#each data.hits as hit }
         <Hit {...hit} />

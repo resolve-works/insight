@@ -1,6 +1,6 @@
 
 <script lang=ts>
-    import Card from '../Card.svelte';
+    import Card from '$lib/Card.svelte';
 
     export let name: string;
     export let id: string;

@@ -1,7 +1,7 @@
 
 <script lang="ts">
-    import Icon from '../Icon.svelte';
-    import Card from '../Card.svelte';
+    import Icon from '$lib/Icon.svelte';
+    import Card from '$lib/Card.svelte';
     export let filename: string;
     export let pages: { index: number, url: URL, highlights: string[] }[];
 </script>
