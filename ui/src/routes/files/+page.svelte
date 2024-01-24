@@ -4,7 +4,7 @@
     import Pagestream from './Pagestream.svelte';
     import Uploader from './Uploader.svelte';
     import Upload from './Upload.svelte';
-    import { uploads } from './stores.ts';
+    import { uploads } from '$lib/stores.ts';
 
     export let data;
 </script>
