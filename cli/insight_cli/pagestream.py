@@ -43,17 +43,12 @@ def create(files):
     """Ingest PDF pagestreams"""
 
     for path in files:
-        res = client.post(
-            f"{config['api']['endpoint']}/api/v1/pagestream",
-            data={"name": path.name},
-            headers={"Prefer": "return=representation"},
-        )
-
-        if res.status_code != 201:
+        res = client.post(f"{config['api']['endpoint']}/api/v1/rpc/seed_pagestream")
+        if res.status_code != 200:
             logging.error(res.text)
             exit(1)
 
-        pagestream = res.json()[0]
+        pagestream_seed = res.json()
         size = path.stat().st_size
 
         with open(path, "rb") as f:
@@ -91,15 +86,29 @@ def create(files):
 
                 minio.put_object(
                     config["storage"]["bucket"],
-                    pagestream["path"],
+                    pagestream_seed["path"],
                     reader_wrapper,
                     size,
                     content_type="application/pdf",
                 )
 
                 res = client.post(
+                    f"{config['api']['endpoint']}/api/v1/pagestream",
+                    data={
+                        "id": pagestream_seed["id"],
+                        "path": pagestream_seed["path"],
+                        "name": path.name,
+                    },
+                    headers={"Prefer": "return=representation"},
+                )
+
+                if res.status_code != 201:
+                    logging.error(res.text)
+                    exit(1)
+
+                res = client.post(
                     f"{config['api']['endpoint']}/api/v1/rpc/ingest_pagestream",
-                    data={"id": pagestream["id"]},
+                    data={"id": pagestream_seed["id"]},
                 )
 
                 if res.status_code != 204:

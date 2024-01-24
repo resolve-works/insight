@@ -5,6 +5,8 @@ begin;
 \set pg_worker_user `echo $PG_WORKER_USER`
 \set pg_worker_password `echo $PG_WORKER_PASSWORD`
 
+alter default privileges revoke execute on functions from public;
+
 create schema if not exists private;
 
 create extension if not exists vector;
@@ -21,9 +23,10 @@ grant internal_worker to :pg_api_user;
 
 create role :pg_worker_user noinherit login password :'pg_worker_password';
 
-\ir include/pagestream.sql
-\ir include/file.sql
-\ir include/prompt.sql
+\ir include/tables.sql
+\ir include/functions.sql
+\ir include/triggers.sql
+\ir include/views.sql
 
 create table private.data_page (
     id bigint not null,

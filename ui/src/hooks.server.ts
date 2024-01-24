@@ -78,6 +78,12 @@ export async function handle({event, resolve}) {
         event.cookies.set('refresh_token', tokens.refresh_token, { path: '/' })
         event.locals.access_token = tokens.access_token;
 
+        // Parse token payload and remember user ID
+        // Convert base64URL JWT payload to normal base64
+        //const payload = event.locals.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        //const payload_data = JSON.parse(atob(payload))
+        //event.locals.sub = payload_data.sub;
+
         // Fetch timed S3 credentials
         const url = new URL(public_env.PUBLIC_STORAGE_ENDPOINT)
         url.searchParams.set("Action", "AssumeRoleWithWebIdentity")

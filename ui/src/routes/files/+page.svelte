@@ -14,11 +14,11 @@
     <main>
         <Uploader />
 
-        {#each $uploads as file }
+        {#each $uploads as file (file.name) }
             <Upload file={file} />
         {/each}
 
-        {#each data.pagestreams as pagestream }
+        {#each data.pagestreams as pagestream (pagestream.id)}
             <Pagestream name={pagestream.name} />
         {/each}
     </main>

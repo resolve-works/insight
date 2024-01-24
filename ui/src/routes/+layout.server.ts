@@ -1,3 +1,3 @@
 export async function load({ locals }) {
-	return locals;
+    return locals;
 }
