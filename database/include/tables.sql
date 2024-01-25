@@ -1,7 +1,7 @@
 
 create type pagestream_status as enum ('uploading', 'ingesting', 'idle');
 
-create table if not exists private.pagestream (
+create table if not exists private.pagestreams (
     id uuid default gen_random_uuid(),
     owner_id uuid not null,
 
@@ -14,9 +14,9 @@ create table if not exists private.pagestream (
 
     primary key (id)
 );
-grant select, insert on private.pagestream to external_user;
+grant select, insert on private.pagestreams to external_user;
 
-create table private.file (
+create table private.documents (
     id uuid default gen_random_uuid(),
     owner_id uuid not null,
     pagestream_id uuid not null,
@@ -26,10 +26,10 @@ create table private.file (
     name text not null,
 
     primary key (id),
-    foreign key(pagestream_id) references private.pagestream (id) match simple on delete restrict not valid
+    foreign key(pagestream_id) references private.pagestreams (id) match simple on delete restrict not valid
 );
-grant select on private.file to external_user;
-grant select, insert on private.file to internal_worker;
+grant select on private.documents to external_user;
+grant select, insert on private.documents to internal_worker;
 
 
 create table if not exists private.prompt (
@@ -49,7 +49,7 @@ create table if not exists private.source (
     score float not null,
 
     constraint fk_prompt foreign key(prompt_id) references private.prompt(id) on delete cascade,
-    constraint fk_pagestream foreign key(pagestream_id) references private.pagestream(id) on delete cascade
+    constraint fk_pagestream foreign key(pagestream_id) references private.pagestreams(id) on delete cascade
 );
 grant select, insert on private.source to external_user;
 

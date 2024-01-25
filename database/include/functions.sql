@@ -1,10 +1,10 @@
 
 create or replace function ingest_pagestream(id uuid) returns void as $$
     import json
-    plan = plpy.prepare("update pagestream set status='ingesting' where id=$1", ["uuid"])
+    plan = plpy.prepare("update pagestreams set status='ingesting' where id=$1", ["uuid"])
     plpy.execute(plan, [id])
 
-    plan = plpy.prepare("select * from pagestream where id=$1", ["uuid"])
+    plan = plpy.prepare("select * from pagestreams where id=$1", ["uuid"])
     results = plpy.execute(plan, [id])
 
     plan = plpy.prepare("notify pagestream, '{payload}'".format(payload=json.dumps(results[0])))
@@ -64,7 +64,7 @@ create or replace function create_prompt(query text, similarity_top_k integer) r
     return json.dumps(list(prompts))
 $$ language plpython3u;
 
-create or replace function file(private.source) returns setof private.file rows 1 as $$
-  select * from private.file where pagestream_id = $1.pagestream_id and from_page <= $1.index and to_page > $1.index
+create or replace function documents(private.source) returns setof private.documents rows 1 as $$
+  select * from private.documents where pagestream_id = $1.pagestream_id and from_page <= $1.index and to_page > $1.index
 $$ stable language sql;
 
