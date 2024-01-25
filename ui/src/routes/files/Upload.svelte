@@ -5,13 +5,18 @@
     import { uploads } from '$lib/stores';
     import { invalidate } from '$app/navigation';
 
-    export let file: File;
+    export let file: File
+    export let access_token: string
 
     let total = file.size;
     let loaded = 0;
 
     onMount(async () => {
-        const response = await fetch('/files', { method: 'POST' })
+        const response = await fetch('/files', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: file.name })
+        })
         const pagestream = await response.json()
 
         // https://github.com/whatwg/fetch/issues/607
@@ -24,14 +29,16 @@
 
         // When upload is done, strip upload
         xhr.upload.addEventListener("loadend", async () => {
-            const { id, path } = pagestream;
-            const response = await fetch('/files', { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, path, name: file.name })
+            const response = await fetch(`/api/v1/pagestream?id=eq.${pagestream.id}`, { 
+                method: 'PATCH',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${access_token}`,
+                },
+                body: JSON.stringify({ status: 'idle' })
             })
-            if(response.status == 200) {
-                uploads.update(uploads => uploads.filter(f => f.name != file.name))
+            if(response.status == 204) {
+                uploads.update(uploads => uploads.filter(f => f != file))
             }
 
             await invalidate(url => url.pathname == '/api/v1/pagestream')

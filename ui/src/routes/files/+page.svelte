@@ -7,6 +7,8 @@
     import { uploads } from '$lib/stores.ts';
 
     export let data;
+    const { access_token } = data;
+
 </script>
 
 
@@ -15,7 +17,7 @@
         <Uploader />
 
         {#each $uploads as file (file.name) }
-            <Upload file={file} />
+            <Upload file={file} access_token={access_token} />
         {/each}
 
         {#each data.pagestreams as pagestream (pagestream.id)}

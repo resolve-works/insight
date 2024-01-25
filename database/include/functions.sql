@@ -1,14 +1,4 @@
 
-create or replace function seed_pagestream() returns json as $$
-declare
-    owner_id uuid := current_setting('request.jwt.claims', true)::json->>'sub';
-    id uuid := gen_random_uuid();
-begin
-    return ('{"id":"' || id::text || '", "path": "' || (owner_id::text || '/' || id::text || '.pdf') || '"}')::json;
-end;
-$$ language plpgsql;
-grant execute on function seed_pagestream to external_user;
-
 create or replace function ingest_pagestream(id uuid) returns void as $$
     import json
     plan = plpy.prepare("select * from private.pagestream where id=$1", ["uuid"])

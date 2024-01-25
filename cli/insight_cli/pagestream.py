@@ -43,12 +43,17 @@ def create(files):
     """Ingest PDF pagestreams"""
 
     for path in files:
-        res = client.post(f"{config['api']['endpoint']}/api/v1/rpc/seed_pagestream")
-        if res.status_code != 200:
+        res = client.post(
+            f"{config['api']['endpoint']}/api/v1/pagestream",
+            data={"name": path.name},
+            headers={"Prefer": "return=representation"},
+        )
+
+        if res.status_code != 201:
             logging.error(res.text)
             exit(1)
 
-        pagestream_seed = res.json()
+        pagestream = res.json()[0]
         size = path.stat().st_size
 
         with open(path, "rb") as f:
@@ -86,29 +91,24 @@ def create(files):
 
                 minio.put_object(
                     config["storage"]["bucket"],
-                    pagestream_seed["path"],
+                    pagestream["path"],
                     reader_wrapper,
                     size,
                     content_type="application/pdf",
                 )
 
-                res = client.post(
-                    f"{config['api']['endpoint']}/api/v1/pagestream",
-                    data={
-                        "id": pagestream_seed["id"],
-                        "path": pagestream_seed["path"],
-                        "name": path.name,
-                    },
-                    headers={"Prefer": "return=representation"},
+                res = client.patch(
+                    f"{config['api']['endpoint']}/api/v1/pagestream?id=eq.{pagestream['id']}",
+                    data={"status": "idle"},
                 )
 
-                if res.status_code != 201:
+                if res.status_code != 204:
                     logging.error(res.text)
                     exit(1)
 
                 res = client.post(
                     f"{config['api']['endpoint']}/api/v1/rpc/ingest_pagestream",
-                    data={"id": pagestream_seed["id"]},
+                    data={"id": pagestream["id"]},
                 )
 
                 if res.status_code != 204:

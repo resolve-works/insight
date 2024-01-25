@@ -1,9 +1,14 @@
 
+create type pagestream_status as enum ('uploading', 'ingesting', 'idle');
+
 create table if not exists private.pagestream (
-    id uuid not null,
+    id uuid default gen_random_uuid(),
     owner_id uuid not null,
-    path text not null,
+
+    path text generated always as (owner_id::text || '/' || id::text || '.pdf') stored,
     name text not null,
+    status pagestream_status not null default 'uploading',
+
     created_at timestamp with time zone default current_timestamp,
     updated_at timestamp with time zone default current_timestamp,
 
