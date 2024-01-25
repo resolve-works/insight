@@ -1,7 +1,7 @@
 
 create or replace view pagestream as 
-    select id, name, path, created_at, updated_at from private.pagestream;
-grant insert, select on pagestream to external_user;
+    select id, name, path, status, created_at, updated_at from private.pagestream;
+grant select, insert, update on pagestream to external_user;
 
 create or replace view file as 
     select id, pagestream_id, path, from_page, to_page, name from private.file;
