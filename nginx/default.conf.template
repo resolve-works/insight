@@ -60,8 +60,8 @@ server {
         default_type  application/json;
         proxy_hide_header Content-Location;
         add_header Content-Location  /api/v1/$upstream_http_content_location;
-        proxy_set_header  Connection "";
         proxy_http_version 1.1;
+        proxy_set_header  Connection "";
         proxy_pass http://postgrest/;
     }
 
@@ -70,6 +70,7 @@ server {
         proxy_buffering off;
         proxy_request_buffering off;
 
+        proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_set_header Host $http_host;
