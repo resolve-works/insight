@@ -1,7 +1,10 @@
 
 create or replace function ingest_pagestream(id uuid) returns void as $$
     import json
-    plan = plpy.prepare("select * from private.pagestream where id=$1", ["uuid"])
+    plan = plpy.prepare("update pagestream set status='ingesting' where id=$1", ["uuid"])
+    plpy.execute(plan, [id])
+
+    plan = plpy.prepare("select * from pagestream where id=$1", ["uuid"])
     results = plpy.execute(plan, [id])
 
     plan = plpy.prepare("notify pagestream, '{payload}'".format(payload=json.dumps(results[0])))

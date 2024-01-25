@@ -10,7 +10,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"download-icons": "curl 'https://css.gg/css?=|comment|file|file-document|menu|search|log-out|folder|software-upload' -o ./src/routes/icons.css"
+		"download-icons": "curl 'https://css.gg/css?=|comment|file|file-document|menu|search|log-out|folder|software-upload|software-download|spinner' -o ./src/lib/icons.css"
 	},
 	"devDependencies": {
 		"@fontsource-variable/roboto-slab": "^5.0.18",

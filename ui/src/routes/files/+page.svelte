@@ -21,7 +21,7 @@
         {/each}
 
         {#each data.pagestreams as pagestream (pagestream.id)}
-            <Pagestream name={pagestream.name} />
+            <Pagestream {...pagestream} />
         {/each}
     </main>
 </Layout>

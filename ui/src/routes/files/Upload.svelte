@@ -29,7 +29,7 @@
 
         // When upload is done, strip upload
         xhr.upload.addEventListener("loadend", async () => {
-            const response = await fetch(`/api/v1/pagestream?id=eq.${pagestream.id}`, { 
+            const patch_response = await fetch(`/api/v1/pagestream?id=eq.${pagestream.id}`, { 
                 method: 'PATCH',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -37,10 +37,26 @@
                 },
                 body: JSON.stringify({ status: 'idle' })
             })
-            if(response.status == 204) {
-                uploads.update(uploads => uploads.filter(f => f != file))
+            if(patch_response.status != 204) {
+                throw new Error('Could not mark file as uploaded')
             }
 
+            // TODO - Send STOMP message through rabbitmq websocket instead
+            const ingest_response = await fetch('/api/v1/rpc/ingest_pagestream', { 
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${access_token}`,
+                },
+                body: JSON.stringify({ id: pagestream.id })
+            })
+            if(ingest_response.status != 204) {
+                throw new Error('Could not trigger ingest of file')
+            }
+
+            // TODO - Proper error handling. The web is unstable, uploads fail
+
+            uploads.update(uploads => uploads.filter(f => f != file))
             await invalidate(url => url.pathname == '/api/v1/pagestream')
         });
 

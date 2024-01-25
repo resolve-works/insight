@@ -85,5 +85,4 @@
     span :global(.gg-software-upload) {
         --ggs: 1.8;
     }
-
 </style>
