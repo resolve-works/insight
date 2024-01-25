@@ -11,15 +11,15 @@ from .oauth import client, get_token
 
 
 @click.group()
-def pagestream():
-    """Manage PDF pagestreams."""
+def file():
+    """Manage PDF files."""
     pass
 
 
-@pagestream.command()
+@file.command()
 def list():
-    """List uploaded PDF pagestreams."""
-    res = client.get(f"{config['api']['endpoint']}/api/v1/pagestream")
+    """List uploaded PDF files."""
+    res = client.get(f"{config['api']['endpoint']}/api/v1/files")
     print(res.text)
 
 
@@ -37,14 +37,14 @@ def load_file(path):
         yield chunk
 
 
-@pagestream.command()
+@file.command()
 @click.argument("files", nargs=-1, type=click.Path(path_type=Path))
-def create(files):
-    """Ingest PDF pagestreams"""
+def upload(files):
+    """Ingest PDF files"""
 
     for path in files:
         res = client.post(
-            f"{config['api']['endpoint']}/api/v1/pagestreams",
+            f"{config['api']['endpoint']}/api/v1/files",
             data={"name": path.name},
             headers={"Prefer": "return=representation"},
         )
@@ -53,7 +53,7 @@ def create(files):
             logging.error(res.text)
             exit(1)
 
-        pagestream = res.json()[0]
+        file = res.json()[0]
         size = path.stat().st_size
 
         with open(path, "rb") as f:
@@ -91,14 +91,14 @@ def create(files):
 
                 minio.put_object(
                     config["storage"]["bucket"],
-                    pagestream["path"],
+                    file["path"],
                     reader_wrapper,
                     size,
                     content_type="application/pdf",
                 )
 
                 res = client.patch(
-                    f"{config['api']['endpoint']}/api/v1/pagestreams?id=eq.{pagestream['id']}",
+                    f"{config['api']['endpoint']}/api/v1/files?id=eq.{file['id']}",
                     data={"status": "idle"},
                 )
 
@@ -107,8 +107,8 @@ def create(files):
                     exit(1)
 
                 res = client.post(
-                    f"{config['api']['endpoint']}/api/v1/rpc/ingest_pagestream",
-                    data={"id": pagestream["id"]},
+                    f"{config['api']['endpoint']}/api/v1/rpc/ingest_file",
+                    data={"id": file["id"]},
                 )
 
                 if res.status_code != 204:

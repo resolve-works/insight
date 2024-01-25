@@ -1,7 +1,7 @@
 import click
 from itertools import groupby
 from .config import config
-from .pagestream import pagestream
+from .file import file
 from .oauth import authorize_device, delete_token, client
 
 
@@ -11,7 +11,7 @@ def cli():
     pass
 
 
-cli.add_command(pagestream)
+cli.add_command(file)
 
 
 @cli.command()
@@ -110,12 +110,12 @@ def prompt(query, similarity_top_k):
         exit(1)
 
     res = client.get(
-        f"{config['api']['endpoint']}/api/v1/prompt?select=response,source(score, index,...documents(name))&source.order=score.desc&id=eq.{res.json()[0]['id']}"
+        f"{config['api']['endpoint']}/api/v1/prompts?select=response,sources(score, index,...document(name))&sources.order=score.desc&id=eq.{res.json()[0]['id']}"
     )
 
     for prompt in res.json():
         click.echo(f"Response: {prompt['response']}")
-        for document_name, pages in groupby(prompt["source"], lambda x: x.pop("name")):
+        for document_name, pages in groupby(prompt["sources"], lambda x: x.pop("name")):
             click.echo("\033[1m" + document_name.upper() + "\033[0m")
             for page in pages:
                 click.echo(f"{page['score']}\t- Page {page['index'] + 1}")

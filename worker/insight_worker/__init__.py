@@ -4,14 +4,14 @@ import asyncio
 import os
 import logging
 import psycopg2
-from .ingestors import ingest_pagestream
+from .ingestors import ingest_file
 from .oauth import OAuth2Session
 
 logging.basicConfig(level=logging.INFO)
 
 conn = psycopg2.connect(os.environ.get("POSTGRES_URI"))
 cursor = conn.cursor()
-cursor.execute(f"LISTEN pagestream;")
+cursor.execute(f"LISTEN file;")
 conn.commit()
 
 
@@ -42,8 +42,8 @@ def reader():
     for notification in conn.notifies:
         object = json.loads(notification.payload)
         match notification.channel:
-            case "pagestream":
-                ingest_pagestream(**object)
+            case "file":
+                ingest_file(**object)
 
     conn.notifies.clear()
 

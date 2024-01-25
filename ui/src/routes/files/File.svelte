@@ -10,7 +10,7 @@
 </script>
 
 <Card>
-    <a href={`/pagestreams/${id}`}>
+    <a href={`/files/${id}`}>
         <h3>
             {name}
 

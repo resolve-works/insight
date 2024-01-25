@@ -24,9 +24,9 @@ grant internal_worker to :pg_api_user;
 create role :pg_worker_user noinherit login password :'pg_worker_password';
 
 \ir include/tables.sql
+\ir include/views.sql
 \ir include/functions.sql
 \ir include/triggers.sql
-\ir include/views.sql
 
 create table private.data_page (
     id bigint not null,

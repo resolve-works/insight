@@ -20,8 +20,8 @@ def store_embeddings(pages):
     nodes = [
         TextNode(
             text=page["contents"],
-            id_=f"{page['pagestream_id']}_{page['index']}",
-            metadata={"pagestream_id": page["pagestream_id"], "index": page["index"]},
+            id_=f"{page['file_id']}_{page['index']}",
+            metadata={"file_id": page["file_id"], "index": page["index"]},
         )
         for page in pages
     ]

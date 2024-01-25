@@ -51,25 +51,25 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def ingest_pagestream(id, owner_id, path, name, **kwargs):
-    logging.info(f"Ingesting pagestream {id}")
+def ingest_file(id, owner_id, path, name, **kwargs):
+    logging.info(f"Ingesting file {id}")
 
     temp_path = Path(TemporaryDirectory().name)
-    pagestream_path = temp_path / "pagestream.pdf"
+    file_path = temp_path / "file.pdf"
     document_path = temp_path / "document.pdf"
 
     session = OAuth2Session()
     minio = get_minio(session.token["access_token"])
-    minio.fget_object(env.get("STORAGE_BUCKET"), path, pagestream_path)
+    minio.fget_object(env.get("STORAGE_BUCKET"), path, file_path)
 
-    with Pdf.open(pagestream_path) as pdf:
+    with Pdf.open(file_path) as pdf:
         to_page = len(pdf.pages)
 
     res = session.post(
         f"{env.get('API_ENDPOINT')}/api/v1/documents",
         data={
             "owner_id": owner_id,
-            "pagestream_id": id,
+            "file_id": id,
             "name": name,
             "from_page": 0,
             "to_page": to_page,
@@ -78,10 +78,10 @@ def ingest_pagestream(id, owner_id, path, name, **kwargs):
     )
     document = res.json()[0]
 
-    logging.info(f"Saving pagestream {id} as document {document['id']}")
+    logging.info(f"Saving file {id} as document {document['id']}")
 
     # OCR & optimize new PDF
-    process = Process(target=ocrmypdf_process, args=(pagestream_path, document_path))
+    process = Process(target=ocrmypdf_process, args=(file_path, document_path))
     process.start()
     process.join()
 
@@ -103,7 +103,7 @@ def ingest_pagestream(id, owner_id, path, name, **kwargs):
     html_doc = html.document_fromstring(body.pop("X-TIKA:content", None))
     pages = [
         {
-            "pagestream_id": id,
+            "file_id": id,
             "index": document["from_page"] + index,
             "contents": page.text_content(),
         }
@@ -125,7 +125,7 @@ def ingest_pagestream(id, owner_id, path, name, **kwargs):
         raise Exception(res.text)
 
     res = session.patch(
-        f"{env.get('API_ENDPOINT')}/api/v1/pagestreams?id=eq.{id}",
+        f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{id}",
         data={"status": "idle"},
     )
     if res.status_code != 204:

@@ -5,14 +5,14 @@
     import { uploads } from '$lib/stores';
     import { invalidate } from '$app/navigation';
 
-    export let file: File
+    export let upload: File
     export let access_token: string
 
-    let total = file.size;
+    let total = upload.size;
     let loaded = 0;
 
-    async function create_pagestream(name: string) {
-        const response = await fetch('/api/v1/pagestreams', { 
+    async function create_file(name: string) {
+        const response = await fetch('/api/v1/files', { 
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -21,12 +21,12 @@
             },
             body: JSON.stringify({ name })
         })
-        const pagestreams = await response.json()
-        return pagestreams[0]
+        const files = await response.json()
+        return files[0]
     }
 
     onMount(async () => {
-        const pagestream = await create_pagestream(file.name)
+        const file = await create_file(upload.name)
 
         // Get presigned upload url
         const response = await fetch('/sign', {
@@ -34,7 +34,7 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ method: 'PUT', path: pagestream.path })
+            body: JSON.stringify({ method: 'PUT', path: file.path })
         })
 
         const url = await response.json()
@@ -49,7 +49,7 @@
 
         // When upload is done, strip upload
         xhr.upload.addEventListener("loadend", async () => {
-            const patch_response = await fetch(`/api/v1/pagestreams?id=eq.${pagestream.id}`, { 
+            const patch_response = await fetch(`/api/v1/files?id=eq.${file.id}`, { 
                 method: 'PATCH',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -62,13 +62,13 @@
             }
 
             // TODO - Send STOMP message through rabbitmq websocket instead
-            const ingest_response = await fetch('/api/v1/rpc/ingest_pagestream', { 
+            const ingest_response = await fetch('/api/v1/rpc/ingest_file', { 
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${access_token}`,
                 },
-                body: JSON.stringify({ id: pagestream.id })
+                body: JSON.stringify({ id: file.id })
             })
             if(ingest_response.status != 204) {
                 throw new Error('Could not trigger ingest of file')
@@ -76,19 +76,19 @@
 
             // TODO - Proper error handling. The web is unstable, uploads fail
 
-            uploads.update(uploads => uploads.filter(f => f != file))
-            invalidate(url => url.pathname == '/api/v1/pagestreams')
+            uploads.update(uploads => uploads.filter(f => f != upload))
+            invalidate(url => url.pathname == '/api/v1/files')
         });
 
         // TODO - error
 
         xhr.open("PUT", url, true);
-        xhr.send(file);
+        xhr.send(upload);
     })
 </script>
 
 <Card>
-    <h3>{file.name}</h3>
+    <h3>{upload.name}</h3>
     <p>Uploading...</p>
     <progress value={loaded} max={total}></progress>
 </Card>

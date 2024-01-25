@@ -18,5 +18,5 @@ def get_ocr_engine():
 
 # @hookimpl
 # def add_options(parser):
-# parser.add_argument("--pagestream-id", help="UUID identifying pagestream")
-# parser.add_argument("--from-page", help="Start of document in pagestream")
+# parser.add_argument("--file-id", help="UUID identifying file")
+# parser.add_argument("--from-page", help="Start of document in file")
