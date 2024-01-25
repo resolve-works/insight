@@ -12,7 +12,7 @@
     let loaded = 0;
 
     async function create_pagestream(name: string) {
-        const response = await fetch('/api/v1/pagestream', { 
+        const response = await fetch('/api/v1/pagestreams', { 
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -49,7 +49,7 @@
 
         // When upload is done, strip upload
         xhr.upload.addEventListener("loadend", async () => {
-            const patch_response = await fetch(`/api/v1/pagestream?id=eq.${pagestream.id}`, { 
+            const patch_response = await fetch(`/api/v1/pagestreams?id=eq.${pagestream.id}`, { 
                 method: 'PATCH',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -77,7 +77,7 @@
             // TODO - Proper error handling. The web is unstable, uploads fail
 
             uploads.update(uploads => uploads.filter(f => f != file))
-            invalidate(url => url.pathname == '/api/v1/pagestream')
+            invalidate(url => url.pathname == '/api/v1/pagestreams')
         });
 
         // TODO - error

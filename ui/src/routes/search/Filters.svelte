@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Search from '../Search.svelte'
+    import Search from '$lib/Search.svelte'
     import { page } from '$app/stores';
     const query = $page.url.searchParams.get('query')
 

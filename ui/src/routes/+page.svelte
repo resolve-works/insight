@@ -1,7 +1,7 @@
 
 <script>
-    import Search from './Search.svelte';
-    import Layout from './Layout.svelte';
+    import Search from '$lib/Search.svelte';
+    import Layout from '$lib/Layout.svelte';
 </script>
 
 

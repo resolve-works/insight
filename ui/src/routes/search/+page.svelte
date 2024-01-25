@@ -1,7 +1,7 @@
 <script>
     import Filters from './Filters.svelte'
     import Hit from './Hit.svelte'
-    import Layout from '../Layout.svelte'
+    import Layout from '$lib/Layout.svelte'
 
     export let data
 </script>

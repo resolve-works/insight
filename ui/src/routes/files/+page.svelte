@@ -2,7 +2,7 @@
 <script>
     import { onMount } from 'svelte'
     import { invalidate } from '$app/navigation';
-    import Layout from '../Layout.svelte';
+    import Layout from '$lib/Layout.svelte';
     import Pagestream from './Pagestream.svelte';
     import Uploader from './Uploader.svelte';
     import Upload from './Upload.svelte';
@@ -14,7 +14,7 @@
     // TODO - Poor mans event system
     onMount(() => {
         const interval = setInterval(() => {
-            invalidate(url => url.pathname == '/api/v1/pagestream')
+            invalidate(url => url.pathname == '/api/v1/pagestreams')
         }, 5000)
 
         return () => {

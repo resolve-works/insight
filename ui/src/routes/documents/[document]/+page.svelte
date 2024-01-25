@@ -1,6 +1,6 @@
 
 <script>
-    import Layout from '../../Layout.svelte';
+    import Layout from '$lib/Layout.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import { page } from '$app/stores';
     export let data;

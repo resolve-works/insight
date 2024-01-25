@@ -44,7 +44,7 @@ def create(files):
 
     for path in files:
         res = client.post(
-            f"{config['api']['endpoint']}/api/v1/pagestream",
+            f"{config['api']['endpoint']}/api/v1/pagestreams",
             data={"name": path.name},
             headers={"Prefer": "return=representation"},
         )
@@ -98,7 +98,7 @@ def create(files):
                 )
 
                 res = client.patch(
-                    f"{config['api']['endpoint']}/api/v1/pagestream?id=eq.{pagestream['id']}",
+                    f"{config['api']['endpoint']}/api/v1/pagestreams?id=eq.{pagestream['id']}",
                     data={"status": "idle"},
                 )
 

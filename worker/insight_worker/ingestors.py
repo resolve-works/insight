@@ -56,7 +56,7 @@ def ingest_pagestream(id, owner_id, path, name, **kwargs):
 
     temp_path = Path(TemporaryDirectory().name)
     pagestream_path = temp_path / "pagestream.pdf"
-    file_path = temp_path / "file.pdf"
+    document_path = temp_path / "document.pdf"
 
     session = OAuth2Session()
     minio = get_minio(session.token["access_token"])
@@ -66,7 +66,7 @@ def ingest_pagestream(id, owner_id, path, name, **kwargs):
         to_page = len(pdf.pages)
 
     res = session.post(
-        f"{env.get('API_ENDPOINT')}/api/v1/file",
+        f"{env.get('API_ENDPOINT')}/api/v1/documents",
         data={
             "owner_id": owner_id,
             "pagestream_id": id,
@@ -76,57 +76,59 @@ def ingest_pagestream(id, owner_id, path, name, **kwargs):
         },
         headers={"Prefer": "return=representation"},
     )
-    file = res.json()[0]
+    document = res.json()[0]
 
-    logging.info(f"Saving pagestream {id} as file {file['id']}")
+    logging.info(f"Saving pagestream {id} as document {document['id']}")
 
     # OCR & optimize new PDF
-    process = Process(target=ocrmypdf_process, args=(pagestream_path, file_path))
+    process = Process(target=ocrmypdf_process, args=(pagestream_path, document_path))
     process.start()
     process.join()
 
     session = OAuth2Session()
     minio = get_minio(session.token["access_token"])
-    minio.fput_object(env.get("STORAGE_BUCKET"), file["path"], file_path)
+    minio.fput_object(env.get("STORAGE_BUCKET"), document["path"], document_path)
 
-    logging.info(f"Extracting metadata from file {file['id']}")
+    logging.info(f"Extracting metadata from document {document['id']}")
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/pdf",
     }
-    res = requests.put(env.get("TIKA_URI"), data=open(file_path, "rb"), headers=headers)
+    res = requests.put(
+        env.get("TIKA_URI"), data=open(document_path, "rb"), headers=headers
+    )
     body = res.json()
 
-    logging.info(f"Generating embeddings for file {file['id']}")
-    document = html.document_fromstring(body.pop("X-TIKA:content", None))
+    logging.info(f"Generating embeddings for document {document['id']}")
+    html_doc = html.document_fromstring(body.pop("X-TIKA:content", None))
     pages = [
         {
             "pagestream_id": id,
-            "index": file["from_page"] + index,
+            "index": document["from_page"] + index,
             "contents": page.text_content(),
         }
-        for index, page in enumerate(document.find_class("page"))
+        for index, page in enumerate(html_doc.find_class("page"))
     ]
     store_embeddings(pages)
 
-    logging.info(f"Indexing file {file['id']}")
-    body["insight:filename"] = file["name"]
+    logging.info(f"Indexing document {document['id']}")
+    body["insight:filename"] = document["name"]
     body["insight:pages"] = [
-        {"file_id": file["id"], "index": index, "contents": page.text_content()}
-        for index, page in enumerate(document.find_class("page"))
+        {"document_id": document["id"], "index": index, "contents": page.text_content()}
+        for index, page in enumerate(html_doc.find_class("page"))
     ]
 
     res = OAuth2Session().put(
-        f"{env.get('API_ENDPOINT')}/api/v1/index/_doc/{file['id']}", json=body
+        f"{env.get('API_ENDPOINT')}/api/v1/index/_doc/{document['id']}", json=body
     )
     if res.status_code != 201:
         raise Exception(res.text)
 
     res = session.patch(
-        f"{env.get('API_ENDPOINT')}/api/v1/pagestream?id=eq.{id}",
+        f"{env.get('API_ENDPOINT')}/api/v1/pagestreams?id=eq.{id}",
         data={"status": "idle"},
     )
     if res.status_code != 204:
         raise Exception(res.text)
 
-    logging.info(f"Done processing of file {file['id']}")
+    logging.info(f"Done processing of document {document['id']}")
