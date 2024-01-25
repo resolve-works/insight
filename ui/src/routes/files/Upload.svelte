@@ -80,8 +80,6 @@
             invalidate(url => url.pathname == '/api/v1/files')
         });
 
-        // TODO - error
-
         xhr.open("PUT", url, true);
         xhr.send(upload);
     })

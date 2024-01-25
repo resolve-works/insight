@@ -6,53 +6,43 @@
     export let total: number;
 </script>
 
-<aside>
-    <header>
-        <Search value={query ? query : ''} />
-    </header>
+<header>
+    <Search value={query ? query : ''} />
+</header>
 
-    <main>
-        <h2>{total} document{total == 1 ? '' : 's'} found</h2>
+<main>
+    <h2>{total} document{total == 1 ? '' : 's'} found</h2>
 
-        <h4>Document type:</h4>
-        <ul>
-            <li>
-                <label>
-                    <input type="checkbox" checked={true}> 
-                    Document
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" checked={true}> 
-                    Email
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" checked={true}> 
-                    Presentation
-                </label>
-            </li>
-        </ul>
+    <h4>Document type:</h4>
+    <ul>
+        <li>
+            <label>
+                <input type="checkbox" checked={true}> 
+                Document
+            </label>
+        </li>
+        <li>
+            <label>
+                <input type="checkbox" checked={true}> 
+                Email
+            </label>
+        </li>
+        <li>
+            <label>
+                <input type="checkbox" checked={true}> 
+                Presentation
+            </label>
+        </li>
+    </ul>
 
-        <p>
-        <br>
-            <a class="button" href="/conversations">Start conversation about these documents</a>
-        </p>
-    </main>
+    <br>
 
-</aside>
+    <p>
+        <a class="button" href="/conversations">Start conversation about these documents</a>
+    </p>
+</main>
 
 <style>
-    aside {
-        display: grid;
-        grid-template-rows: var(--header-height) auto var(--footer-height);
-        position: sticky;
-        top: 0;
-        min-height: 100vh;
-    }
-
     header {
         display: grid;
         align-items: center;

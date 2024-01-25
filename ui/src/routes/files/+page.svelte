@@ -23,7 +23,6 @@
     })
 </script>
 
-
 <Layout>
     <main>
         <Uploader />
@@ -38,5 +37,3 @@
     </main>
 </Layout>
 
-<style>
-</style>

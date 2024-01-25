@@ -10,7 +10,9 @@
 
 	{#if $$slots.subnav}
         <nav class="subnav">
-            <slot name="subnav" />
+            <aside>
+                <slot name="subnav" />
+            </aside>
         </nav>
     {/if}
 
@@ -69,6 +71,14 @@
         background: var(--color-subnavigation);
         color: var(--text-color-light);
         box-shadow: var(--box-shadow);
+    }
+
+    aside {
+        display: grid;
+        grid-template-rows: var(--header-height) auto var(--footer-height);
+        position: sticky;
+        top: 0;
+        min-height: 100vh;
     }
 
     .page {
