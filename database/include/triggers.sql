@@ -1,4 +1,4 @@
 
-create or replace trigger pagestream_set_owner before insert on private.pagestreams for each row execute function private.pagestream_set_owner();
-create or replace trigger set_updated_at before update on private.pagestreams for each row execute function set_updated_at()
+create or replace trigger set_file_owner before insert on private.files for each row execute function set_file_owner();
+create or replace trigger set_updated_at before update on private.files for each row execute function set_updated_at()
 
