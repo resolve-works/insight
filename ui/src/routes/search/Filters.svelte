@@ -12,9 +12,9 @@
     </header>
 
     <main>
-        <h2>{total} file{total == 1 ? '' : 's'} found</h2>
+        <h2>{total} document{total == 1 ? '' : 's'} found</h2>
 
-        <h4>File type:</h4>
+        <h4>Document type:</h4>
         <ul>
             <li>
                 <label>
@@ -38,7 +38,7 @@
 
         <p>
         <br>
-            <a class="button" href="/conversations">Start conversation about these files</a>
+            <a class="button" href="/conversations">Start conversation about these documents</a>
         </p>
     </main>
 

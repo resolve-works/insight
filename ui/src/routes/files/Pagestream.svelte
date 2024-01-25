@@ -6,32 +6,27 @@
     export let id: string;
     export let name: string;
     export let status: string;
-    export let documents: { id: string, name: string }[]
-
-    const is_archive = documents && documents.length > 1;
-    const url = is_archive ? `/pagestreams/${id}` : `/documents/${documents[0].id}`
+    export let documents: { id: string, name: string }[] = []
 </script>
 
 <Card>
-    <a href={url}>
+    <a href={`/pagestreams/${id}`}>
         <h3>
             {name}
 
             {#if status != 'idle'}
                 <Icon class="gg-loadbar" />
             {:else}
-                {#if is_archive}
+                {#if documents.length > 1}
                     <Icon class="gg-box" />
                 {/if}
             {/if}
         </h3>
-    </a>
 
-    {#if is_archive}
-        {#each documents as document}
-            {document.name}
-        {/each}
-    {/if}
+        {#if documents.length > 1}
+            <p>{documents.length} embedded document{documents.length == 1 ? '' : 's'}</p>
+        {/if}
+    </a>
 </Card>
 
 <style>
