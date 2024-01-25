@@ -11,13 +11,33 @@
     let total = file.size;
     let loaded = 0;
 
-    onMount(async () => {
-        const response = await fetch('/files', { 
+    async function create_pagestream(name: string) {
+        const response = await fetch('/api/v1/pagestream', { 
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: file.name })
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${access_token}`,
+                'Prefer': 'return=representation',
+            },
+            body: JSON.stringify({ name })
         })
-        const pagestream = await response.json()
+        const pagestreams = await response.json()
+        return pagestreams[0]
+    }
+
+    onMount(async () => {
+        const pagestream = await create_pagestream(file.name)
+
+        // Get presigned upload url
+        const response = await fetch('/sign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ method: 'PUT', path: pagestream.path })
+        })
+
+        const url = await response.json()
 
         // https://github.com/whatwg/fetch/issues/607
         // Fetch doesn't allow tracking progress for now
@@ -57,12 +77,12 @@
             // TODO - Proper error handling. The web is unstable, uploads fail
 
             uploads.update(uploads => uploads.filter(f => f != file))
-            await invalidate(url => url.pathname == '/api/v1/pagestream')
+            invalidate(url => url.pathname == '/api/v1/pagestream')
         });
 
         // TODO - error
 
-        xhr.open("PUT", pagestream.url, true);
+        xhr.open("PUT", url, true);
         xhr.send(file);
     })
 </script>

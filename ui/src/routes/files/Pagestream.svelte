@@ -5,18 +5,29 @@
 
     export let name: string;
     export let status: string;
+    export let file: { id: string, name: string }[]
 </script>
 
 <Card>
     <h3>
-        {name}
+        <span>
+            <Icon class="gg-box" />
+            {name}
+        </span>
+
         {#if status != 'idle'}
-            <span>
+            <span class="status">
                 {status}
                 <Icon class="gg-spinner" />
             </span>
         {/if}
     </h3>
+
+    {#if file}
+        {#each file as f}
+            {f.name}
+        {/each}
+    {/if}
 </Card>
 
 <style>
@@ -30,12 +41,15 @@
         display: grid;
         grid-template-columns: auto auto;
         align-items: center;
+        gap: 1rem;
+    }
+
+    .status {
         font-weight: normal;
     }
 
-    span :global(.gg-spinner) {
+    .status :global(.gg-spinner) {
         --ggs: 1.4;
-        margin: 0.2rem 0 0 2rem;
     }
 </style>
 

@@ -1,5 +1,7 @@
 
 <script>
+    import { onMount } from 'svelte'
+    import { invalidate } from '$app/navigation';
     import Layout from '../Layout.svelte';
     import Pagestream from './Pagestream.svelte';
     import Uploader from './Uploader.svelte';
@@ -9,6 +11,16 @@
     export let data;
     const { access_token } = data;
 
+    // TODO - Poor mans event system
+    onMount(() => {
+        const interval = setInterval(() => {
+            invalidate(url => url.pathname == '/api/v1/pagestream')
+        }, 5000)
+
+        return () => {
+            clearInterval(interval)
+        }
+    })
 </script>
 
 

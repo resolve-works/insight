@@ -2,9 +2,9 @@
 import { env } from '$env/dynamic/public';
 import { presignSignatureV4 } from 'minio/dist/esm/signing.mjs'
 
-// Seems to not matter, though is required
-const REGION = 'insight';
-
+/**
+ * Sign a S3 storage path for method. Keep this on the server because of the crypto dependency
+ */
 export default function sign(path: string, locals: App.Locals, method: string = 'GET') {
     const { access_key_id, secret_access_key, session_token } = locals;
     const url = new URL(env.PUBLIC_STORAGE_ENDPOINT)
@@ -19,5 +19,5 @@ export default function sign(path: string, locals: App.Locals, method: string = 
         },
     }
 
-    return presignSignatureV4(request, access_key_id, secret_access_key, session_token, REGION, new Date(), 60 * 60)
+    return presignSignatureV4(request, access_key_id, secret_access_key, session_token, 'insight', new Date(), 60 * 60)
 }

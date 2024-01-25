@@ -5,12 +5,12 @@ begin;
 \set pg_worker_user `echo $PG_WORKER_USER`
 \set pg_worker_password `echo $PG_WORKER_PASSWORD`
 
-alter default privileges revoke execute on functions from public;
-
 create schema if not exists private;
 
 create extension if not exists vector;
 create extension if not exists plpython3u;
+
+alter default privileges revoke execute on functions from public;
 
 create role external_anonymous nologin;
 create role external_user nologin;

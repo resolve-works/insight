@@ -51,7 +51,7 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def ingest_pagestream(id, owner_id, path, name):
+def ingest_pagestream(id, owner_id, path, name, **kwargs):
     logging.info(f"Ingesting pagestream {id}")
 
     temp_path = Path(TemporaryDirectory().name)
@@ -120,6 +120,13 @@ def ingest_pagestream(id, owner_id, path, name):
         f"{env.get('API_ENDPOINT')}/api/v1/index/_doc/{file['id']}", json=body
     )
     if res.status_code != 201:
+        raise Exception(res.text)
+
+    res = session.patch(
+        f"{env.get('API_ENDPOINT')}/api/v1/pagestream?id=eq.{id}",
+        data={"status": "idle"},
+    )
+    if res.status_code != 204:
         raise Exception(res.text)
 
     logging.info(f"Done processing of file {file['id']}")
