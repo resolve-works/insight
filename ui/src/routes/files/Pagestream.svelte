@@ -10,16 +10,12 @@
 
 <Card>
     <h3>
-        <span>
-            <Icon class="gg-box" />
-            {name}
-        </span>
+        {name}
 
         {#if status != 'idle'}
-            <span class="status">
-                {status}
-                <Icon class="gg-spinner" />
-            </span>
+            <Icon class="gg-loadbar" />
+        {:else}
+            <Icon class="gg-box" />
         {/if}
     </h3>
 
@@ -34,22 +30,8 @@
     h3 {
         display: grid;
         grid-template-columns: auto auto;
-        justify-content: space-between;
-    }
-
-    span {
-        display: grid;
-        grid-template-columns: auto auto;
         align-items: center;
-        gap: 1rem;
-    }
-
-    .status {
-        font-weight: normal;
-    }
-
-    .status :global(.gg-spinner) {
-        --ggs: 1.4;
+        justify-content: space-between;
     }
 </style>
 
