@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
 
-    export let url: URL;
+    export let url: string;
     export let index: string;
 
     let canvas: HTMLCanvasElement;
