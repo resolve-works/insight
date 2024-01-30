@@ -1,12 +1,8 @@
 
 <script>
-    import Layout from '$lib/Layout.svelte';
+    import Page from '$lib/Page.svelte';
 </script>
 
-
-<Layout>
-    <main>
-        <h2>Conversations</h2>
-    </main>
-</Layout>
-
+<Page>
+    <h2>Conversations</h2>
+</Page>

@@ -2,8 +2,6 @@
     import { page } from '$app/stores';
     import Icon from '$lib/Icon.svelte';
 
-    export let collapsed = false;
-
     const items = [
         { href: "/search", name: "Search", class: "gg-search" },
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
@@ -11,48 +9,28 @@
     ]
 </script>
 
-<div class="container" class:collapsed={collapsed}>
-    <a class="logo" href="/">
-        <h1>Insight</h1>
-        <Icon class="gg-menu" />
-    </a>
+<a class="logo" href="/">
+    <h1>Insight</h1>
+    <Icon class="gg-menu" />
+</a>
 
-    <ul>
-        {#each items as item}
-            <li>
-                <a href={item.href} class:active={$page.url.pathname.startsWith(new URL(item.href, $page.url.origin).pathname)}>
-                    <span>{item.name}</span>
-                    <Icon class={item.class} />
-                </a>
-            </li>
-        {/each}
-    </ul>
+<ul>
+    {#each items as item}
+        <li>
+            <a href={item.href} class:active={$page.url.pathname.startsWith(new URL(item.href, $page.url.origin).pathname)}>
+                <span>{item.name}</span>
+                <Icon class={item.class} />
+            </a>
+        </li>
+    {/each}
+</ul>
 
-    <a class="profile" href="/profile">
-        <span>Sign out</span>
-        <Icon class="gg-log-out" />
-    </a>
-</div>
+<a class="profile" href="/profile">
+    <span>Sign out</span>
+    <Icon class="gg-log-out" />
+</a>
 
 <style>
-    .container {
-        display: grid;
-        grid-template-rows: var(--header-height) 1fr var(--footer-height);
-        min-width: 18rem;
-        position: sticky;
-        top: 0;
-        height: 100vh;
-    }
-
-    .container.collapsed {
-        min-width: 0;
-    }
-
-    .container.collapsed h1,
-    .container.collapsed span {
-        display: none;
-    }
-
     a {
         grid-template-columns: auto auto;
         justify-content: space-between;

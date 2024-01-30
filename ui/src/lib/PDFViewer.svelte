@@ -39,4 +39,13 @@
     })
 </script>
 
-<canvas bind:this={canvas} />
+<article>
+    <canvas bind:this={canvas} />
+</article>
+
+<style>
+    article {
+        display: grid;
+        justify-content: center;
+    }
+</style>

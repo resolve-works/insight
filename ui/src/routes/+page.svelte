@@ -1,14 +1,12 @@
 
 <script>
     import Search from '$lib/Search.svelte';
-    import Layout from '$lib/Layout.svelte';
+    import Page from '$lib/Page.svelte';
 </script>
 
 
-<Layout>
-    <main>
-        <h1>Insight FOIA search</h1>
-        <Search />
-    </main>
-</Layout>
+<Page>
+    <h1>Insight FOIA search</h1>
+    <Search />
+</Page>
 

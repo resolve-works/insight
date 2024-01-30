@@ -2,7 +2,7 @@
 <script>
     import { onMount } from 'svelte'
     import { invalidate } from '$app/navigation';
-    import Layout from '$lib/Layout.svelte';
+    import Page from '$lib/Page.svelte';
     import File from './File.svelte';
     import Uploader from './Uploader.svelte';
     import Upload from './Upload.svelte';
@@ -23,17 +23,15 @@
     })
 </script>
 
-<Layout>
-    <main>
-        <Uploader />
+<Page>
+    <Uploader />
 
-        {#each $uploads as upload (upload.name) }
-            <Upload upload={upload} access_token={access_token} />
-        {/each}
+    {#each $uploads as upload (upload.name) }
+        <Upload upload={upload} access_token={access_token} />
+    {/each}
 
-        {#each data.files as file (file.id)}
-            <File {...file} />
-        {/each}
-    </main>
-</Layout>
+    {#each data.files as file (file.id)}
+        <File {...file} />
+    {/each}
+</Page>
 
