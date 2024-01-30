@@ -4,11 +4,10 @@
 </script>
 
 <header>
-    <p>{name}</p>
+    <h2>{documents.length} embedded document{documents.length == 1 ? '' : 's'}</h2>
 </header>
 
 <main>
-    <h2>{documents.length} embedded document{documents.length == 1 ? '' : 's'}</h2>
 
     <ul>
         {#each documents as document, index}
