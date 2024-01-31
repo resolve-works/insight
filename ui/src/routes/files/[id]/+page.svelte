@@ -6,17 +6,19 @@
     import { documents } from './stores.ts'
     export let data;
 
-    documents.set(data.file.documents)
+    documents.set(data.documents.map(document => ({ original: document, changes: structuredClone(document) })))
 
     function store_documents() {
 
     }
 
     function add_document() {
-        documents.update(documents => {
-            return [ ...documents, {}, ]
-        })
+        $documents = [ ...$documents, { original: {}, changes: { from_page: 0, to_page: 1, name: '' }, }]
     }
+
+    $: is_changed = $documents
+        .map(({ original, changes }) => JSON.stringify(original) != JSON.stringify(changes))
+        .reduce((a, b) => a || b);
 </script>
 
 <Page class="with-sidebar-right">
@@ -25,16 +27,22 @@
 
 <aside>
     <header>
-        <h2>{$documents.length} embedded document{$documents.length == 1 ? '' : 's'}</h2>
+        {#if $documents.length == 1}
+            <h2>Single document</h2>
+        {:else}
+            <h2>File split in {$documents.length} documents</h2>
+        {/if}
     </header>
 
     <div class="documents">
-        {#each $documents as document, index}
-            <Document {document} {index} />
+        {#each $documents as _, index}
+            <Document {index} />
         {/each}
 
         <button on:click={add_document}>Add split</button>
-        <button class="secondary" on:click={store_documents}>Store changes</button>
+        {#if is_changed}
+            <button class="secondary" on:click={store_documents}>Store changes</button>
+        {/if}
     </div>
 </aside>
 

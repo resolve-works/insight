@@ -11,7 +11,7 @@ export async function load({ params, fetch, locals }) {
     const file = files[0]
 
     return { 
-        file,
+        documents: file.documents,
         url: sign(file.path, locals),
     }
 }

@@ -2,41 +2,42 @@
 <script lang="ts">
     import type { Document } from './stores.ts'
     import { documents } from './stores.ts'
-
-    export let document: Document;
-    let defaults = {
-        from_page: 0,
-        to_page: 1,
-    }
-    let data: Document = { ...defaults, ...document};
-
     export let index: number;
+
+    $: is_changed = JSON.stringify($documents[index].original) != JSON.stringify($documents[index].changes)
 
     function remove() {
 
     }
 
-    function cancel() {
-        documents.update(documents => {
-            documents.splice(index, 1)
-            return documents;
-        })
+    function cancel_adding() {
+        $documents.splice(index, 1)
+        $documents = $documents;
+    }
+
+    function cancel_changes() {
+        $documents[index].changes = structuredClone($documents[index].original)
+        $documents = $documents
     }
 </script>
 
 <div class="embed">
     <form>
-        <input type="text" placeholder="Document name" bind:value={data.name} />
+        <input type="text" placeholder="Document name" bind:value={$documents[index].changes.name} class:changed={$documents[index].changes.name != $documents[index].original.name} />
 
         <div class="row">
-            <input type="number" bind:value={data.from_page} />
+            <input type="number" bind:value={$documents[index].changes.from_page} class:changed={$documents[index].changes.from_page != $documents[index].original.from_page} />
             <span>to</span>
-            <input type="number" bind:value={data.to_page} />
+            <input type="number" bind:value={$documents[index].changes.to_page} class:changed={$documents[index].changes.to_page != $documents[index].original.to_page} />
 
-            {#if document.id}
-                <button class="outline" on:click={remove}>Remove</button>
+            {#if $documents[index].original.id}
+                {#if is_changed}
+                    <button class="outline" on:click={cancel_changes}>Cancel changes</button>
+                {:else}
+                    <button class="outline" on:click={remove}>Remove</button>
+                {/if}
             {:else}
-                <button class="outline" on:click={cancel}>Cancel adding</button>
+                <button class="outline" on:click={cancel_adding}>Cancel adding</button>
             {/if}
         </div>
     </form>
@@ -49,6 +50,11 @@
 
     input {
         border-color: var(--color-subnavigation-darker);
+    }
+
+    input.changed {
+        border-color: var(--color-secondary);
+        background: #FFFAEB;
     }
 
     input[type=text] {

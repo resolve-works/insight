@@ -9,5 +9,5 @@ export type Document = {
     to_page?: number;
 }
 
-export const documents: Writable<Document[]> = writable([]);
+export const documents: Writable<{ original: Document, changes: Document }[]> = writable([]);
 
