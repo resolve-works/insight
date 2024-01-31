@@ -1,24 +1,33 @@
 
 <script lang="ts">
-    export let from_page: number;
-    export let to_page: number;
+    import type { Document } from './+page.svelte'
 
-    export let id: string;
-    export let name: string;
+    export let document: Document;
+
+    export let index: number;
+    export let is_editing: false;
 </script>
 
-<div>
-    <h3>{name}</h3>
+<div class="embed">
+    {#if is_editing}
+        <input type="text" value={document.name} />
+    {:else}
+        <h3>{document.name}</h3>
+    {/if}
 
     <form>
-        <input type="number" value={from_page + 1} />
-        <span>to</span>
-        <input type="number" value={to_page} />
+        <div>
+            <input disabled type="number" value={document.from_page + 1} />
+            <span>to</span>
+            <input disabled type="number" value={document.to_page} />
+        </div>
+
+        <button>Edit</button>
     </form>
 </div>
 
 <style>
-    div {
+    .embed {
         overflow-x: hidden;
     }
 
@@ -29,6 +38,13 @@
     }
 
     input[type=number] {
-        width: 8rem;
+        width: 6rem;
+        border-color: var(--color-subnavigation-darker);
+    }
+
+    form {
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: center;
     }
 </style>
