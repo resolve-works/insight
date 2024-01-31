@@ -24,7 +24,7 @@
             "nav content content content"
             "nav content content content"
             "nav content content content";
-        grid-template-columns: 18rem 2fr 3fr 2fr;
+        grid-template-columns: 20rem 5fr 6fr 5fr;
         grid-template-rows: var(--header-height) 1fr var(--footer-height);
 
         height: 100vh;

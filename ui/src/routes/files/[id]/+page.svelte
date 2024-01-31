@@ -1,47 +1,20 @@
 
-<script context="module" lang="ts">
-    export type Document = {
-        id?: string,
-        name?: string,
-        from_page: number,
-        to_page: number,
-    }
-
-    export type EmbedData = {
-        is_edited: boolean,
-        document: Document,
-    }
-</script>
-
 <script lang="ts">
     import Page from '$lib/Page.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
-    import Embed from './Embed.svelte';
-    import { writable } from 'svelte/store';
-    import type { Writable } from 'svelte/store';
+    import Document from './Document.svelte';
+    import { documents } from './stores.ts'
     export let data;
 
+    documents.set(data.file.documents)
 
-    export const embeds: Writable<EmbedData[]> = writable([]);
-
-    const { documents } = data.file;
-    embeds.set(documents.map((document: Document) => ({ document, is_edited: false })))
-
-    function store_embeds() {
+    function store_documents() {
 
     }
 
-    function add_embed() {
-        embeds.update(embeds => {
-            const document = {
-                from_page: 0, 
-                to_page: 1,
-            }
-
-            return [
-                ...embeds,
-                { document, is_edited: true },
-            ]
+    function add_document() {
+        documents.update(documents => {
+            return [ ...documents, {}, ]
         })
     }
 </script>
@@ -52,16 +25,16 @@
 
 <aside>
     <header>
-        <h2>{$embeds.length} embedded document{$embeds.length == 1 ? '' : 's'}</h2>
+        <h2>{$documents.length} embedded document{$documents.length == 1 ? '' : 's'}</h2>
     </header>
 
-    <div>
-        {#each $embeds as embed, index}
-            <Embed embeds={embeds} {...embed} index={index} />
+    <div class="documents">
+        {#each $documents as document, index}
+            <Document {document} {index} />
         {/each}
 
-        <button on:click={add_embed}>Add split</button>
-        <button class="secondary" on:click={store_embeds}>Store splits</button>
+        <button on:click={add_document}>Add split</button>
+        <button class="secondary" on:click={store_documents}>Store changes</button>
     </div>
 </aside>
 
@@ -78,11 +51,6 @@
     header {
         display: grid;
         align-items: center;
-    }
-
-    div {
-        overflow-x: hidden;
-        margin-bottom: 1rem;
     }
 
     button {
