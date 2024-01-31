@@ -41,7 +41,7 @@
         <br>
 
         <p>
-            <a class="button" href="/conversations">Start conversation about these documents</a>
+            <a class="button secondary" href="/conversations">Start conversation about these documents</a>
         </p>
     </nav>
 </aside>
@@ -83,8 +83,6 @@
     }
 
     a.button {
-        background: #FECF49;
-        color: var(--text-color-dark);
         display: block;
     }
 </style>

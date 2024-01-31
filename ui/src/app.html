@@ -25,6 +25,7 @@
         --border-size: 0.0625rem;
 
         --color-primary: #B85143;
+        --color-secondary: #FECF49;
         --color-white: #F9FAFB;
 
         --color-page: #ECEEF1;
@@ -73,11 +74,23 @@
         font-size: 1rem;
         padding: 0.75rem 1rem;
         border-radius: var(--input-border-radius);
-        background: var(--color-primary);
-        color: var(--text-color-light);
         border: none;
         text-decoration: none;
         text-align: center;
+    }
+
+    input[type=submit].primary,
+    a.button.primary,
+    button.primary {
+        background: var(--color-primary);
+        color: var(--text-color-light);
+    }
+
+    input[type=submit].secondary,
+    a.button.secondary,
+    button.secondary {
+        background: var(--color-secondary);
+        color: var(--text-color-dark);
     }
 
     textarea,

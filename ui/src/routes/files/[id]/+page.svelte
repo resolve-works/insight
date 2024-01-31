@@ -17,9 +17,13 @@
         <h2>{documents.length} embedded document{documents.length == 1 ? '' : 's'}</h2>
     </header>
 
-    {#each documents as document, index}
-        <Embed {...document} />
-    {/each}
+    <div>
+        {#each documents as document, index}
+            <Embed {...document} />
+        {/each}
+
+        <button class="secondary">Add split</button>
+    </div>
 </aside>
 
 <style>
@@ -35,5 +39,16 @@
     header {
         display: grid;
         align-items: center;
+    }
+
+    div {
+        overflow-x: hidden;
+        margin-bottom: 1rem;
+    }
+
+    button {
+        display: block;
+        width: 100%;
+        margin-top: 2rem;
     }
 </style>

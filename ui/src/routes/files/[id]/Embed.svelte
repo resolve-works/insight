@@ -7,17 +7,28 @@
     export let name: string;
 </script>
 
-<h3>{name}</h3>
+<div>
+    <h3>{name}</h3>
 
-<form>
-    from: <input type="number" value={from_page + 1} />
-    to:<input type="number" value={to_page} />
-</form>
+    <form>
+        <input type="number" value={from_page + 1} />
+        <span>to</span>
+        <input type="number" value={to_page} />
+    </form>
+</div>
 
 <style>
+    div {
+        overflow-x: hidden;
+    }
+
     h3 {
         overflow-x: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+    }
+
+    input[type=number] {
+        width: 8rem;
     }
 </style>
