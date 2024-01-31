@@ -1,16 +1,15 @@
 
 create or replace function ingest_file(id uuid) returns void as $$
-    import json
-    plan = plpy.prepare("update files set status='ingesting' where id=$1", ["uuid"])
-    plpy.execute(plan, [id])
-
-    plan = plpy.prepare("select * from files where id=$1", ["uuid"])
-    results = plpy.execute(plan, [id])
-
-    plan = plpy.prepare("notify file, '{payload}'".format(payload=json.dumps(results[0])))
+    plan = plpy.prepare("notify file, '{id}'".format(id=id))
     plpy.execute(plan)
 $$ language plpython3u;
 grant execute on function ingest_file to external_user;
+
+create or replace function ingest_document(id uuid) returns void as $$
+    plan = plpy.prepare("notify document, '{id}'".format(id=id))
+    plpy.execute(plan)
+$$ language plpython3u;
+grant execute on function ingest_document to external_user;
 
 create or replace function set_updated_at() returns trigger as $$
 begin

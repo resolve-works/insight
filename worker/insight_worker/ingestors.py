@@ -51,37 +51,84 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def ingest_file(id, owner_id, path, name, **kwargs):
-    logging.info(f"Ingesting file {id}")
-
-    temp_path = Path(TemporaryDirectory().name)
-    file_path = temp_path / "file.pdf"
-    document_path = temp_path / "document.pdf"
-
+def ingest_file(id):
     session = OAuth2Session()
+    res = session.get(f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{id}")
+    file = res.json()[0]
+
+    logging.info(f"Ingesting file {file['id']}")
+    file_path = Path(TemporaryDirectory().name) / "file.pdf"
+
     minio = get_minio(session.token["access_token"])
-    minio.fget_object(env.get("STORAGE_BUCKET"), path, file_path)
+    minio.fget_object(env.get("STORAGE_BUCKET"), file["path"], file_path)
 
     with Pdf.open(file_path) as pdf:
-        to_page = len(pdf.pages)
+        pages = len(pdf.pages)
+
+    res = session.patch(
+        f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{file['id']}",
+        data={"pages": pages, "status": "idle"},
+    )
+
+    if res.status_code != 204:
+        raise Exception(res.text)
 
     res = session.post(
         f"{env.get('API_ENDPOINT')}/api/v1/documents",
         data={
-            "owner_id": owner_id,
-            "file_id": id,
-            "name": name,
+            "owner_id": file["owner_id"],
+            "file_id": file["id"],
+            "name": file["name"],
             "from_page": 0,
-            "to_page": to_page,
+            "to_page": pages,
         },
+    )
+
+    if res.status_code != 201:
+        raise Exception(res.text)
+
+
+def ingest_document(id):
+    session = OAuth2Session()
+    res = session.patch(
+        f"{env.get('API_ENDPOINT')}/api/v1/documents?id=eq.{document['id']}",
+        data={"status": "ingesting"},
         headers={"Prefer": "return=representation"},
+    )
+
+    if res.status_code != 201:
+        raise Exception(res.text)
+
+    print(res.text)
+
+    res = session.get(
+        f"{env.get('API_ENDPOINT')}/api/v1/documents?select=id,name,path,file(owner_id,path)&id=eq.{id}"
     )
     document = res.json()[0]
 
-    logging.info(f"Saving file {id} as document {document['id']}")
+    logging.info(
+        f"Saving pages {document['from_page']} to {document['to_page']} of file {document['file_id']} as document {document['id']}"
+    )
+
+    temp_path = Path(TemporaryDirectory().name)
+    file_path = temp_path / "file.pdf"
+    intermediate_path = temp_path / "intermediate.pdf"
+    document_path = temp_path / "final.pdf"
+
+    minio = get_minio(session.token["access_token"])
+    minio.fget_object(env.get("STORAGE_BUCKET"), document["file"]["path"], file_path)
+
+    # Extract Document from file
+    with Pdf.open(file_path) as file_pdf:
+        document_pdf = Pdf.new()
+        for page in file_pdf.pages[document["from_page"] : document["to_page"]]:
+            document_pdf.pages.append(page)
+
+        # TODO - add metadata
+        document_pdf.save(intermediate_path)
 
     # OCR & optimize new PDF
-    process = Process(target=ocrmypdf_process, args=(file_path, document_path))
+    process = Process(target=ocrmypdf_process, args=(intermediate_path, document_path))
     process.start()
     process.join()
 
@@ -103,7 +150,7 @@ def ingest_file(id, owner_id, path, name, **kwargs):
     html_doc = html.document_fromstring(body.pop("X-TIKA:content", None))
     pages = [
         {
-            "file_id": id,
+            "file_id": document["file_id"],
             "index": document["from_page"] + index,
             "contents": page.text_content(),
         }
@@ -125,10 +172,10 @@ def ingest_file(id, owner_id, path, name, **kwargs):
         raise Exception(res.text)
 
     res = session.patch(
-        f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{id}",
+        f"{env.get('API_ENDPOINT')}/api/v1/documents?id=eq.{document['id']}",
         data={"status": "idle"},
     )
     if res.status_code != 204:
         raise Exception(res.text)
 
-    logging.info(f"Done processing of document {document['id']}")
+    logging.info(f"Done processing of document {id}")
