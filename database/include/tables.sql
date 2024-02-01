@@ -47,6 +47,9 @@ create table if not exists private.prompts (
 
     status prompt_status not null default 'answering',
 
+    created_at timestamp with time zone default current_timestamp,
+    updated_at timestamp with time zone default current_timestamp,
+
     primary key (id)
 );
 
