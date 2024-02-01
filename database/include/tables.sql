@@ -7,6 +7,7 @@ create table if not exists private.files (
 
     path text generated always as (owner_id::text || '/' || id::text || '.pdf') stored,
     name text not null,
+    pages integer,
 
     status file_status not null default 'uploading',
 
@@ -18,7 +19,7 @@ create table if not exists private.files (
 grant select, insert on private.files to external_user;
 
 
-create type document_status as enum ('extracting', 'ocring', 'indexing', 'embedding', 'idle');
+create type document_status as enum ('ingesting', 'idle');
 
 create table private.documents (
     id uuid default gen_random_uuid(),
@@ -27,9 +28,10 @@ create table private.documents (
 
     name text not null,
     path text generated always as (owner_id::text || '/' || file_id::text || '/' || id::text || '.pdf') stored,
-
     from_page integer not null,
     to_page integer not null,
+
+    status document_status not null default 'ingesting',
 
     primary key (id),
     foreign key(file_id) references private.files (id) match simple on delete restrict not valid
