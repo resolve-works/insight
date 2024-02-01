@@ -10,6 +10,7 @@ from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from pikepdf import Pdf
+from itertools import chain
 from .vectorstore import store_embeddings
 from .oauth import OAuth2Session
 
@@ -138,13 +139,12 @@ def ingest_document(id):
 
     # Extract Document from file
     with Pdf.open(file_path) as file_pdf:
-        document_pdf = Pdf.new()
-        for page in file_pdf.pages[document["from_page"] : document["to_page"]]:
-            document_pdf.pages.append(page)
-
-        # TODO - add metadata
-        document_pdf.save(intermediate_path)
-        document_pdf.close()
+        pages = len(file_pdf.pages)
+        for p in chain(
+            range(0, document["from_page"]), range(document["to_page"], pages)
+        ):
+            del file_pdf.pages[p]
+        file_pdf.save(intermediate_path)
 
     # OCR & optimize new PDF
     process = Process(target=ocrmypdf_process, args=(intermediate_path, document_path))
@@ -175,6 +175,7 @@ def ingest_document(id):
         }
         for index, page in enumerate(html_doc.find_class("page"))
     ]
+
     store_embeddings(pages)
 
     logging.info(f"Indexing document {document['id']}")
