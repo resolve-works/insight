@@ -1,17 +1,16 @@
 import click
-import json
 import asyncio
 import os
 import logging
 import psycopg2
-from .ingestors import ingest_file
+from .ingestors import ingest_file, ingest_document
 from .oauth import OAuth2Session
 
 logging.basicConfig(level=logging.INFO)
 
 conn = psycopg2.connect(os.environ.get("POSTGRES_URI"))
 cursor = conn.cursor()
-cursor.execute(f"LISTEN file;")
+cursor.execute(f"LISTEN file; LISTEN document;")
 conn.commit()
 
 
@@ -40,10 +39,11 @@ def create_mapping():
 def reader():
     conn.poll()
     for notification in conn.notifies:
-        object = json.loads(notification.payload)
         match notification.channel:
             case "file":
-                ingest_file(**object)
+                ingest_file(notification.payload)
+            case "document":
+                ingest_document(notification.payload)
 
     conn.notifies.clear()
 

@@ -45,14 +45,26 @@ def ocrmypdf_process(input_file, output_file):
         input_file,
         output_file,
         language="nld",
-        force_ocr=True,
         color_conversion_strategy="RGB",
+        progress_bar=False,
+        # Only use one thread
+        jobs=1,
+        # Skip pages with text layer on it
+        # TODO - Enable user to force OCR
+        skip_text=True,
         # plugins=["insight_worker.plugin"],
     )
 
 
 def ingest_file(id):
     session = OAuth2Session()
+    res = session.patch(
+        f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{id}",
+        data={"status": "analyzing"},
+    )
+    if res.status_code != 204:
+        raise Exception(res.text)
+
     res = session.get(f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{id}")
     file = res.json()[0]
 
@@ -69,10 +81,10 @@ def ingest_file(id):
         f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{file['id']}",
         data={"pages": pages, "status": "idle"},
     )
-
     if res.status_code != 204:
         raise Exception(res.text)
 
+    # We're assuming that file contains 1 document spanning all the pages in the file.
     res = session.post(
         f"{env.get('API_ENDPOINT')}/api/v1/documents",
         data={
@@ -82,32 +94,38 @@ def ingest_file(id):
             "from_page": 0,
             "to_page": pages,
         },
+        headers={"Prefer": "return=representation"},
     )
-
     if res.status_code != 201:
+        raise Exception(res.text)
+
+    document = res.json()[0]
+    logging.info(f"Created document {document['id']}")
+
+    res = session.post(
+        f"{env.get('API_ENDPOINT')}/api/v1/rpc/ingest_document",
+        data={"id": document["id"]},
+    )
+    if res.status_code != 204:
         raise Exception(res.text)
 
 
 def ingest_document(id):
     session = OAuth2Session()
-    res = session.patch(
-        f"{env.get('API_ENDPOINT')}/api/v1/documents?id=eq.{document['id']}",
-        data={"status": "ingesting"},
-        headers={"Prefer": "return=representation"},
-    )
-
-    if res.status_code != 201:
-        raise Exception(res.text)
-
-    print(res.text)
-
     res = session.get(
-        f"{env.get('API_ENDPOINT')}/api/v1/documents?select=id,name,path,file(owner_id,path)&id=eq.{id}"
+        f"{env.get('API_ENDPOINT')}/api/v1/documents?select=id,name,path,from_page,to_page,file_id,files(path)&id=eq.{id}"
     )
     document = res.json()[0]
 
+    res = session.patch(
+        f"{env.get('API_ENDPOINT')}/api/v1/documents?id=eq.{document['id']}",
+        data={"status": "ingesting"},
+    )
+    if res.status_code != 204:
+        raise Exception(res.text)
+
     logging.info(
-        f"Saving pages {document['from_page']} to {document['to_page']} of file {document['file_id']} as document {document['id']}"
+        f"Extracting pages {document['from_page']} to {document['to_page']} of file {document['file_id']} as document {document['id']}"
     )
 
     temp_path = Path(TemporaryDirectory().name)
@@ -116,7 +134,7 @@ def ingest_document(id):
     document_path = temp_path / "final.pdf"
 
     minio = get_minio(session.token["access_token"])
-    minio.fget_object(env.get("STORAGE_BUCKET"), document["file"]["path"], file_path)
+    minio.fget_object(env.get("STORAGE_BUCKET"), document["files"]["path"], file_path)
 
     # Extract Document from file
     with Pdf.open(file_path) as file_pdf:
@@ -126,6 +144,7 @@ def ingest_document(id):
 
         # TODO - add metadata
         document_pdf.save(intermediate_path)
+        document_pdf.close()
 
     # OCR & optimize new PDF
     process = Process(target=ocrmypdf_process, args=(intermediate_path, document_path))
