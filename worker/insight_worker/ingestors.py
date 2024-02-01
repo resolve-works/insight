@@ -49,6 +49,8 @@ def ocrmypdf_process(input_file, output_file):
         language="nld",
         color_conversion_strategy="RGB",
         progress_bar=False,
+        # https://github.com/ocrmypdf/OCRmyPDF/issues/1162
+        continue_on_soft_render_error=True,
         # Only use one thread
         jobs=1,
         # Skip pages with text layer on it
@@ -159,7 +161,7 @@ def ingest_document(id):
     logging.info(f"Generating embeddings for document {document['id']}")
 
     document_pdf = fitz.open(document_path)  # open a document
-    page_contents = [page.get_text().encode("utf8") for page in document_pdf]
+    page_contents = [page.get_text(sort=True) for page in document_pdf]
 
     pages = [
         {
@@ -167,7 +169,7 @@ def ingest_document(id):
             "index": document["from_page"] + index,
             "contents": contents,
         }
-        for index, contents in page_contents
+        for index, contents in enumerate(page_contents)
     ]
     store_embeddings(pages)
 
@@ -176,7 +178,7 @@ def ingest_document(id):
     body["filename"] = document["name"]
     body["pages"] = [
         {"document_id": document["id"], "index": index, "contents": contents}
-        for index, contents in page_contents
+        for index, contents in enumerate(page_contents)
     ]
 
     res = OAuth2Session().put(

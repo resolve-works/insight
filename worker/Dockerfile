@@ -1,6 +1,22 @@
-FROM jbarlow83/ocrmypdf-alpine:latest
+FROM python:3.11
 
-RUN apk add bash ca-certificates tesseract-ocr-data-nld mupdf-dev build-base linux-headers python3-dev
+# Install latest ghostscript to fix a regression that breaks OCRmyPDF
+WORKDIR /home
+RUN wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10021/ghostscript-10.02.1.tar.gz
+RUN tar xfz ghostscript-10.02.1.tar.gz
+WORKDIR /home/ghostscript-10.02.1
+RUN ./configure && make
+RUN make install
+RUN rm -rf /home/ghostscript-10.02.1
+
+RUN apt update && apt install -y tesseract-ocr tesseract-ocr-nld libleptonica-dev pngquant
+
+RUN git clone https://github.com/agl/jbig2enc /home/jbig2enc
+WORKDIR /home/jbig2enc
+RUN ./autogen.sh
+RUN ./configure && make
+RUN make install
+RUN rm -rf /home/jbig2enc
 
 COPY . /home/insight
 WORKDIR /home/insight
@@ -11,5 +27,5 @@ ENV NLTK_DATA=/tmp/llama_index
 RUN python3 -c 'import nltk; import os; nltk.download("punkt", download_dir=os.environ.get("NLTK_DATA"));'
 
 WORKDIR /home
-ENTRYPOINT /app/.venv/bin/insight-worker
-CMD process-messages
+CMD insight-worker process-messages
+

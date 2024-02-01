@@ -5,8 +5,6 @@
 </script>
 
 <Page>
-    <h2>Conversations</h2>
-
     <div class="message user">
         <aside>
             <h3>U</h3>
@@ -41,6 +39,9 @@
             <p>It's important to note that the specific advice given by consultants depends on the unique needs and goals of each client. If you're looking for more detailed information or specific advice, I recommend consulting with a professional consultant in the relevant field. </p>
         </Card>
     </div>
+
+    <textarea>
+    </textarea>
 </Page>
 
 <style>
