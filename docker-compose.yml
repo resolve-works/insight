@@ -47,8 +47,7 @@ services:
 
   worker:
     build: worker
-    entrypoint: /bin/bash
-    command: -c 'update-ca-certificates && watchmedo auto-restart -d=/usr/local/lib/python3.11/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages'
+    command: /bin/bash -c 'update-ca-certificates && watchmedo auto-restart -d=/usr/local/lib/python3.11/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages'
     environment:
       SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
