@@ -49,14 +49,14 @@ def user_groups():
 def search(query):
     """Search pages for text."""
     body = {
-        "_source": {"excludes": ["insight:pages"]},
+        "_source": {"excludes": ["pages"]},
         "query": {
             "nested": {
-                "path": "insight:pages",
+                "path": "pages",
                 "query": {
                     "query_string": {
                         "query": query,
-                        "default_field": "insight:pages.contents",
+                        "default_field": "pages.contents",
                     }
                 },
                 "inner_hits": {
@@ -64,7 +64,7 @@ def search(query):
                         "pre_tags": ["\033[1m"],
                         "post_tags": ["\033[0m"],
                         "fields": {
-                            "insight:pages.contents": {
+                            "pages.contents": {
                                 "fragment_size": 200,
                             }
                         },
@@ -80,12 +80,10 @@ def search(query):
         exit(1)
 
     for document in res.json()["hits"]["hits"]:
-        click.echo(
-            "\033[1m" + document["_source"]["insight:filename"].upper() + "\033[0m"
-        )
-        for page in document["inner_hits"]["insight:pages"]["hits"]["hits"]:
+        click.echo("\033[1m" + document["_source"]["filename"].upper() + "\033[0m")
+        for page in document["inner_hits"]["pages"]["hits"]["hits"]:
             click.echo(f"Page {page['_source']['index'] + 1}")
-            for highlight in page["highlight"]["insight:pages.contents"]:
+            for highlight in page["highlight"]["pages.contents"]:
                 highlight = highlight.replace("\n", "")
                 click.echo(f"\t{highlight}")
 
@@ -100,17 +98,26 @@ def search(query):
 def prompt(query, similarity_top_k):
     """Query LLM about pages similar to a prompt."""
     res = client.post(
-        f"{config['api']['endpoint']}/api/v1/rpc/create_prompt",
+        f"{config['api']['endpoint']}/api/v1/prompts",
         data={"query": query, "similarity_top_k": similarity_top_k},
         headers={"Prefer": "return=representation"},
     )
 
-    if res.status_code != 200:
+    if res.status_code != 201:
+        print(res.text)
+        exit(1)
+
+    prompt = res.json()[0]
+    res = client.post(
+        f"{config['api']['endpoint']}/api/v1/rpc/answer_prompt",
+        data={"id": prompt["id"]},
+    )
+    if res.status_code != 204:
         print(res.text)
         exit(1)
 
     res = client.get(
-        f"{config['api']['endpoint']}/api/v1/prompts?select=response,sources(score, index,...document(name))&sources.order=score.desc&id=eq.{res.json()[0]['id']}"
+        f"{config['api']['endpoint']}/api/v1/prompts?select=response,sources(score, index,...document(name))&sources.order=score.desc&id=eq.{prompt['id']}"
     )
 
     for prompt in res.json():

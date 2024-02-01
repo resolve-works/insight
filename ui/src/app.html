@@ -25,7 +25,11 @@
         --border-size: 0.0625rem;
 
         --color-primary: #B85143;
+        --color-primary-lighter: #E26352;
+        --color-primary-darker: #9C4438;
         --color-secondary: #FECF49;
+        --color-secondary-lighter: #FEEDB9;
+        --color-secondary-darker: #E3B740;
         --color-white: #F9FAFB;
 
         --color-page: #ECEEF1;
@@ -79,6 +83,7 @@
         font-size: 1rem;
         padding: 0.75rem 1rem;
         border-radius: var(--input-border-radius);
+        border: var(--input-border-size) solid #B5BEC8;
         text-decoration: none;
         text-align: center;
         background: var(--color-white);
@@ -96,6 +101,7 @@
     button.primary {
         background: var(--color-primary);
         color: var(--text-color-light);
+        border-color: var(--color-primary-darker);
     }
 
     input[type=submit].secondary,
@@ -103,6 +109,7 @@
     button.secondary {
         background: var(--color-secondary);
         color: var(--text-color-dark);
+        border-color: var(--color-secondary-darker);
     }
 
     textarea,

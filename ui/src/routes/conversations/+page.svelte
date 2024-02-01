@@ -1,47 +1,100 @@
 
-<script>
-    import Page from '$lib/Page.svelte';
+<script lang="ts">
+    import Page from '$lib/Page.svelte'
     import Card from '$lib/Card.svelte'
+    import Icon from '$lib/Icon.svelte'
+    import { invalidate } from '$app/navigation';
+
+    export let data;
+    const { access_token, prompts } = data;
+    let is_disabled = false
+
+    async function create_prompt(e: SubmitEvent) {
+        let form_data = new FormData(e.target);
+        // Strip empty keys
+        let data = Object.fromEntries(Array.from(form_data).filter(([key, value]) => !!value))
+        // Clear form
+        is_disabled = true;
+        
+        const prompt_response = await fetch('/api/v1/prompts', { 
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${access_token}`,
+                'Prefer': 'return=representation',
+            },
+            body: JSON.stringify(data),
+        })
+        if(prompt_response.status != 201) {
+            throw new Error('Could not create prompt')
+        }
+
+        is_disabled = false
+        e.target.reset()
+
+        invalidate(url => url.pathname == '/api/v1/prompts')
+
+        const prompts = await prompt_response.json();
+        const prompt = prompts[0];
+
+        const answer_response = await fetch('/api/v1/rpc/answer_prompt', { 
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${access_token}`,
+            },
+            body: JSON.stringify({ id: prompt.id })
+        })
+        if(answer_response.status != 204) {
+            console.log(answer_response.status)
+            throw new Error('Could not trigger answering of prompt')
+        }
+
+        invalidate(url => url.pathname == '/api/v1/prompts')
+    }
 </script>
 
 <Page>
-    <div class="message user">
-        <aside>
-            <h3>U</h3>
-        </aside>
+    {#each prompts as prompt}
+        <div class="message user">
+            <aside>
+                <h3>U</h3>
+            </aside>
 
-        <Card class="card">
-            <h3>User</h3>
+            <Card class="card">
+                <h3>User</h3>
 
-            <p>What advice is commonly provided by external parties like consultants?</p>
-        </Card>
-    </div>
+                <p>{ prompt.query }</p>
+            </Card>
+        </div>
 
-    <div class="message bot">
-        <aside>
-            <h3>B</h3>
-        </aside>
+        <div class="message bot">
+            <aside>
+                <h3>B</h3>
+            </aside>
 
-        <Card class="card">
-            <h3>Bot</h3>
+            <Card class="card">
+                <h3>Bot</h3>
 
-            <p>Consultants provide advice and expertise in various fields to help businesses or individuals solve specific problems or achieve specific goals. The advice given by consultants can vary depending on their area of expertise, but here are some common types of advice consultants may offer:</p>
+                {#if prompt.response}
+                    <p>{ prompt.response }</p>
+                    <ul>
+                        {#each prompt.sources as source}
+                            <li>{JSON.stringify(source)}</li>
+                        {/each}
+                    </ul>
+                {:else}
+                    <Icon class="gg-loadbar" />
+                {/if}
+            </Card>
+        </div>
+    {/each}
 
-            <ol>
-                <li>Strategic advice: Consultants often help businesses develop long-term strategies for growth, market expansion, or organizational improvement.</li>
-                <li>Operational advice: Consultants may provide recommendations on optimizing business processes, improving efficiency, or streamlining operations.</li>
-                <li>Financial advice: Consultants with financial expertise may offer advice on budgeting, financial planning, investment strategies, or cost reduction.</li>
-                <li>Marketing advice: Consultants can assist with developing marketing strategies, branding, market research, and customer targeting.</li>
-                <li>Technology advice: Consultants may provide guidance on IT infrastructure, software implementation, cybersecurity, or digital transformation.</li>
-                <li>Human resources advice: Consultants can advise on talent acquisition, employee training and development, performance management, or organizational culture.</li>
-            </ol>
-
-            <p>It's important to note that the specific advice given by consultants depends on the unique needs and goals of each client. If you're looking for more detailed information or specific advice, I recommend consulting with a professional consultant in the relevant field. </p>
-        </Card>
-    </div>
-
-    <textarea>
-    </textarea>
+    <form on:submit|preventDefault={create_prompt}>
+        <input type="text" disabled={is_disabled} name="query" placeholder="What's your question?">
+        <input type="number" disabled={is_disabled} name="similarity_top_k" placeholder="Pages (default: 3)" min="0">
+        <input type="submit" disabled={is_disabled} value="Prompt" class="primary">
+    </form>
 </Page>
 
 <style>
@@ -98,5 +151,11 @@
     .message.user :global(.card:before) {
         right: calc(var(--triangle-size) * -1);
         border-left-color: var(--color-white);
+    }
+
+    form {
+        display: grid;
+        grid-template-columns: 4fr 1fr 1fr;
+        gap: 0.5rem;
     }
 </style>
