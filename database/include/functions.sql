@@ -28,11 +28,13 @@ begin
 end
 $$ language plpgsql;
 
-create or replace function create_prompt(query text, similarity_top_k integer) returns json as $$
+create or replace function answer_prompt(id uuid) returns void as $$
     import os
-    import json
     from llama_index import VectorStoreIndex
     from llama_index.vector_stores import PGVectorStore
+
+    plan = plpy.prepare("select * from prompts where id=$1", ["uuid"])
+    prompt = plpy.execute(plan, [id])[0]
 
     vector_store = PGVectorStore.from_params(
         host="127.0.0.1",
@@ -46,24 +48,21 @@ create or replace function create_prompt(query text, similarity_top_k integer) r
         embed_dim=1536,
     )
     vector_store_index = VectorStoreIndex.from_vector_store(vector_store)
-    query_engine = vector_store_index.as_query_engine(similarity_top_k=similarity_top_k)
-    response = query_engine.query(query)
+    query_engine = vector_store_index.as_query_engine(similarity_top_k=prompt['similarity_top_k'])
+    response = query_engine.query(prompt['query'])
 
-    plan = plpy.prepare("insert into private.prompts (query, response) values ($1, $2) returning id", ["text", "text"])
-    prompts = plpy.execute(plan, [query, response.response])
+    plan = plpy.prepare("update prompts set response=$1 where id=$2", ["text", "uuid"])
+    plpy.execute(plan, [response.response, id])
 
     plan = plpy.prepare(
-        "insert into private.sources (prompt_id, file_id, index, score) values ($1, $2, $3, $4)",
+        "insert into sources (prompt_id, file_id, index, score) values ($1, $2, $3, $4)",
         ["uuid", "uuid", "integer", "float"]
     )
     for node in response.source_nodes:
-        node = plpy.execute(
-            plan, 
-            [prompts[0]['id'], node.metadata['file_id'], node.metadata['index'], node.get_score()]
-        )
-    return json.dumps(list(prompts))
+        source_data = [id, node.metadata['file_id'], node.metadata['index'], node.get_score()]
+        node = plpy.execute(plan, source_data)
 $$ language plpython3u;
-grant execute on function create_prompt to external_user;
+grant execute on function answer_prompt to external_user;
 
 create or replace function document(sources) returns setof documents rows 1 as $$
   select * from documents where file_id = $1.file_id and from_page <= $1.index and to_page > $1.index

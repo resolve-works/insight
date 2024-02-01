@@ -9,9 +9,9 @@ create or replace view documents as
 grant select on documents to external_user;
 grant select, insert, update on documents to internal_worker;
 
+create or replace view prompts as select * from private.prompts;
+grant select, insert, update on prompts to external_user;
+
 create or replace view sources as select * from private.sources;
 grant select, insert on sources to external_user;
-
-create or replace view prompts as select * from private.prompts;
-grant select, insert on prompts to external_user;
 

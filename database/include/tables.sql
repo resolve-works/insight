@@ -16,8 +16,6 @@ create table if not exists private.files (
 
     primary key (id)
 );
-grant select, insert on private.files to external_user;
-
 
 create type document_status as enum ('ingesting', 'idle');
 
@@ -34,20 +32,23 @@ create table private.documents (
     status document_status not null default 'ingesting',
 
     primary key (id),
-    foreign key(file_id) references private.files (id) match simple on delete restrict not valid
+    foreign key (file_id) references private.files (id) on delete restrict
 );
-grant select on private.documents to external_user;
-grant select, insert on private.documents to internal_worker;
 
+
+create type prompt_status as enum ('answering', 'idle');
 
 create table if not exists private.prompts (
     id uuid default gen_random_uuid(),
+
     query text not null,
+    similarity_top_k integer not null default 3,
     response text,
+
+    status prompt_status not null default 'answering',
 
     primary key (id)
 );
-grant select, update, insert on private.prompts to external_user;
 
 
 create table if not exists private.sources (
@@ -56,8 +57,7 @@ create table if not exists private.sources (
     index integer not null,
     score float not null,
 
-    constraint fk_prompt foreign key(prompt_id) references private.prompts(id) on delete cascade,
-    constraint fk_file foreign key(file_id) references private.files(id) on delete cascade
+    foreign key (prompt_id) references private.prompts(id) on delete cascade,
+    foreign key (file_id) references private.files(id) on delete cascade
 );
-grant select, insert on private.sources to external_user;
 
