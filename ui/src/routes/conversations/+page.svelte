@@ -5,8 +5,10 @@
     import Icon from '$lib/Icon.svelte'
     import { invalidate } from '$app/navigation';
 
+    let query_input: HTMLInputElement;
+
     export let data;
-    const { access_token, prompts } = data;
+    const { access_token } = data;
     let is_disabled = false
 
     async function create_prompt(e: SubmitEvent) {
@@ -29,10 +31,9 @@
             throw new Error('Could not create prompt')
         }
 
-        is_disabled = false
         e.target.reset()
 
-        invalidate(url => url.pathname == '/api/v1/prompts')
+        await invalidate(url => url.pathname == '/api/v1/prompts')
 
         const prompts = await prompt_response.json();
         const prompt = prompts[0];
@@ -46,55 +47,60 @@
             body: JSON.stringify({ id: prompt.id })
         })
         if(answer_response.status != 204) {
-            console.log(answer_response.status)
             throw new Error('Could not trigger answering of prompt')
         }
 
-        invalidate(url => url.pathname == '/api/v1/prompts')
+        await invalidate(url => url.pathname == '/api/v1/prompts')
+        is_disabled = false
+        query_input.focus()
     }
 </script>
 
 <Page>
-    {#each prompts as prompt}
-        <div class="message user">
-            <aside>
-                <h3>U</h3>
-            </aside>
+    <div class="chat">
+        <div class="messages">
+            {#each data.prompts as prompt}
+                <div class="message user">
+                    <aside>
+                        <h3>U</h3>
+                    </aside>
 
-            <Card class="card">
-                <h3>User</h3>
+                    <Card class="card">
+                        <h3>User</h3>
 
-                <p>{ prompt.query }</p>
-            </Card>
+                        <p>{ prompt.query }</p>
+                    </Card>
+                </div>
+
+                <div class="message bot">
+                    <aside>
+                        <h3>B</h3>
+                    </aside>
+
+                    <Card class="card">
+                        <h3>Bot</h3>
+
+                        {#if prompt.response}
+                            <p>{ prompt.response }</p>
+                            <ul>
+                                {#each prompt.sources as source}
+                                    <li>{JSON.stringify(source)}</li>
+                                {/each}
+                            </ul>
+                        {:else}
+                            <Icon class="gg-loadbar" />
+                        {/if}
+                    </Card>
+                </div>
+            {/each}
         </div>
 
-        <div class="message bot">
-            <aside>
-                <h3>B</h3>
-            </aside>
-
-            <Card class="card">
-                <h3>Bot</h3>
-
-                {#if prompt.response}
-                    <p>{ prompt.response }</p>
-                    <ul>
-                        {#each prompt.sources as source}
-                            <li>{JSON.stringify(source)}</li>
-                        {/each}
-                    </ul>
-                {:else}
-                    <Icon class="gg-loadbar" />
-                {/if}
-            </Card>
-        </div>
-    {/each}
-
-    <form on:submit|preventDefault={create_prompt}>
-        <input type="text" disabled={is_disabled} name="query" placeholder="What's your question?">
-        <input type="number" disabled={is_disabled} name="similarity_top_k" placeholder="Pages (default: 3)" min="0">
-        <input type="submit" disabled={is_disabled} value="Prompt" class="primary">
-    </form>
+        <form on:submit|preventDefault={create_prompt}>
+            <input type="text" bind:this={query_input} disabled={is_disabled} name="query" placeholder="What's your question?">
+            <input type="number" disabled={is_disabled} name="similarity_top_k" placeholder="Pages (default: 3)" min="0">
+            <input type="submit" disabled={is_disabled} value="Prompt" class="primary">
+        </form>
+    </div>
 </Page>
 
 <style>
@@ -102,6 +108,13 @@
         --profile-size: 4rem;
         --profile-margin: 1rem;
         --triangle-size: 3rem;
+    }
+
+    .chat {
+        display: grid;
+        grid-template-rows: auto min-content;
+        min-height: 100%;
+        justify-content: space-between;
     }
 
     .message {
@@ -156,6 +169,7 @@
     form {
         display: grid;
         grid-template-columns: 4fr 1fr 1fr;
+        align-items: center;
         gap: 0.5rem;
     }
 </style>
