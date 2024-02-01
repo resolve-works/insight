@@ -65,5 +65,6 @@
         display: block;
         width: 100%;
         margin-top: 1rem;
+        border-color: var(--color-subnavigation-darker);
     }
 </style>

@@ -20,7 +20,7 @@ def create_mapping():
 
     res = OAuth2Session().put(
         f"{os.environ.get('API_ENDPOINT')}/api/v1/index",
-        json={"mappings": {"properties": {"insight:pages": {"type": "nested"}}}},
+        json={"mappings": {"properties": {"pages": {"type": "nested"}}}},
     )
 
     if res.status_code == 200:

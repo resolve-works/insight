@@ -1,6 +1,5 @@
 
 <script lang="ts">
-    import type { Document } from './stores.ts'
     import { documents } from './stores.ts'
     export let index: number;
 
@@ -48,6 +47,7 @@
         margin-bottom: 1rem;
     }
 
+    button,
     input {
         border-color: var(--color-subnavigation-darker);
     }

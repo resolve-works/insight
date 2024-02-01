@@ -1,6 +1,6 @@
 FROM jbarlow83/ocrmypdf-alpine:latest
 
-RUN apk add tesseract-ocr-data-nld
+RUN apk add bash ca-certificates tesseract-ocr-data-nld mupdf-dev build-base linux-headers python3-dev
 
 COPY . /home/insight
 WORKDIR /home/insight
@@ -11,4 +11,5 @@ ENV NLTK_DATA=/tmp/llama_index
 RUN python3 -c 'import nltk; import os; nltk.download("punkt", download_dir=os.environ.get("NLTK_DATA"));'
 
 WORKDIR /home
-CMD insight-worker process-messages
+ENTRYPOINT /app/.venv/bin/insight-worker
+CMD process-messages

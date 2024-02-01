@@ -10,20 +10,20 @@ export async function load({ url, parent, fetch }) {
             'Authorization': `Bearer ${access_token}` 
         },
         body: JSON.stringify({
-            "_source": {"excludes": ["insight:pages"]},
+            "_source": {"excludes": ["pages"]},
             "query": {
                 "nested": {
-                    "path": "insight:pages",
+                    "path": "pages",
                     "query": {
                         "query_string": {
                             "query": `${query ? query : '*'}`,
-                            "default_field": "insight:pages.contents"
+                            "default_field": "pages.contents"
                         }
                     },
                     "inner_hits": {
                         "highlight": {
                             "fields": {
-                                "insight:pages.contents": {
+                                "pages.contents": {
                                     fragment_size: 200,
                                 }
                             },
@@ -40,8 +40,8 @@ export async function load({ url, parent, fetch }) {
         total: body['hits']['total']['value'],
         hits: body['hits']['hits'].map(hit => {
             return {
-                filename: hit['_source']['insight:filename'],
-                pages: hit["inner_hits"]["insight:pages"]["hits"]["hits"]
+                filename: hit['_source']['filename'],
+                pages: hit["inner_hits"]["pages"]["hits"]["hits"]
                     .filter(page => "highlight" in page)
                     .map(page => {
                         const page_url = new URL(url);
@@ -52,7 +52,7 @@ export async function load({ url, parent, fetch }) {
                         return {
                             index,
                             url: page_url,
-                            highlights: page["highlight"]["insight:pages.contents"],
+                            highlights: page["highlight"]["pages.contents"],
                         }
                     })
             }

@@ -6,6 +6,7 @@ from os import environ as env
 from minio import Minio
 from xml.etree import ElementTree
 from lxml import html
+import fitz
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
@@ -155,34 +156,27 @@ def ingest_document(id):
     minio = get_minio(session.token["access_token"])
     minio.fput_object(env.get("STORAGE_BUCKET"), document["path"], document_path)
 
-    logging.info(f"Extracting metadata from document {document['id']}")
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/pdf",
-    }
-    res = requests.put(
-        env.get("TIKA_URI"), data=open(document_path, "rb"), headers=headers
-    )
-    body = res.json()
-
     logging.info(f"Generating embeddings for document {document['id']}")
-    html_doc = html.document_fromstring(body.pop("X-TIKA:content", None))
+
+    document_pdf = fitz.open(document_path)  # open a document
+    page_contents = [page.get_text().encode("utf8") for page in document_pdf]
+
     pages = [
         {
             "file_id": document["file_id"],
             "index": document["from_page"] + index,
-            "contents": page.text_content(),
+            "contents": contents,
         }
-        for index, page in enumerate(html_doc.find_class("page"))
+        for index, contents in page_contents
     ]
-
     store_embeddings(pages)
 
+    body = {}
     logging.info(f"Indexing document {document['id']}")
-    body["insight:filename"] = document["name"]
-    body["insight:pages"] = [
-        {"document_id": document["id"], "index": index, "contents": page.text_content()}
-        for index, page in enumerate(html_doc.find_class("page"))
+    body["filename"] = document["name"]
+    body["pages"] = [
+        {"document_id": document["id"], "index": index, "contents": contents}
+        for index, contents in page_contents
     ]
 
     res = OAuth2Session().put(
