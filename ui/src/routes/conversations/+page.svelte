@@ -53,6 +53,7 @@
 
         await invalidate(url => url.pathname == '/api/v1/prompts')
         is_disabled = false
+        // Focus won't work on disabled inputs
         await tick();
         query_input.focus()
     }
@@ -62,25 +63,25 @@
     <div class="chat">
         <div class="messages">
             {#each data.prompts as prompt}
-                <div class="message user">
+                <div class="message human">
                     <aside>
-                        <h3>U</h3>
+                        <h3>H</h3>
                     </aside>
 
                     <Card class="card">
-                        <h3>User</h3>
+                        <h3>Human</h3>
 
                         <p>{ prompt.query }</p>
                     </Card>
                 </div>
 
-                <div class="message bot">
+                <div class="message machine">
                     <aside>
-                        <h3>B</h3>
+                        <h3>M</h3>
                     </aside>
 
                     <Card class="card">
-                        <h3>Bot</h3>
+                        <h3>Machine</h3>
 
                         {#if prompt.response}
                             <p>{ prompt.response }</p>
@@ -130,7 +131,7 @@
         margin-bottom: 1rem;
     }
 
-    .message.user {
+    .message.human {
         flex-direction: row-reverse;
     }
 
@@ -146,7 +147,7 @@
         margin-top: var(--profile-margin);
     }
 
-    .message.bot aside {
+    .message.machine aside {
         background: #6167C9;
     }
 
@@ -164,11 +165,11 @@
         border: calc(var(--triangle-size) / 2) solid transparent;
     }
 
-    .message.bot :global(.card:before) {
+    .message.machine :global(.card:before) {
         left: calc(var(--triangle-size) * -1);
         border-right-color: var(--color-white);
     }
-    .message.user :global(.card:before) {
+    .message.human :global(.card:before) {
         right: calc(var(--triangle-size) * -1);
         border-left-color: var(--color-white);
     }
