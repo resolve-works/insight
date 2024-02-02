@@ -2,7 +2,7 @@
 import fs from 'fs';
 
 export async function GET() {
-    const file = fs.createReadStream('node_modules/pdfjs-dist/build/pdf.worker.mjs');
+    const file = fs.createReadStream('node_modules/pdfjs-dist/build/pdf.worker.min.mjs');
 
 	return new Response(file, { 
         headers: { 

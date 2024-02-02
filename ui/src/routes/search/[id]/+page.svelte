@@ -7,6 +7,6 @@
 </script>
 
 <Page>
-    <PDFViewer url={data.url} index={$page.url.searchParams.get('page') ?? '1'} />
+    <PDFViewer url={data.url} index={parseInt($page.url.searchParams.get('page') ?? '1')} />
 </Page>
 
