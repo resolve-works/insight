@@ -4,6 +4,7 @@
     import Card from '$lib/Card.svelte'
     import Icon from '$lib/Icon.svelte'
     import { invalidate } from '$app/navigation';
+    import { tick } from 'svelte';
 
     let query_input: HTMLInputElement;
 
@@ -52,6 +53,7 @@
 
         await invalidate(url => url.pathname == '/api/v1/prompts')
         is_disabled = false
+        await tick();
         query_input.focus()
     }
 </script>
@@ -82,11 +84,16 @@
 
                         {#if prompt.response}
                             <p>{ prompt.response }</p>
-                            <ul>
-                                {#each prompt.sources as source}
-                                    <li>{JSON.stringify(source)}</li>
-                                {/each}
-                            </ul>
+
+                            {#each prompt.sources as source}
+                                <a href="/search/{source.id}?page={source.index - source.from_page}">
+                                    <span>
+                                        <Icon class="gg-file" />
+                                        {source.index - source.from_page}
+                                    </span>
+                                    {source.name}
+                                </a>
+                            {/each}
                         {:else}
                             <Icon class="gg-loadbar" />
                         {/if}
@@ -171,5 +178,18 @@
         grid-template-columns: 4fr 1fr 1fr;
         align-items: center;
         gap: 0.5rem;
+    }
+
+    a {
+        display: flex;
+        align-items: center;
+    }
+
+    span {
+        display: grid;
+        height: 2rem;
+        grid-template-columns: 2rem auto;
+        align-items: center;
+        margin-right: 1rem;
     }
 </style>
