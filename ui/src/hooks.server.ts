@@ -103,13 +103,3 @@ export async function handle({event, resolve}) {
 
     throw auth_redirect(event)
 }
-
-export function handleFetch({ event, request, fetch }) {
-    const url = new URL(request.url)
-    if (url.host === event.url.host) {
-        request.headers.set('Authorization', `Bearer ${event.locals.access_token}`);
-    }
-
-    return fetch(request);
-}
-

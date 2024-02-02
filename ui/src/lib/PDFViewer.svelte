@@ -20,6 +20,9 @@
         const outputScale = window.devicePixelRatio || 1;
 
         const context = canvas.getContext('2d');
+        if( ! context ) {
+            throw Error('Could not get rendering context')
+        }
 
         canvas.width = Math.floor(viewport.width * outputScale);
         canvas.height = Math.floor(viewport.height * outputScale);
@@ -28,14 +31,9 @@
 
         const transform = outputScale !== 1
           ? [outputScale, 0, 0, outputScale, 0, 0]
-          : null;
+          : undefined;
 
-        const renderContext = {
-          canvasContext: context,
-          transform: transform,
-          viewport: viewport
-        };
-        page.render(renderContext);
+        page.render({ canvasContext: context, transform, viewport });
     })
 </script>
 
