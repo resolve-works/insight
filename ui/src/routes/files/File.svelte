@@ -6,7 +6,9 @@
     export let id: string;
     export let name: string;
     export let status: string;
-    export let documents: { id: string, name: string }[] = []
+    export let documents: { id: string, name: string, status: string }[] = []
+
+    $: is_idle = status == 'idle' && documents.every(document => document.status == 'idle');
 </script>
 
 <Card>
@@ -14,7 +16,7 @@
         <h3>
             {name}
 
-            {#if status != 'idle'}
+            {#if ! is_idle}
                 <Icon class="gg-loadbar" />
             {:else}
                 {#if documents.length > 1}
