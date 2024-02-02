@@ -1,6 +1,7 @@
 
 <script lang="ts">
     import { documents } from './stores.ts'
+    export let max: number;
     export let index: number;
 
     $: is_changed = JSON.stringify($documents[index].original) != JSON.stringify($documents[index].changes)
@@ -25,9 +26,17 @@
         <input type="text" placeholder="Document name" bind:value={$documents[index].changes.name} class:changed={$documents[index].changes.name != $documents[index].original.name} />
 
         <div class="row">
-            <input type="number" bind:value={$documents[index].changes.from_page} class:changed={$documents[index].changes.from_page != $documents[index].original.from_page} />
+            <input type="number" 
+                   bind:value={$documents[index].changes.from_page} 
+                   class:changed={$documents[index].changes.from_page != $documents[index].original.from_page} 
+                   min="1" 
+                   {max} />
             <span>to</span>
-            <input type="number" bind:value={$documents[index].changes.to_page} class:changed={$documents[index].changes.to_page != $documents[index].original.to_page} />
+            <input type="number" 
+                   bind:value={$documents[index].changes.to_page} 
+                   class:changed={$documents[index].changes.to_page != $documents[index].original.to_page} 
+                   min="1" 
+                   {max} />
 
             {#if $documents[index].original.id}
                 {#if is_changed}

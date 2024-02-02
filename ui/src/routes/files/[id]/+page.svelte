@@ -4,6 +4,7 @@
     import PDFViewer from '$lib/PDFViewer.svelte';
     import Document from './Document.svelte';
     import { documents } from './stores.ts'
+    import { page } from '$app/stores';
     export let data;
 
     documents.set(data.documents.map(document => ({ original: document, changes: structuredClone(document) })))
@@ -22,7 +23,7 @@
 </script>
 
 <Page class="with-sidebar-right">
-    <PDFViewer url={data.url} index={'1'} />
+    <PDFViewer url={data.url} index={$page.url.searchParams.get('page') ?? '1'} />
 </Page>
 
 <aside>
@@ -36,7 +37,7 @@
 
     <div class="documents">
         {#each $documents as _, index}
-            <Document {index} />
+            <Document {index} max={data.max} />
         {/each}
 
         <button on:click={add_document}>Add split</button>

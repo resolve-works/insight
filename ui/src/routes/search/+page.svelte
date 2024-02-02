@@ -3,14 +3,14 @@
     import Search from '$lib/Search.svelte'
     import Page from '$lib/Page.svelte';
     import { page } from '$app/stores';
-    const query = $page.url.searchParams.get('query')
+    const query = $page.url.searchParams.get('query') || ''
 
     export let data
 </script>
 
 <aside>
     <header>
-        <Search value={query ? query : ''} />
+        <Search value={query} />
     </header>
 
     <nav>

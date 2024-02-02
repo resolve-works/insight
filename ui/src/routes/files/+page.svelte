@@ -15,7 +15,7 @@
     onMount(() => {
         const interval = setInterval(() => {
             invalidate(url => url.pathname == '/api/v1/files')
-        }, 5000)
+        }, 3000)
 
         return () => {
             clearInterval(interval)
