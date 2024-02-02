@@ -86,10 +86,10 @@
                             <p>{ prompt.response }</p>
 
                             {#each prompt.sources as source}
-                                <a href="/search/{source.id}?page={source.index - source.from_page}">
+                                <a href="/search/{source.id}?page={source.index - source.from_page + 1}">
                                     <span>
                                         <Icon class="gg-file" />
-                                        {source.index - source.from_page}
+                                        {source.index - source.from_page + 1}
                                     </span>
                                     {source.name}
                                 </a>
@@ -181,8 +181,9 @@
     }
 
     a {
-        display: flex;
+        display: grid;
         align-items: center;
+        grid-template-columns: 6rem auto;
     }
 
     span {
