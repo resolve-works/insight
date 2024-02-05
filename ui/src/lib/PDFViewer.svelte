@@ -9,7 +9,6 @@
 
     $: {
         if(load_page) {
-            console.log(`loading ${index}`)
             load_page(index)
         }
     }

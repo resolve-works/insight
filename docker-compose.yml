@@ -54,7 +54,6 @@ services:
       AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
       AUTH_CLIENT_ID: ${AUTH_WORKER_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_WORKER_CLIENT_SECRET}
-      TIKA_URI: http://tika:9998/tika
       POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       API_ENDPOINT: https://insight:8080
@@ -64,12 +63,8 @@ services:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
     depends_on:
-      - tika
       - postgres
       - nginx
-
-  tika:
-    image: apache/tika
 
   opensearch:
     build: opensearch

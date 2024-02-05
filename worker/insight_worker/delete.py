@@ -21,7 +21,6 @@ def delete_document(id):
     res = OAuth2Session().delete(
         f"{env.get('API_ENDPOINT')}/api/v1/index/_doc/{document['id']}"
     )
-    print(res.status)
-    print(res.text)
+    print(res.status_code)
     # if res.status_code != 201:
     # raise Exception(res.text)

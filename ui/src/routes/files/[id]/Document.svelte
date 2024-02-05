@@ -89,13 +89,15 @@
 
         {#if $documents[index].original.id}
             {#if ! is_idle}
-                <Icon class="gg-loadbar" />
-            {/if}
-
-            {#if is_changed}
-                <button class="outline" on:click={cancel_changes}>Cancel changes</button>
+                <span class="status">
+                    <Icon class="gg-loadbar" /> {$documents[index].original.status}
+                </span>
             {:else}
-                <button class="outline" on:click={remove}>Remove</button>
+                {#if is_changed}
+                    <button class="outline" on:click={cancel_changes}>Cancel changes</button>
+                {:else}
+                    <button class="outline" on:click={remove}>Remove</button>
+                {/if}
             {/if}
         {:else}
             <button class="outline" on:click={cancel_adding}>Cancel adding</button>

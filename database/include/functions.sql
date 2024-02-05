@@ -8,7 +8,7 @@ grant execute on function ingest_file to external_user;
 create or replace function ingest_document(id uuid) returns void as $$
     plan = plpy.prepare("notify ingest_document, '{payload}'".format(payload=id))
     plpy.execute(plan)
-$$ language sql;
+$$ language plpython3u;
 grant execute on function ingest_document to external_user;
 grant execute on function ingest_document to internal_worker;
 

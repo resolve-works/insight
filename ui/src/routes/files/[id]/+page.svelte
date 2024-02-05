@@ -1,5 +1,7 @@
 
 <script lang="ts">
+    import { onMount } from 'svelte';
+    import { invalidate } from '$app/navigation';
     import Page from '$lib/Page.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import Document from './Document.svelte';
@@ -9,6 +11,18 @@
 
     $documents = data.documents.map(document => ({ original: document, changes: structuredClone(document) }))
     const { access_token } = data;
+
+    // TODO - Poor mans event system
+    onMount(() => {
+        const interval = setInterval(() => {
+            console.log('what')
+            invalidate(url => url.pathname == '/api/v1/files')
+        }, 3000)
+
+        return () => {
+            clearInterval(interval)
+        }
+    })
 
     function store_documents() {
 
@@ -20,7 +34,7 @@
 
     $: is_changed = $documents
         .map(({ original, changes }) => JSON.stringify(original) != JSON.stringify(changes))
-        .reduce((a, b) => a || b);
+        .reduce((a, b) => a || b, false);
 </script>
 
 <Page class="with-sidebar-right">
