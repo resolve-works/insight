@@ -11,7 +11,7 @@ def delete_document(id):
     res = session.get(f"{env.get('API_ENDPOINT')}/api/v1/documents?id=eq.{id}")
     document = res.json()[0]
 
-    logging.info(f"Deleteing document {document['id']}")
+    logging.info(f"Deleting document {document['id']}")
 
     # Remove file from object storage
     minio = get_minio(session.token["access_token"])
@@ -21,6 +21,14 @@ def delete_document(id):
     res = OAuth2Session().delete(
         f"{env.get('API_ENDPOINT')}/api/v1/index/_doc/{document['id']}"
     )
-    print(res.status_code)
-    # if res.status_code != 201:
-    # raise Exception(res.text)
+    if res.status_code != 200:
+        raise Exception(res.text)
+
+    # Remove indexed contents
+    res = OAuth2Session().delete(
+        f"{env.get('API_ENDPOINT')}/api/v1/documents?id=eq.{document['id']}"
+    )
+    if res.status_code != 204:
+        raise Exception(res.text)
+
+    logging.info(f"Document {document['id']} deleted succesfully")

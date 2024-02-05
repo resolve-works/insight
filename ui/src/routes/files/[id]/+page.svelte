@@ -9,14 +9,13 @@
     import { page } from '$app/stores';
     export let data;
 
-    $documents = data.documents.map(document => ({ original: document, changes: structuredClone(document) }))
+    $: $documents = data.documents.map(document => ({ original: document, changes: structuredClone(document) }))
     const { access_token } = data;
 
     // TODO - Poor mans event system
     onMount(() => {
         const interval = setInterval(() => {
-            console.log('what')
-            invalidate(url => url.pathname == '/api/v1/files')
+            invalidate(url => url.pathname == '/api/v1/documents')
         }, 3000)
 
         return () => {

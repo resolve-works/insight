@@ -30,7 +30,7 @@
             throw new Error('Could not mark document as deleting')
         }
 
-        await invalidate(url => url.pathname == '/api/v1/files')
+        invalidate(url => url.pathname == '/api/v1/documents')
 
         // Trigger delete job
         const ingest_response = await fetch('/api/v1/rpc/delete_document', { 
@@ -130,13 +130,15 @@
         padding-right: 0.5rem;
     }
 
-    .row {
+    .row,
+    .status {
         display: flex;
         align-items: center;
+        gap: 0.5rem;
     }
 
-    span {
-        margin: 0.5rem;
+    .status {
+        margin-left: auto;
     }
 
     button {
