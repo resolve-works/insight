@@ -10,4 +10,3 @@ export type Document = {
 }
 
 export const documents: Writable<{ original: Document, changes: Document }[]> = writable([]);
-

@@ -6,6 +6,8 @@
 <article {...$$props}>
     <header>
         <Breadcrumbs />
+
+        <slot name="header" />
     </header>
 
     <main>

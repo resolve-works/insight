@@ -1,20 +1,10 @@
 
 <script lang="ts">
-    import { page } from '$app/stores'
-    import { goto } from '$app/navigation'
-    import { browser } from '$app/environment';
     import { documents } from './stores.ts'
     export let max: number;
     export let index: number;
 
     $: is_changed = JSON.stringify($documents[index].original) != JSON.stringify($documents[index].changes)
-
-    $: {
-        $page.url.searchParams.set('page', $documents[index].changes.from_page); 
-        if(browser) {  
-            goto(`?${$page.url.searchParams.toString()}`);
-        }
-    }
 
     function remove() {
 
