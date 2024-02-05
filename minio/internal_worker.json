@@ -14,6 +14,13 @@
              "s3:PutObject"
          ],
          "Resource": "arn:aws:s3:::insight/*"
+      },
+      {
+         "Effect": "Allow",
+         "Action": [
+             "s3:DeleteObject"
+         ],
+         "Resource": "arn:aws:s3:::insight/*"
       }
    ]
 }

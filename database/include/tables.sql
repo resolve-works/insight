@@ -1,5 +1,5 @@
 
-create type file_status as enum ('uploading', 'analyzing', 'idle');
+create type file_status as enum ('uploading', 'analyzing', 'deleting', 'idle');
 
 create table if not exists private.files (
     id uuid default gen_random_uuid(),
@@ -17,7 +17,7 @@ create table if not exists private.files (
     primary key (id)
 );
 
-create type document_status as enum ('ingesting', 'idle');
+create type document_status as enum ('ingesting', 'deleting', 'idle');
 
 create table private.documents (
     id uuid default gen_random_uuid(),

@@ -6,8 +6,8 @@ grant select, update on files to internal_worker;
 
 create or replace view documents as 
     select id, owner_id, file_id, path, from_page, to_page, name, status from private.documents;
-grant select on documents to external_user;
-grant select, insert, update on documents to internal_worker;
+grant select, update on documents to external_user;
+grant select, insert, update, delete on documents to internal_worker;
 
 create or replace view prompts as select * from private.prompts;
 grant select, insert, update on prompts to external_user;
