@@ -1,11 +1,6 @@
 import logging
 import ocrmypdf
-import requests
-from urllib.parse import urlparse
 from os import environ as env
-from minio import Minio
-from xml.etree import ElementTree
-from lxml import html
 import fitz
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
@@ -13,33 +8,11 @@ from pathlib import Path
 from pikepdf import Pdf
 from itertools import chain
 from .vectorstore import store_embeddings
+from .storage import get_minio
 from .oauth import OAuth2Session
 
 
 logging.basicConfig(level=logging.INFO)
-
-
-def get_minio(token):
-    res = requests.post(
-        env.get("STORAGE_ENDPOINT"),
-        data={
-            "Action": "AssumeRoleWithWebIdentity",
-            "Version": "2011-06-15",
-            "DurationSeconds": "3600",
-            "WebIdentityToken": token,
-        },
-    )
-    tree = ElementTree.fromstring(res.content)
-    ns = {"s3": "https://sts.amazonaws.com/doc/2011-06-15/"}
-    credentials = tree.find("./s3:AssumeRoleWithWebIdentityResult/s3:Credentials", ns)
-
-    return Minio(
-        urlparse(env.get("STORAGE_ENDPOINT")).netloc,
-        access_key=credentials.find("s3:AccessKeyId", ns).text,
-        secret_key=credentials.find("s3:SecretAccessKey", ns).text,
-        session_token=credentials.find("s3:SessionToken", ns).text,
-        region="insight",
-    )
 
 
 def ocrmypdf_process(input_file, output_file):

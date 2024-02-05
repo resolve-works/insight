@@ -1,16 +1,22 @@
 
 create or replace function ingest_file(id uuid) returns void as $$
-    plan = plpy.prepare("notify file, '{payload}'".format(payload=id))
+    plan = plpy.prepare("notify ingest_file, '{payload}'".format(payload=id))
     plpy.execute(plan)
 $$ language plpython3u;
 grant execute on function ingest_file to external_user;
 
 create or replace function ingest_document(id uuid) returns void as $$
-    plan = plpy.prepare("notify document, '{payload}'".format(payload=id))
+    plan = plpy.prepare("notify ingest_document, '{payload}'".format(payload=id))
     plpy.execute(plan)
-$$ language plpython3u;
+$$ language sql;
 grant execute on function ingest_document to external_user;
 grant execute on function ingest_document to internal_worker;
+
+create or replace function delete_document(id uuid) returns void as $$
+    plan = plpy.prepare("notify delete_document, '{payload}'".format(payload=id))
+    plpy.execute(plan)
+$$ language plpython3u;
+grant execute on function delete_document to external_user;
 
 create or replace function set_updated_at() returns trigger as $$
 begin

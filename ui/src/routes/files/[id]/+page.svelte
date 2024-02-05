@@ -7,14 +7,15 @@
     import { page } from '$app/stores';
     export let data;
 
-    documents.set(data.documents.map(document => ({ original: document, changes: structuredClone(document) })))
+    $documents = data.documents.map(document => ({ original: document, changes: structuredClone(document) }))
+    const { access_token } = data;
 
     function store_documents() {
 
     }
 
     function add_document() {
-        $documents = [ ...$documents, { original: {}, changes: { from_page: 0, to_page: 1, name: '' }, }]
+        $documents = [ ...$documents, { original: {}, changes: { from_page: 1, to_page: 1, name: '' }, }]
     }
 
     $: is_changed = $documents
@@ -37,7 +38,7 @@
 
     <div class="documents">
         {#each $documents as _, index}
-            <Document {index} max={data.max} />
+            <Document {access_token} {index} pages={data.pages} />
         {/each}
 
         <button on:click={add_document}>Add split</button>

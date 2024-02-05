@@ -1,13 +1,49 @@
 
 <script lang="ts">
+    import Icon from '$lib/Icon.svelte';
+    import { invalidate } from '$app/navigation';
     import { documents } from './stores.ts'
-    export let max: number;
-    export let index: number;
+    import { ssp, queryParam } from 'sveltekit-search-params'
+    export let pages: number
+    export let index: number
+    export let access_token: string
 
     $: is_changed = JSON.stringify($documents[index].original) != JSON.stringify($documents[index].changes)
+    $: is_idle = $documents[index].original.status == 'idle'
 
-    function remove() {
+	let page = queryParam('page', ssp.number());
+    async function change(e: Event) {
+        $page = parseInt((e.target as HTMLInputElement).value)
+    }
 
+    async function remove() {
+        // Mark model for deletion
+        const patch_response = await fetch(`/api/v1/documents?id=eq.${$documents[index].original.id}`, { 
+            method: 'PATCH',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${access_token}`,
+            },
+            body: JSON.stringify({ status: 'deleting' })
+        })
+        if(patch_response.status != 204) {
+            throw new Error('Could not mark document as deleting')
+        }
+
+        await invalidate(url => url.pathname == '/api/v1/files')
+
+        // Trigger delete job
+        const ingest_response = await fetch('/api/v1/rpc/delete_document', { 
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${access_token}`,
+            },
+            body: JSON.stringify({ id: $documents[index].original.id })
+        })
+        if(ingest_response.status != 204) {
+            throw new Error('Could not trigger delete job for document')
+        }
     }
 
     function cancel_adding() {
@@ -22,33 +58,49 @@
 </script>
 
 <div class="embed">
-    <form>
-        <input type="text" placeholder="Document name" bind:value={$documents[index].changes.name} class:changed={$documents[index].changes.name != $documents[index].original.name} />
+    <input 
+        type="text" 
+        placeholder="Document name"
+        disabled={!is_idle}
+        bind:value={$documents[index].changes.name}
+        class:changed={$documents[index].changes.name != $documents[index].original.name} 
+        />
 
-        <div class="row">
-            <input type="number" 
-                   bind:value={$documents[index].changes.from_page} 
-                   class:changed={$documents[index].changes.from_page != $documents[index].original.from_page} 
-                   min="1" 
-                   {max} />
-            <span>to</span>
-            <input type="number" 
-                   bind:value={$documents[index].changes.to_page} 
-                   class:changed={$documents[index].changes.to_page != $documents[index].original.to_page} 
-                   min="1" 
-                   {max} />
+    <div class="row">
+        <input 
+            type="number" 
+            bind:value={$documents[index].changes.from_page} 
+            on:change={change}
+            disabled={!is_idle}
+            class:changed={$documents[index].changes.from_page != $documents[index].original.from_page} 
+            min="1" 
+            max={$documents[index].changes.to_page} 
+            />
+        <span>to</span>
+        <input 
+            type="number" 
+            bind:value={$documents[index].changes.to_page} 
+            on:change={change}
+            disabled={!is_idle}
+            class:changed={$documents[index].changes.to_page != $documents[index].original.to_page} 
+            min={$documents[index].changes.from_page}
+            max={pages} 
+            />
 
-            {#if $documents[index].original.id}
-                {#if is_changed}
-                    <button class="outline" on:click={cancel_changes}>Cancel changes</button>
-                {:else}
-                    <button class="outline" on:click={remove}>Remove</button>
-                {/if}
-            {:else}
-                <button class="outline" on:click={cancel_adding}>Cancel adding</button>
+        {#if $documents[index].original.id}
+            {#if ! is_idle}
+                <Icon class="gg-loadbar" />
             {/if}
-        </div>
-    </form>
+
+            {#if is_changed}
+                <button class="outline" on:click={cancel_changes}>Cancel changes</button>
+            {:else}
+                <button class="outline" on:click={remove}>Remove</button>
+            {/if}
+        {:else}
+            <button class="outline" on:click={cancel_adding}>Cancel adding</button>
+        {/if}
+    </div>
 </div>
 
 <style>
