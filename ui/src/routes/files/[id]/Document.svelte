@@ -13,8 +13,9 @@
     $: can_edit = ! ('status' in document.original) || document.original.status == 'idle'
 
 	let page = queryParam('page', ssp.number());
-    async function change(e: Event) {
+    async function go_to_page(e: Event) {
         $page = parseInt((e.target as HTMLInputElement).value)
+        $changed = $changed;
     }
 
     async function remove() {
@@ -52,7 +53,7 @@
     }
 
     function cancel_changes() {
-        $changed[document.original.id] = document.original;
+        $changed[document.original.id] = structuredClone(document.original);
     }
 </script>
 
@@ -61,6 +62,7 @@
         type="text" 
         placeholder="Document name"
         disabled={!can_edit}
+        on:change={() => $changed = $changed}
         bind:value={document.changes.name}
         class:changed={document.changes.name != document.original.name} 
         />
@@ -69,7 +71,7 @@
         <input 
             type="number" 
             bind:value={document.changes.from_page} 
-            on:change={change}
+            on:change={go_to_page}
             disabled={!can_edit}
             class:changed={document.changes.from_page != document.original.from_page} 
             min="1" 
@@ -79,7 +81,7 @@
         <input 
             type="number" 
             bind:value={document.changes.to_page} 
-            on:change={change}
+            on:change={go_to_page}
             disabled={!can_edit}
             class:changed={document.changes.to_page != document.original.to_page} 
             min={document.changes.from_page}

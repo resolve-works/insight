@@ -5,7 +5,7 @@
     import Page from '$lib/Page.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import Document from './Document.svelte';
-    import { existing, created, changed, documents } from './stores.ts'
+    import { existing, created, documents } from './stores.ts'
     import { page } from '$app/stores';
     export let data;
 
@@ -31,7 +31,7 @@
         $created = [ ...$created, { from_page: 1, to_page: 1, name: '' }]
     }
 
-    $: is_changed = $changed.length || $created.length;
+    $: is_changed = $documents.some(document => document.is_changed)
 </script>
 
 <Page class="with-sidebar-right">
