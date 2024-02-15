@@ -9,6 +9,8 @@ export async function load({ params, fetch, parent, data }) {
 
     return { 
         ...data,
+        // File ID is needed to post new documents
+        file_id: params.id,
         // Humans index from 1
         //
         // When you say "to 137" to a human, they expect 137 to be in the

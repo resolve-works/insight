@@ -24,12 +24,15 @@ create table private.documents (
     owner_id uuid not null,
     file_id uuid not null,
 
-    name text not null,
+    name text,
     path text generated always as (owner_id::text || '/' || file_id::text || '/' || id::text || '.pdf') stored,
     from_page integer not null,
     to_page integer not null,
 
-    status document_status not null default 'ingesting',
+    status document_status not null default 'idle',
+
+    created_at timestamp with time zone default current_timestamp,
+    updated_at timestamp with time zone default current_timestamp,
 
     primary key (id),
     foreign key (file_id) references private.files (id) on delete restrict
@@ -40,6 +43,7 @@ create type prompt_status as enum ('answering', 'idle');
 
 create table if not exists private.prompts (
     id uuid default gen_random_uuid(),
+    owner_id uuid not null,
 
     query text not null,
     similarity_top_k integer not null default 3,

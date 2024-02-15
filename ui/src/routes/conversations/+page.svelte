@@ -21,7 +21,7 @@
         let data = Object.fromEntries(Array.from(form_data).filter(([key, value]) => !!value))
         is_disabled = true;
         
-        const prompt = await insight.create('/prompts', data)
+        const prompt = await insight.post('/prompts', data)
         // Clear form
         e.target.reset()
         await invalidate(url => url.pathname == '/api/v1/prompts')

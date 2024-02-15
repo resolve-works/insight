@@ -1,16 +1,20 @@
 
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, getContext } from 'svelte';
     import { invalidate } from '$app/navigation';
     import Page from '$lib/Page.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import Document from './Document.svelte';
-    import { existing, created, documents } from './stores.ts'
+    import { existing, changed, created, documents } from './stores.ts'
     import { page } from '$app/stores';
-    export let data;
+    import type { Insight } from '$lib/insight.ts';
 
+    export let data;
     $: $existing = data.documents;
-    const { access_token } = data;
+    $: is_changed = $documents.some(document => document.is_changed)
+    let is_disabled = false;
+
+    const insight: Insight = getContext('insight');
 
     // TODO - Poor mans event system
     onMount(() => {
@@ -23,15 +27,40 @@
         }
     })
 
-    function store_documents() {
+    async function store() {
+        is_disabled = true;
 
+        for(const document of $documents.filter(document => document.is_changed)) {
+            const changes = {
+                ...document.changes,
+                // Pages are 0 indexed in database, 1 indexed in inputs as to not confuse the humans
+                from_page: document.changes.from_page - 1,
+            }
+
+            if('id' in document.original) {
+                // Existing documents
+                await insight.patch('/documents', document.original.id, changes)
+                await insight.rpc('/ingest_document', document.original.id)
+            } else {
+                // New documents
+                const { id } = await insight.post('/documents', { ...changes, file_id: data.file_id, })
+                await insight.rpc('/ingest_document', id)
+            }
+        }
+
+        // Get new list of documents
+        await invalidate(url => url.pathname == '/api/v1/documents')
+
+        // Clear stores that track form state
+        $changed = {};
+        $created = [];
+
+        is_disabled = false;
     }
 
-    function add_document() {
-        $created = [ ...$created, { from_page: 1, to_page: 1, name: '' }]
+    function add() {
+        $created = [ ...$created, { from_page: 1, to_page: data.pages, name: '' }]
     }
-
-    $: is_changed = $documents.some(document => document.is_changed)
 </script>
 
 <Page class="with-sidebar-right">
@@ -49,12 +78,12 @@
 
     <div class="documents">
         {#each $documents as document}
-            <Document {access_token} {document} pages={data.pages} />
+            <Document {document} pages={data.pages} />
         {/each}
 
-        <button on:click={add_document}>Add split</button>
+        <button on:click={add}>Add split</button>
         {#if is_changed}
-            <button class="secondary" on:click={store_documents}>Store changes</button>
+            <button class="secondary" disabled={is_disabled} on:click={store}>Store changes</button>
         {/if}
     </div>
 </aside>
