@@ -28,6 +28,7 @@ services:
       AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
       PUBLIC_STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
       PUBLIC_STORAGE_BUCKET: ${STORAGE_BUCKET}
+      PUBLIC_API_ENDPOINT: ${API_ENDPOINT}
     volumes:
       - ./ui:/insight-ui
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
@@ -56,7 +57,7 @@ services:
       AUTH_CLIENT_SECRET: ${AUTH_WORKER_CLIENT_SECRET}
       POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      API_ENDPOINT: https://insight:8080
+      API_ENDPOINT: ${API_ENDPOINT}
       STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
       STORAGE_BUCKET: ${STORAGE_BUCKET}
     volumes:
