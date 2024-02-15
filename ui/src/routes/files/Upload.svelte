@@ -2,7 +2,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import Card from '$lib/Card.svelte';
-    import { uploads } from '$lib/stores';
+    import { uploads } from './stores.ts';
     import { invalidate } from '$app/navigation';
 
     export let upload: File

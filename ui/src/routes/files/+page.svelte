@@ -6,7 +6,7 @@
     import File from './File.svelte';
     import Uploader from './Uploader.svelte';
     import Upload from './Upload.svelte';
-    import { uploads } from '$lib/stores.ts';
+    import { uploads } from './stores.ts';
 
     export let data;
     const { access_token } = data;
