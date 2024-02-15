@@ -25,7 +25,7 @@ begin
 end;
 $$ language plpgsql;
 
-create or replace function set_file_owner() returns trigger as $$
+create or replace function set_owner() returns trigger as $$
 declare
     owner_id uuid := current_setting('request.jwt.claims', true)::json->>'sub';
 begin
