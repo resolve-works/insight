@@ -167,4 +167,6 @@ def ingest_document(id):
     if res.status_code != 204:
         raise Exception(res.text)
 
+    # TODO - Remove embeddings
+
     logging.info(f"Done processing of document {id}")

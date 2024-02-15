@@ -5,11 +5,11 @@
     import Page from '$lib/Page.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import Document from './Document.svelte';
-    import { documents } from './stores.ts'
+    import { existing, created, changed, documents } from './stores.ts'
     import { page } from '$app/stores';
     export let data;
 
-    $: $documents = data.documents.map(document => ({ original: document, changes: structuredClone(document) }))
+    $: $existing = data.documents;
     const { access_token } = data;
 
     // TODO - Poor mans event system
@@ -28,12 +28,10 @@
     }
 
     function add_document() {
-        $documents = [ ...$documents, { original: {}, changes: { from_page: 1, to_page: 1, name: '' }, }]
+        $created = [ ...$created, { from_page: 1, to_page: 1, name: '' }]
     }
 
-    $: is_changed = $documents
-        .map(({ original, changes }) => JSON.stringify(original) != JSON.stringify(changes))
-        .reduce((a, b) => a || b, false);
+    $: is_changed = $changed.length || $created.length;
 </script>
 
 <Page class="with-sidebar-right">
@@ -50,8 +48,8 @@
     </header>
 
     <div class="documents">
-        {#each $documents as _, index}
-            <Document {access_token} {index} pages={data.pages} />
+        {#each $documents as document}
+            <Document {access_token} {document} pages={data.pages} />
         {/each}
 
         <button on:click={add_document}>Add split</button>

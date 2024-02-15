@@ -1,6 +1,4 @@
 
-import sign from '$lib/sign.ts';
-
 export async function load({ params, fetch, parent, data }) {
     const { access_token } = await parent();
 

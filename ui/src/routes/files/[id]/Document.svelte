@@ -2,14 +2,15 @@
 <script lang="ts">
     import Icon from '$lib/Icon.svelte';
     import { invalidate } from '$app/navigation';
-    import { documents } from './stores.ts'
+    import { created, changed } from './stores.ts'
+    import type { DocumentInput } from './stores.ts'
     import { ssp, queryParam } from 'sveltekit-search-params'
     export let pages: number
-    export let index: number
+    export let document: DocumentInput;
     export let access_token: string
 
-    $: is_changed = JSON.stringify($documents[index].original) != JSON.stringify($documents[index].changes)
-    $: is_idle = $documents[index].original.status == 'idle'
+    $: is_changed = JSON.stringify(document.original) != JSON.stringify(document.changes)
+    $: can_edit = ! ('status' in document.original) || document.original.status == 'idle'
 
 	let page = queryParam('page', ssp.number());
     async function change(e: Event) {
@@ -18,7 +19,7 @@
 
     async function remove() {
         // Mark model for deletion
-        const patch_response = await fetch(`/api/v1/documents?id=eq.${$documents[index].original.id}`, { 
+        const patch_response = await fetch(`/api/v1/documents?id=eq.${document.original.id}`, { 
             method: 'PATCH',
             headers: { 
                 'Content-Type': 'application/json',
@@ -39,7 +40,7 @@
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${access_token}`,
             },
-            body: JSON.stringify({ id: $documents[index].original.id })
+            body: JSON.stringify({ id: document.original.id })
         })
         if(ingest_response.status != 204) {
             throw new Error('Could not trigger delete job for document')
@@ -47,13 +48,11 @@
     }
 
     function cancel_adding() {
-        $documents.splice(index, 1)
-        $documents = $documents;
+        $created = $created.filter(obj => ! Object.is(obj, document.changes))
     }
 
     function cancel_changes() {
-        $documents[index].changes = structuredClone($documents[index].original)
-        $documents = $documents
+        $changed[document.original.id] = document.original;
     }
 </script>
 
@@ -61,36 +60,36 @@
     <input 
         type="text" 
         placeholder="Document name"
-        disabled={!is_idle}
-        bind:value={$documents[index].changes.name}
-        class:changed={$documents[index].changes.name != $documents[index].original.name} 
+        disabled={!can_edit}
+        bind:value={document.changes.name}
+        class:changed={document.changes.name != document.original.name} 
         />
 
     <div class="row">
         <input 
             type="number" 
-            bind:value={$documents[index].changes.from_page} 
+            bind:value={document.changes.from_page} 
             on:change={change}
-            disabled={!is_idle}
-            class:changed={$documents[index].changes.from_page != $documents[index].original.from_page} 
+            disabled={!can_edit}
+            class:changed={document.changes.from_page != document.original.from_page} 
             min="1" 
-            max={$documents[index].changes.to_page} 
+            max={document.changes.to_page} 
             />
         <span>to</span>
         <input 
             type="number" 
-            bind:value={$documents[index].changes.to_page} 
+            bind:value={document.changes.to_page} 
             on:change={change}
-            disabled={!is_idle}
-            class:changed={$documents[index].changes.to_page != $documents[index].original.to_page} 
-            min={$documents[index].changes.from_page}
+            disabled={!can_edit}
+            class:changed={document.changes.to_page != document.original.to_page} 
+            min={document.changes.from_page}
             max={pages} 
             />
 
-        {#if $documents[index].original.id}
-            {#if ! is_idle}
+        {#if document.original.id}
+            {#if ! can_edit}
                 <span class="status">
-                    <Icon class="gg-loadbar" /> {$documents[index].original.status}
+                    <Icon class="gg-loadbar" /> {document.original.status}
                 </span>
             {:else}
                 {#if is_changed}
