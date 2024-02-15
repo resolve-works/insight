@@ -9,7 +9,6 @@
     import { uploads } from './stores.ts';
 
     export let data;
-    const { access_token } = data;
 
     // TODO - Poor mans event system
     onMount(() => {
@@ -27,7 +26,7 @@
     <Uploader />
 
     {#each $uploads as upload (upload.name) }
-        <Upload upload={upload} access_token={access_token} />
+        <Upload upload={upload} />
     {/each}
 
     {#each data.files as file (file.id)}

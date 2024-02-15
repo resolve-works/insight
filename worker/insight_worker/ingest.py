@@ -36,13 +36,13 @@ def ocrmypdf_process(input_file, output_file):
 def ingest_file(id):
     session = OAuth2Session()
     res = session.patch(
-        f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{id}",
+        f"{env.get('API_ENDPOINT')}/files?id=eq.{id}",
         data={"status": "analyzing"},
     )
     if res.status_code != 204:
         raise Exception(res.text)
 
-    res = session.get(f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{id}")
+    res = session.get(f"{env.get('API_ENDPOINT')}/files?id=eq.{id}")
     file = res.json()[0]
 
     logging.info(f"Ingesting file {file['id']}")
@@ -55,7 +55,7 @@ def ingest_file(id):
         pages = len(pdf.pages)
 
     res = session.patch(
-        f"{env.get('API_ENDPOINT')}/api/v1/files?id=eq.{file['id']}",
+        f"{env.get('API_ENDPOINT')}/files?id=eq.{file['id']}",
         data={"pages": pages, "status": "idle"},
     )
     if res.status_code != 204:
@@ -63,7 +63,7 @@ def ingest_file(id):
 
     # We're assuming that file contains 1 document spanning all the pages in the file.
     res = session.post(
-        f"{env.get('API_ENDPOINT')}/api/v1/documents",
+        f"{env.get('API_ENDPOINT')}/documents",
         data={
             "owner_id": file["owner_id"],
             "file_id": file["id"],
@@ -80,7 +80,7 @@ def ingest_file(id):
     logging.info(f"Created document {document['id']}")
 
     res = session.post(
-        f"{env.get('API_ENDPOINT')}/api/v1/rpc/ingest_document",
+        f"{env.get('API_ENDPOINT')}/rpc/ingest_document",
         data={"id": document["id"]},
     )
     if res.status_code != 204:
@@ -90,12 +90,12 @@ def ingest_file(id):
 def ingest_document(id):
     session = OAuth2Session()
     res = session.get(
-        f"{env.get('API_ENDPOINT')}/api/v1/documents?select=id,name,path,from_page,to_page,file_id,files(path)&id=eq.{id}"
+        f"{env.get('API_ENDPOINT')}/documents?select=id,name,path,from_page,to_page,file_id,files(path)&id=eq.{id}"
     )
     document = res.json()[0]
 
     res = session.patch(
-        f"{env.get('API_ENDPOINT')}/api/v1/documents?id=eq.{document['id']}",
+        f"{env.get('API_ENDPOINT')}/documents?id=eq.{document['id']}",
         data={"status": "ingesting"},
     )
     if res.status_code != 204:
@@ -155,13 +155,13 @@ def ingest_document(id):
     ]
 
     res = OAuth2Session().put(
-        f"{env.get('API_ENDPOINT')}/api/v1/index/_doc/{document['id']}", json=body
+        f"{env.get('API_ENDPOINT')}/index/_doc/{document['id']}", json=body
     )
     if res.status_code != 201:
         raise Exception(res.text)
 
     res = session.patch(
-        f"{env.get('API_ENDPOINT')}/api/v1/documents?id=eq.{document['id']}",
+        f"{env.get('API_ENDPOINT')}/documents?id=eq.{document['id']}",
         data={"status": "idle"},
     )
     if res.status_code != 204:

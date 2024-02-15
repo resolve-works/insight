@@ -1,59 +1,34 @@
 
 <script lang="ts">
+    import { getContext } from 'svelte'; 
     import Page from '$lib/Page.svelte'
     import Card from '$lib/Card.svelte'
     import Icon from '$lib/Icon.svelte'
     import { invalidate } from '$app/navigation';
     import { tick } from 'svelte';
+    import type { Insight } from '$lib/insight.js';
 
     let query_input: HTMLInputElement;
 
     export let data;
-    const { access_token } = data;
     let is_disabled = false
+
+    const insight: Insight = getContext('insight')
 
     async function create_prompt(e: SubmitEvent) {
         let form_data = new FormData(e.target);
         // Strip empty keys
         let data = Object.fromEntries(Array.from(form_data).filter(([key, value]) => !!value))
-        // Clear form
         is_disabled = true;
         
-        const prompt_response = await fetch('/api/v1/prompts', { 
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${access_token}`,
-                'Prefer': 'return=representation',
-            },
-            body: JSON.stringify(data),
-        })
-        if(prompt_response.status != 201) {
-            throw new Error('Could not create prompt')
-        }
-
+        const prompt = await insight.create('/prompts', data)
+        // Clear form
         e.target.reset()
-
         await invalidate(url => url.pathname == '/api/v1/prompts')
-
-        const prompts = await prompt_response.json();
-        const prompt = prompts[0];
-
-        const answer_response = await fetch('/api/v1/rpc/answer_prompt', { 
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${access_token}`,
-            },
-            body: JSON.stringify({ id: prompt.id })
-        })
-        if(answer_response.status != 204) {
-            throw new Error('Could not trigger answering of prompt')
-        }
-
+        await insight.rpc('/answer_prompt', prompt.id)
         await invalidate(url => url.pathname == '/api/v1/prompts')
         is_disabled = false
-        // Focus won't work on disabled inputs
+        // Focus won't work on disabled inputs, wait for tick
         await tick();
         query_input.focus()
     }

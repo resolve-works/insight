@@ -1,13 +1,18 @@
 
 <script lang="ts">
+    import { getContext } from 'svelte';
     import Icon from '$lib/Icon.svelte';
     import { invalidate } from '$app/navigation';
     import { created, changed } from './stores.ts'
     import type { DocumentInput } from './stores.ts'
     import { ssp, queryParam } from 'sveltekit-search-params'
+    import type { Insight } from '$lib/insight.ts'; 
+    
     export let pages: number
     export let document: DocumentInput;
     export let access_token: string
+    
+    const insight: Insight = getContext('insight');
 
     $: is_changed = JSON.stringify(document.original) != JSON.stringify(document.changes)
     $: can_edit = ! ('status' in document.original) || document.original.status == 'idle'
@@ -20,32 +25,11 @@
 
     async function remove() {
         // Mark model for deletion
-        const patch_response = await fetch(`/api/v1/documents?id=eq.${document.original.id}`, { 
-            method: 'PATCH',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${access_token}`,
-            },
-            body: JSON.stringify({ status: 'deleting' })
-        })
-        if(patch_response.status != 204) {
-            throw new Error('Could not mark document as deleting')
-        }
-
+        await insight.patch('/documents', document.original.id, { status: 'deleting' })
         invalidate(url => url.pathname == '/api/v1/documents')
 
         // Trigger delete job
-        const ingest_response = await fetch('/api/v1/rpc/delete_document', { 
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${access_token}`,
-            },
-            body: JSON.stringify({ id: document.original.id })
-        })
-        if(ingest_response.status != 204) {
-            throw new Error('Could not trigger delete job for document')
-        }
+        await insight.rpc('/delete_document', document.original.id)
     }
 
     function cancel_adding() {
