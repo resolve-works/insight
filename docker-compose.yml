@@ -32,6 +32,8 @@ services:
     volumes:
       - ./ui:/insight-ui
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
+    depends_on:
+      - rabbitmq
 
   postgrest:
     image: postgrest/postgrest
@@ -66,6 +68,7 @@ services:
     depends_on:
       - postgres
       - nginx
+      - rabbitmq
 
   opensearch:
     build: opensearch
@@ -82,8 +85,28 @@ services:
       - ./certs/opensearch.pem:/usr/share/opensearch/config/opensearch.pem
       - ./certs/opensearch-key.pem:/usr/share/opensearch/config/opensearch-key.pem
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 8081:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: insight
+      RABBITMQ_DEFAULT_PASS: insight
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  debezium:
+    image: debezium/server:2.6
+    volumes:
+      - debezium-data:/debezium/data
+      - ./debezium/application.properties:/debezium/conf/application.properties
+    depends_on:
+      - postgres
+      - rabbitmq
+
   postgres:
     build: postgres
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     environment:
       POSTGRES_USER: insight
       POSTGRES_PASSWORD: insight
@@ -94,6 +117,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./database:/docker-entrypoint-initdb.d
 
   minio:
@@ -144,4 +168,6 @@ volumes:
   minio-data: {}
   postgres-data: {}
   opensearch-data: {}
+  rabbitmq-data: {}
+  debezium-data: {}
 
