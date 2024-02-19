@@ -89,11 +89,11 @@ services:
     image: rabbitmq:3-management
     ports:
       - 8081:15672
-    environment:
-      RABBITMQ_DEFAULT_USER: insight
-      RABBITMQ_DEFAULT_PASS: insight
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+
 
   debezium:
     image: debezium/server:2.6
