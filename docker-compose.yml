@@ -96,7 +96,9 @@ services:
 
 
   debezium:
-    image: debezium/server:2.6
+    image: debezium/server:latest
+    environment:
+      ENABLE_DEBEZIUM_SCRIPTING: true
     volumes:
       - debezium-data:/debezium/data
       - ./debezium/application.properties:/debezium/conf/application.properties

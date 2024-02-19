@@ -16,6 +16,7 @@ create table if not exists private.files (
 
     primary key (id)
 );
+alter table private.files replica identity full;
 
 create type document_status as enum ('ingesting', 'deleting', 'idle');
 
