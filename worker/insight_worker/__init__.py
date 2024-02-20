@@ -1,6 +1,7 @@
 import click
-import os
 import logging
+from os import environ as env
+from pika import ConnectionParameters, SelectConnection, PlainCredentials
 from .ingest import analyze_file, ingest_document
 from .delete import delete_document
 from .oauth import OAuth2Session
@@ -13,7 +14,7 @@ def create_mapping():
     logging.info("Creating index")
 
     res = OAuth2Session().put(
-        f"{os.environ.get('API_ENDPOINT')}/index",
+        f"{env.get('API_ENDPOINT')}/index",
         json={"mappings": {"properties": {"pages": {"type": "nested"}}}},
     )
 
@@ -35,8 +36,38 @@ def cli():
     pass
 
 
+def on_open(connection):
+    logging.info("Processing messages")
+    pass
+
+
+def on_close(connection, exception):
+    connection.ioloop.stop()
+
+
 @cli.command()
 def process_messages():
     create_mapping()
-    logging.info("Processing messages")
-    # TODO - Attach to queue
+
+    # Get access token from Oauth provider
+    parameters = ConnectionParameters(
+        host="rabbitmq",
+        credentials=PlainCredentials(
+            env.get("RABBITMQ_USER"), env.get("RABBITMQ_PASSWORD")
+        ),
+    )
+
+    connection = SelectConnection(
+        parameters=parameters,
+        on_open_callback=on_open,
+        on_close_callback=on_close,
+    )
+    try:
+        # Loop so we can communicate with RabbitMQ
+        connection.ioloop.start()
+    except KeyboardInterrupt:
+        # Gracefully close the connection
+        connection.close()
+        # Loop until we're fully closed.
+        # The on_close callback is required to stop the io loop
+        connection.ioloop.start()
