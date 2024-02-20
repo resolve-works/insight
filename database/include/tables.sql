@@ -1,5 +1,5 @@
 
-create type file_status as enum ('uploading', 'analyzing', 'deleting', 'idle');
+create type file_status as enum ('uploading', 'analyzing', 'idle');
 
 create table if not exists private.files (
     id uuid default gen_random_uuid(),
@@ -18,7 +18,7 @@ create table if not exists private.files (
 );
 alter table private.files replica identity full;
 
-create type document_status as enum ('ingesting', 'deleting', 'idle');
+create type document_status as enum ('ingesting', 'idle');
 
 create table private.documents (
     id uuid default gen_random_uuid(),
@@ -38,7 +38,7 @@ create table private.documents (
     primary key (id),
     foreign key (file_id) references private.files (id) on delete restrict
 );
-
+alter table private.documents replica identity full;
 
 create type prompt_status as enum ('answering', 'idle');
 

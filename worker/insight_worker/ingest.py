@@ -33,15 +33,8 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def ingest_file(id):
+def analyze_file(id):
     session = OAuth2Session()
-    res = session.patch(
-        f"{env.get('API_ENDPOINT')}/files?id=eq.{id}",
-        data={"status": "analyzing"},
-    )
-    if res.status_code != 204:
-        raise Exception(res.text)
-
     res = session.get(f"{env.get('API_ENDPOINT')}/files?id=eq.{id}")
     file = res.json()[0]
 
@@ -93,13 +86,6 @@ def ingest_document(id):
         f"{env.get('API_ENDPOINT')}/documents?select=id,name,path,from_page,to_page,file_id,files(path)&id=eq.{id}"
     )
     document = res.json()[0]
-
-    res = session.patch(
-        f"{env.get('API_ENDPOINT')}/documents?id=eq.{document['id']}",
-        data={"status": "ingesting"},
-    )
-    if res.status_code != 204:
-        raise Exception(res.text)
 
     logging.info(
         f"Extracting pages {document['from_page']} to {document['to_page']} of file {document['file_id']} as document {document['id']}"

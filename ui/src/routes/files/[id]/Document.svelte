@@ -26,8 +26,6 @@
         // Mark model for deletion
         await insight.patch('/documents', document.original.id, { status: 'deleting' })
         invalidate(url => url.pathname == '/api/v1/documents')
-        // Trigger delete job
-        await insight.rpc('/delete_document', document.original.id)
     }
 
     function cancel_adding() {

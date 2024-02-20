@@ -34,8 +34,7 @@
 
         // When upload is done, strip upload
         xhr.upload.addEventListener("loadend", async () => {
-            await insight.patch('/files', file.id, { status: 'idle' })
-            await insight.rpc('/ingest_file', file.id)
+            await insight.patch('/files', file.id, { status: 'analyzing' })
 
             // TODO - Proper error handling. The web is unstable, uploads fail
 

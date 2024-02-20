@@ -99,16 +99,7 @@ def upload(files):
 
                 res = client.patch(
                     f"{config['api']['endpoint']}/api/v1/files?id=eq.{file['id']}",
-                    data={"status": "idle"},
-                )
-
-                if res.status_code != 204:
-                    logging.error(res.text)
-                    exit(1)
-
-                res = client.post(
-                    f"{config['api']['endpoint']}/api/v1/rpc/ingest_file",
-                    data={"id": file["id"]},
+                    data={"status": "analyzing"},
                 )
 
                 if res.status_code != 204:
