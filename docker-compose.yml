@@ -57,7 +57,6 @@ services:
       AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
       AUTH_CLIENT_ID: ${AUTH_WORKER_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_WORKER_CLIENT_SECRET}
-      POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       API_ENDPOINT: ${API_ENDPOINT}
       STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
@@ -66,9 +65,10 @@ services:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
     depends_on:
-      - postgres
+      - postgrest
       - nginx
       - rabbitmq
+      - opensearch
 
   opensearch:
     build: opensearch
@@ -86,14 +86,14 @@ services:
       - ./certs/opensearch-key.pem:/usr/share/opensearch/config/opensearch-key.pem
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3
     ports:
-      - 8081:15672
+      - 15672:15672
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
       - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-
 
   debezium:
     image: debezium/server:latest

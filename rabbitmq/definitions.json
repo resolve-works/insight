@@ -2,7 +2,7 @@
   "bindings": [
     {
       "arguments": {},
-      "destination": "document_ingest",
+      "destination": "insight_worker",
       "destination_type": "queue",
       "routing_key": "",
       "source": "insight.private.documents",
@@ -10,7 +10,7 @@
     },
     {
       "arguments": {},
-      "destination": "file_analyze",
+      "destination": "insight_worker",
       "destination_type": "queue",
       "routing_key": "",
       "source": "insight.private.files",
@@ -23,7 +23,7 @@
       "auto_delete": false,
       "durable": true,
       "name": "insight.private.files",
-      "type": "direct",
+      "type": "topic",
       "vhost": "/"
     },
     {
@@ -31,7 +31,7 @@
       "auto_delete": false,
       "durable": true,
       "name": "insight.private.documents",
-      "type": "direct",
+      "type": "topic",
       "vhost": "/"
     }
   ],
@@ -41,7 +41,7 @@
     {
       "configure": ".*",
       "read": ".*",
-      "user": "insight",
+      "user": "debezium",
       "vhost": "/",
       "write": ".*"
     }
@@ -52,15 +52,7 @@
       "arguments": {},
       "auto_delete": false,
       "durable": true,
-      "name": "document_ingest",
-      "type": "classic",
-      "vhost": "/"
-    },
-    {
-      "arguments": {},
-      "auto_delete": false,
-      "durable": true,
-      "name": "file_analyze",
+      "name": "insight_worker",
       "type": "classic",
       "vhost": "/"
     }
@@ -72,11 +64,9 @@
     {
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "limits": {},
-      "name": "insight",
-      "password_hash": "pxHJF2T/baHiMqhNNn1KJqg4Zlt7BKMM2TPRsiyGRm5taeHv",
-      "tags": [
-        "administrator"
-      ]
+      "name": "debezium",
+      "password_hash": "F3Slp2bntEk4ulVjh3RyJPOzsYodSIfhY6AhwakIqoerPjwi",
+      "tags": []
     }
   ],
   "vhosts": [
