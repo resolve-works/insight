@@ -39,12 +39,17 @@ def cli():
 
 def on_message(channel, method_frame, header_frame, body):
     body = json.loads(body)
-    logging.info(body)
+    after = body["after"]
 
     match method_frame.routing_key:
         case "analyze_file":
-            analyze_file(body)
-            channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+            analyze_file(after)
+        case "ingest_document":
+            ingest_document(after)
+        case _:
+            raise Exception(f"Unknown routing key: {method_frame.routing_key}")
+
+    channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
 
 def on_channel_open(channel):

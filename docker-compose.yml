@@ -67,6 +67,8 @@ services:
       STORAGE_SECRET_KEY: ${STORAGE_WORKER_SECRET_KEY}
       RABBITMQ_USER: worker
       RABBITMQ_PASSWORD: 5Ytge8Xg4gI38sJXmi7q
+      OPENSEARCH_USER: worker
+      OPENSEARCH_PASSWORD: m0nOtnEhob0kSKaZyFbQ
     volumes:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt

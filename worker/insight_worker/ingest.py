@@ -2,6 +2,8 @@ import logging
 import ocrmypdf
 from os import environ as env
 import fitz
+import requests
+from base64 import b64encode
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
@@ -14,7 +16,7 @@ from .storage import get_minio
 from .oauth import OAuth2Session
 from .models import Files, Documents
 
-engine = create_engine(env.get("POSTGRES_URI"), echo=True)
+engine = create_engine(env.get("POSTGRES_URI"))
 
 logging.basicConfig(level=logging.INFO)
 
@@ -37,13 +39,8 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def analyze_file(body):
-    data = body["after"]
-    logging.info(data)
-
-    logging.info(f"Ingesting file {data['id']}")
+def analyze_file(data):
     file_path = Path(TemporaryDirectory().name) / "file.pdf"
-
     minio = get_minio()
     minio.fget_object(env.get("STORAGE_BUCKET"), data["path"], file_path)
 
@@ -65,31 +62,23 @@ def analyze_file(body):
         session.commit()
 
 
-def ingest_document(id):
-    session = OAuth2Session()
-    res = session.get(
-        f"{env.get('API_ENDPOINT')}/documents?select=id,name,path,from_page,to_page,file_id,files(path)&id=eq.{id}"
-    )
-    document = res.json()[0]
-
-    logging.info(
-        f"Extracting pages {document['from_page']} to {document['to_page']} of file {document['file_id']} as document {document['id']}"
-    )
-
+def ingest_document(data):
     temp_path = Path(TemporaryDirectory().name)
     file_path = temp_path / "file.pdf"
     intermediate_path = temp_path / "intermediate.pdf"
     document_path = temp_path / "final.pdf"
 
-    minio = get_minio(session.token["access_token"])
-    minio.fget_object(env.get("STORAGE_BUCKET"), document["files"]["path"], file_path)
+    with Session(engine) as session:
+        stmt = select(Files).where(Files.id == data["file_id"])
+        file = session.scalars(stmt).one()
+
+    minio = get_minio()
+    minio.fget_object(env.get("STORAGE_BUCKET"), file.path, file_path)
 
     # Extract Document from file
     with Pdf.open(file_path) as file_pdf:
         pages = len(file_pdf.pages)
-        for p in chain(
-            range(0, document["from_page"]), range(document["to_page"], pages)
-        ):
+        for p in chain(range(0, data["from_page"]), range(data["to_page"], pages)):
             del file_pdf.pages[p]
         file_pdf.save(intermediate_path)
 
@@ -98,21 +87,18 @@ def ingest_document(id):
     process.start()
     process.join()
 
-    session = OAuth2Session()
-    minio = get_minio(session.token["access_token"])
-    minio.fput_object(env.get("STORAGE_BUCKET"), document["path"], document_path)
-
-    logging.info(f"Generating embeddings for document {document['id']}")
+    minio.fput_object(env.get("STORAGE_BUCKET"), data["path"], document_path)
 
     # fitz is pyMuPDF used for extracting text layers
     document_pdf = fitz.open(document_path)
     # Sort sorts the text nodes by position on the page instead of order in the PDF structure
     page_contents = [page.get_text(sort=True) for page in document_pdf]
 
+    # TODO - Remove embeddings of previous run
     pages = [
         {
-            "file_id": document["file_id"],
-            "index": document["from_page"] + index,
+            "file_id": data["file_id"],
+            "index": data["from_page"] + index,
             "contents": contents,
         }
         for index, contents in enumerate(page_contents)
@@ -120,26 +106,27 @@ def ingest_document(id):
     store_embeddings(pages)
 
     body = {}
-    logging.info(f"Indexing document {document['id']}")
-    body["filename"] = document["name"]
+    logging.info(f"Indexing document {data['id']}")
+    body["filename"] = data["name"]
     body["pages"] = [
-        {"document_id": document["id"], "index": index, "contents": contents}
+        {"document_id": data["id"], "index": index, "contents": contents}
         for index, contents in enumerate(page_contents)
     ]
 
-    res = OAuth2Session().put(
-        f"{env.get('API_ENDPOINT')}/index/_doc/{document['id']}", json=body
+    token = b64encode(
+        f"{env.get('OPENSEARCH_USER')}:{env.get('OPENSEARCH_PASSWORD')}".encode()
+    )
+    headers = {"Authorization": f"Basic {token.decode()}"}
+    res = requests.put(
+        f"{env.get('API_ENDPOINT')}/index/_doc/{data['id']}",
+        headers=headers,
+        json=body,
     )
     if res.status_code != 201:
         raise Exception(res.text)
 
-    res = session.patch(
-        f"{env.get('API_ENDPOINT')}/documents?id=eq.{document['id']}",
-        data={"status": "idle"},
-    )
-    if res.status_code != 204:
-        raise Exception(res.text)
-
-    # TODO - Remove embeddings
-
-    logging.info(f"Done processing of document {id}")
+    with Session(engine) as session:
+        stmt = select(Documents).where(Documents.id == data["id"])
+        document = session.scalars(stmt).one()
+        document.status = "idle"
+        session.commit()
