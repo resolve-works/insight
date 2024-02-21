@@ -48,7 +48,7 @@ CREATE TYPE prompt_status AS enum (
 );
 
 CREATE TABLE IF NOT EXISTS private.prompts (
-    id uuid DEFAULT gen_random_uuid (),
+    id bigserial,
     owner_id uuid NOT NULL,
     query text NOT NULL,
     similarity_top_k integer NOT NULL DEFAULT 3,
@@ -61,12 +61,21 @@ CREATE TABLE IF NOT EXISTS private.prompts (
 
 CREATE TABLE IF NOT EXISTS private.sources (
     id bigserial,
-    prompt_id uuid NOT NULL,
+    prompt_id bigint NOT NULL,
     file_id uuid NOT NULL,
     index integer NOT NULL,
     score float NOT NULL,
     FOREIGN KEY (prompt_id) REFERENCES private.prompts (id) ON DELETE CASCADE,
     FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE CASCADE,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE private.data_page (
+    id bigserial,
+    text character varying NOT NULL,
+    metadata_ json,
+    node_id character varying,
+    embedding vector (1536),
     PRIMARY KEY (id)
 );
 

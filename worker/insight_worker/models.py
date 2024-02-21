@@ -1,55 +1,104 @@
-from sqlalchemy import Column, DateTime, Double, Enum, Integer, MetaData, Table, Text, Uuid
+from typing import Any, List, Optional
 
-metadata = MetaData()
+from sqlalchemy import BigInteger, Computed, DateTime, Double, Enum, ForeignKeyConstraint, Integer, JSON, PrimaryKeyConstraint, String, Text, Uuid, text
+from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, mapped_column, relationship
+from sqlalchemy.sql.sqltypes import NullType
+import datetime
+import uuid
 
-
-t_documents = Table(
-    'documents', metadata,
-    Column('id', Uuid),
-    Column('owner_id', Uuid),
-    Column('file_id', Uuid),
-    Column('path', Text),
-    Column('from_page', Integer),
-    Column('to_page', Integer),
-    Column('name', Text),
-    Column('status', Enum('ingesting', 'idle', name='document_status')),
-    schema='public'
-)
+class Base(MappedAsDataclass, DeclarativeBase):
+    pass
 
 
-t_files = Table(
-    'files', metadata,
-    Column('id', Uuid),
-    Column('owner_id', Uuid),
-    Column('name', Text),
-    Column('path', Text),
-    Column('pages', Integer),
-    Column('status', Enum('uploading', 'analyzing', 'idle', name='file_status')),
-    Column('created_at', DateTime(True)),
-    Column('updated_at', DateTime(True)),
-    schema='public'
-)
+class DataPage(Base):
+    __tablename__ = 'data_page'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='data_page_pkey'),
+        {'schema': 'private'}
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    text_: Mapped[str] = mapped_column('text', String)
+    metadata_: Mapped[Optional[dict]] = mapped_column(JSON)
+    node_id: Mapped[Optional[str]] = mapped_column(String)
+    embedding: Mapped[Optional[Any]] = mapped_column(NullType)
 
 
-t_prompts = Table(
-    'prompts', metadata,
-    Column('id', Uuid),
-    Column('owner_id', Uuid),
-    Column('query', Text),
-    Column('similarity_top_k', Integer),
-    Column('response', Text),
-    Column('status', Enum('answering', 'idle', name='prompt_status')),
-    Column('created_at', DateTime(True)),
-    Column('updated_at', DateTime(True)),
-    schema='public'
-)
+class Files(Base):
+    __tablename__ = 'files'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='files_pkey'),
+        {'schema': 'private'}
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text('gen_random_uuid()'))
+    owner_id: Mapped[uuid.UUID] = mapped_column(Uuid)
+    name: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Enum('uploading', 'analyzing', 'idle', name='file_status'), server_default=text("'uploading'::file_status"))
+    path: Mapped[Optional[str]] = mapped_column(Text, Computed("((((owner_id)::text || '/'::text) || (id)::text) || '.pdf'::text)", persisted=True))
+    pages: Mapped[Optional[int]] = mapped_column(Integer)
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
+
+    documents: Mapped[List['Documents']] = relationship('Documents', back_populates='file')
+    sources: Mapped[List['Sources']] = relationship('Sources', back_populates='file')
 
 
-t_sources = Table(
-    'sources', metadata,
-    Column('prompt_id', Uuid),
-    Column('file_id', Uuid),
-    Column('index', Integer),
-    Column('score', Double(53)),
-    schema='public'
-)
+class Prompts(Base):
+    __tablename__ = 'prompts'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='prompts_pkey'),
+        {'schema': 'private'}
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    owner_id: Mapped[uuid.UUID] = mapped_column(Uuid)
+    query: Mapped[str] = mapped_column(Text)
+    similarity_top_k: Mapped[int] = mapped_column(Integer, server_default=text('3'))
+    status: Mapped[str] = mapped_column(Enum('answering', 'idle', name='prompt_status'), server_default=text("'answering'::prompt_status"))
+    response: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
+
+    sources: Mapped[List['Sources']] = relationship('Sources', back_populates='prompt')
+
+
+class Documents(Base):
+    __tablename__ = 'documents'
+    __table_args__ = (
+        ForeignKeyConstraint(['file_id'], ['private.files.id'], ondelete='RESTRICT', name='documents_file_id_fkey'),
+        PrimaryKeyConstraint('id', name='documents_pkey'),
+        {'schema': 'private'}
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text('gen_random_uuid()'))
+    owner_id: Mapped[uuid.UUID] = mapped_column(Uuid)
+    file_id: Mapped[uuid.UUID] = mapped_column(Uuid)
+    from_page: Mapped[int] = mapped_column(Integer)
+    to_page: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(Enum('ingesting', 'idle', name='document_status'), server_default=text("'idle'::document_status"))
+    name: Mapped[Optional[str]] = mapped_column(Text)
+    path: Mapped[Optional[str]] = mapped_column(Text, Computed("((((((owner_id)::text || '/'::text) || (file_id)::text) || '/'::text) || (id)::text) || '.pdf'::text)", persisted=True))
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
+
+    file: Mapped['Files'] = relationship('Files', back_populates='documents')
+
+
+class Sources(Base):
+    __tablename__ = 'sources'
+    __table_args__ = (
+        ForeignKeyConstraint(['file_id'], ['private.files.id'], ondelete='CASCADE', name='sources_file_id_fkey'),
+        ForeignKeyConstraint(['prompt_id'], ['private.prompts.id'], ondelete='CASCADE', name='sources_prompt_id_fkey'),
+        PrimaryKeyConstraint('id', name='sources_pkey'),
+        {'schema': 'private'}
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    prompt_id: Mapped[int] = mapped_column(BigInteger)
+    file_id: Mapped[uuid.UUID] = mapped_column(Uuid)
+    index: Mapped[int] = mapped_column(Integer)
+    score: Mapped[float] = mapped_column(Double(53))
+
+    file: Mapped['Files'] = relationship('Files', back_populates='sources')
+    prompt: Mapped['Prompts'] = relationship('Prompts', back_populates='sources')
