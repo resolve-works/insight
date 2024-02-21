@@ -37,8 +37,8 @@ def cli():
 
 
 def on_message(channel, method_frame, header_frame, body):
-    # logging.info(method_frame)
-    # logging.info(header_frame)
+    logging.info(method_frame)
+    logging.info(header_frame)
     logging.info(body)
     print(body)
     print()
@@ -46,7 +46,7 @@ def on_message(channel, method_frame, header_frame, body):
 
 
 def on_channel_open(channel):
-    channel.basic_consume("insight_worker", on_message)
+    channel.basic_consume("worker", on_message)
 
 
 def on_open(connection):
