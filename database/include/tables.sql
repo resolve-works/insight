@@ -31,7 +31,7 @@ CREATE TABLE private.documents (
     path text NOT NULL,
     from_page integer NOT NULL,
     to_page integer NOT NULL,
-    status document_status NOT NULL DEFAULT 'idle',
+    status document_status NOT NULL DEFAULT 'ingesting',
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),

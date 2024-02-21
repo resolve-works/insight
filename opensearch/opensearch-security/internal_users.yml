@@ -6,3 +6,8 @@ _meta:
   type: "internalusers"
   config_version: 2
 
+worker:
+  hash: "$2y$12$ZINHctQ0.UfuRsN3MGmyB.GzpDJbHXrShBAuh8.BFTVNyuG4yPePm"
+  reserved: false
+  backend_roles:
+  - "internal_worker"
