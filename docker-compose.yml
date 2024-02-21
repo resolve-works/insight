@@ -90,12 +90,15 @@ services:
       - ./certs/opensearch-key.pem:/usr/share/opensearch/config/opensearch-key.pem
 
   rabbitmq:
-    image: rabbitmq:3
+    image: rabbitmq:3-management
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 3s
     ports:
       - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: insight
+      RABBITMQ_DEFAULT_PASS: insight
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
       - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json

@@ -2,9 +2,17 @@
   "bindings": [
     {
       "arguments": {},
-      "destination": "insight_worker",
+      "destination": "worker",
       "destination_type": "queue",
-      "routing_key": "*",
+      "routing_key": "analyze_file",
+      "source": "insight",
+      "vhost": "/"
+    },
+    {
+      "arguments": {},
+      "destination": "worker",
+      "destination_type": "queue",
+      "routing_key": "ingest_document",
       "source": "insight",
       "vhost": "/"
     }
@@ -22,6 +30,13 @@
   "global_parameters": [],
   "parameters": [],
   "permissions": [
+    {
+      "configure": ".*",
+      "read": ".*",
+      "user": "insight",
+      "vhost": "/",
+      "write": ".*"
+    },
     {
       "configure": ".*",
       "read": ".*",
@@ -43,7 +58,7 @@
       "arguments": {},
       "auto_delete": false,
       "durable": true,
-      "name": "insight_worker",
+      "name": "worker",
       "type": "classic",
       "vhost": "/"
     }
@@ -52,6 +67,15 @@
   "rabbitmq_version": "3.12.12",
   "topic_permissions": [],
   "users": [
+    {
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "limits": {},
+      "name": "insight",
+      "password_hash": "KRo4Dat76FR6etVdo0T7dlZXOd7IoinLrVxWtxl+YiXeijJZ",
+      "tags": [
+        "administrator"
+      ]
+    },
     {
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "limits": {},
