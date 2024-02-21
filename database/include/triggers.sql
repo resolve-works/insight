@@ -3,13 +3,18 @@ CREATE OR REPLACE TRIGGER set_file_owner
     FOR EACH ROW
     EXECUTE FUNCTION set_owner ();
 
+CREATE OR REPLACE TRIGGER set_file_path
+    BEFORE INSERT ON private.files
+    FOR EACH ROW
+    EXECUTE FUNCTION set_file_path ();
+
+CREATE OR REPLACE TRIGGER set_document_path
+    BEFORE INSERT ON private.documents
+    FOR EACH ROW
+    EXECUTE FUNCTION set_document_path ();
+
 CREATE OR REPLACE TRIGGER set_prompt_owner
     BEFORE INSERT ON private.prompts
-    FOR EACH ROW
-    EXECUTE FUNCTION set_owner ();
-
-CREATE OR REPLACE TRIGGER set_document_owner
-    BEFORE INSERT ON private.documents
     FOR EACH ROW
     EXECUTE FUNCTION set_owner ();
 

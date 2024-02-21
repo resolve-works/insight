@@ -25,7 +25,8 @@ GRANT usage ON SCHEMA public TO internal_worker;
 GRANT usage ON SCHEMA private TO internal_worker;
 GRANT usage ON SCHEMA public TO :pg_worker_user;
 GRANT usage ON SCHEMA private TO :pg_worker_user;
-GRANT ALL ON ALL tables IN SCHEMA private TO :pg_worker_user;
+GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA private TO :pg_worker_user;
+GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA public TO :pg_worker_user;
 GRANT usage, SELECT ON ALL sequences IN SCHEMA private TO :pg_worker_user;
 COMMIT;
 

@@ -7,7 +7,7 @@ CREATE TYPE file_status AS ENUM (
 CREATE TABLE IF NOT EXISTS private.files (
     id uuid DEFAULT gen_random_uuid (),
     owner_id uuid NOT NULL,
-    path text GENERATED ALWAYS AS (owner_id::text || '/' || id::text || '.pdf') STORED,
+    path text NOT NULL,
     name text NOT NULL,
     pages integer,
     status file_status NOT NULL DEFAULT 'uploading',
@@ -26,10 +26,9 @@ CREATE TYPE document_status AS ENUM (
 
 CREATE TABLE private.documents (
     id uuid DEFAULT gen_random_uuid (),
-    owner_id uuid NOT NULL,
     file_id uuid NOT NULL,
     name text,
-    path text GENERATED ALWAYS AS (owner_id::text || '/' || file_id::text || '/' || id::text || '.pdf') STORED,
+    path text NOT NULL,
     from_page integer NOT NULL,
     to_page integer NOT NULL,
     status document_status NOT NULL DEFAULT 'idle',

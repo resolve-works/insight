@@ -44,7 +44,7 @@ def on_message(channel, method_frame, header_frame, body):
     match method_frame.routing_key:
         case "analyze_file":
             analyze_file(body)
-    # channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+            channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
 
 def on_channel_open(channel):

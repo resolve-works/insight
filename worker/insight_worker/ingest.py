@@ -7,10 +7,14 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from pikepdf import Pdf
 from itertools import chain
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
 from .vectorstore import store_embeddings
 from .storage import get_minio
 from .oauth import OAuth2Session
+from .models import Files, Documents
 
+engine = create_engine(env.get("POSTGRES_URI"), echo=True)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -34,48 +38,31 @@ def ocrmypdf_process(input_file, output_file):
 
 
 def analyze_file(body):
-    file = body["after"]
+    data = body["after"]
+    logging.info(data)
 
-    logging.info(f"Ingesting file {file['id']}")
+    logging.info(f"Ingesting file {data['id']}")
     file_path = Path(TemporaryDirectory().name) / "file.pdf"
 
     minio = get_minio()
-    minio.fget_object(env.get("STORAGE_BUCKET"), file["path"], file_path)
+    minio.fget_object(env.get("STORAGE_BUCKET"), data["path"], file_path)
 
     with Pdf.open(file_path) as pdf:
         pages = len(pdf.pages)
 
-    res = session.patch(
-        f"{env.get('API_ENDPOINT')}/files?id=eq.{file['id']}",
-        data={"pages": pages, "status": "idle"},
-    )
-    if res.status_code != 204:
-        raise Exception(res.text)
+    with Session(engine) as session:
+        stmt = select(Files).where(Files.id == data["id"])
+        file = session.scalars(stmt).one()
+        file.pages = pages
+        file.status = "idle"
 
-    # We're assuming that file contains 1 document spanning all the pages in the file.
-    res = session.post(
-        f"{env.get('API_ENDPOINT')}/documents",
-        data={
-            "owner_id": file["owner_id"],
-            "file_id": file["id"],
-            "name": file["name"],
-            "from_page": 0,
-            "to_page": pages,
-        },
-        headers={"Prefer": "return=representation"},
-    )
-    if res.status_code != 201:
-        raise Exception(res.text)
-
-    document = res.json()[0]
-    logging.info(f"Created document {document['id']}")
-
-    res = session.post(
-        f"{env.get('API_ENDPOINT')}/rpc/ingest_document",
-        data={"id": document["id"]},
-    )
-    if res.status_code != 204:
-        raise Exception(res.text)
+        document = Documents(
+            name=data["name"],
+            from_page=0,
+            to_page=pages,
+        )
+        file.documents.append(document)
+        session.commit()
 
 
 def ingest_document(id):
@@ -117,7 +104,9 @@ def ingest_document(id):
 
     logging.info(f"Generating embeddings for document {document['id']}")
 
-    document_pdf = fitz.open(document_path)  # open a document
+    # fitz is pyMuPDF used for extracting text layers
+    document_pdf = fitz.open(document_path)
+    # Sort sorts the text nodes by position on the page instead of order in the PDF structure
     page_contents = [page.get_text(sort=True) for page in document_pdf]
 
     pages = [
