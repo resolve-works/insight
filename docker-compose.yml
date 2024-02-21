@@ -138,8 +138,10 @@ services:
     image: minio/minio
     command: server /data
     environment:
-      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
+      MINIO_ROOT_USER: ${STORAGE_ROOT_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${STORAGE_ROOT_SECRET_KEY}
+      MINIO_WORKER_USER: ${STORAGE_WORKER_ACCESS_KEY}
+      MINIO_WORKER_PASSWORD: ${STORAGE_WORKER_SECRET_KEY}
       MINIO_IDENTITY_OPENID_CONFIG_URL: https://secure.ftm.nl/realms/insight/.well-known/openid-configuration
       MINIO_IDENTITY_OPENID_CLAIM_NAME: roles
       MINIO_IDENTITY_OPENID_CLIENT_ID: ${AUTH_CLIENT_ID}
@@ -154,8 +156,10 @@ services:
     entrypoint: /bin/bash
     environment:
       MINIO_ENDPOINT: ${STORAGE_ENDPOINT}
-      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
+      MINIO_ROOT_USER: ${STORAGE_ROOT_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${STORAGE_ROOT_SECRET_KEY}
+      MINIO_WORKER_USER: ${STORAGE_WORKER_ACCESS_KEY}
+      MINIO_WORKER_PASSWORD: ${STORAGE_WORKER_SECRET_KEY}
     volumes:
       - ./minio:/root/minio
       - ./certs/rootCA.pem:/root/.mc/certs/CAs/insight.pem
