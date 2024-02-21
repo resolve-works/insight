@@ -18,7 +18,6 @@ GRANT SELECT, UPDATE ON files TO internal_worker;
 CREATE OR REPLACE VIEW documents AS
 SELECT
     id,
-    owner_id,
     file_id,
     path,
     from_page,
