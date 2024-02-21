@@ -36,9 +36,21 @@ def cli():
     pass
 
 
+def on_message(channel, method_frame, header_frame, body):
+    # logging.info(method_frame)
+    # logging.info(header_frame)
+    logging.info(body)
+    print(body)
+    print()
+    channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+
+
+def on_channel_open(channel):
+    channel.basic_consume("insight_worker", on_message)
+
+
 def on_open(connection):
-    logging.info("Processing messages")
-    pass
+    connection.channel(on_open_callback=on_channel_open)
 
 
 def on_close(connection, exception):
@@ -65,7 +77,7 @@ def process_messages():
     try:
         # Loop so we can communicate with RabbitMQ
         connection.ioloop.start()
-    except KeyboardInterrupt:
+    except SystemExit:
         # Gracefully close the connection
         connection.close()
         # Loop until we're fully closed.

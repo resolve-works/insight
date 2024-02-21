@@ -4,16 +4,8 @@
       "arguments": {},
       "destination": "insight_worker",
       "destination_type": "queue",
-      "routing_key": "",
-      "source": "insight.private.documents",
-      "vhost": "/"
-    },
-    {
-      "arguments": {},
-      "destination": "insight_worker",
-      "destination_type": "queue",
-      "routing_key": "",
-      "source": "insight.private.files",
+      "routing_key": "*",
+      "source": "insight",
       "vhost": "/"
     }
   ],
@@ -22,16 +14,8 @@
       "arguments": {},
       "auto_delete": false,
       "durable": true,
-      "name": "insight.private.files",
-      "type": "topic",
-      "vhost": "/"
-    },
-    {
-      "arguments": {},
-      "auto_delete": false,
-      "durable": true,
-      "name": "insight.private.documents",
-      "type": "topic",
+      "name": "insight",
+      "type": "direct",
       "vhost": "/"
     }
   ],
