@@ -1,5 +1,6 @@
 import click
 import logging
+import json
 from os import environ as env
 from pika import ConnectionParameters, SelectConnection, PlainCredentials
 from .ingest import analyze_file, ingest_document
@@ -37,12 +38,13 @@ def cli():
 
 
 def on_message(channel, method_frame, header_frame, body):
-    logging.info(method_frame)
-    logging.info(header_frame)
+    body = json.loads(body)
     logging.info(body)
-    print(body)
-    print()
-    channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+
+    match method_frame.routing_key:
+        case "analyze_file":
+            analyze_file(body)
+    # channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
 
 def on_channel_open(channel):
@@ -75,7 +77,6 @@ def process_messages():
         on_close_callback=on_close,
     )
     try:
-        # Loop so we can communicate with RabbitMQ
         connection.ioloop.start()
     except SystemExit:
         # Gracefully close the connection

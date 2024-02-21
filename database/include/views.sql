@@ -1,17 +1,50 @@
+CREATE OR REPLACE VIEW files AS
+SELECT
+    id,
+    owner_id,
+    name,
+    path,
+    pages,
+    status,
+    created_at,
+    updated_at
+FROM
+    private.files;
 
-create or replace view files as 
-    select id, owner_id, name, path, pages, status, created_at, updated_at from private.files;
-grant select, insert, update on files to external_user;
-grant select, update on files to internal_worker;
+GRANT SELECT, INSERT, UPDATE ON files TO external_user;
 
-create or replace view documents as 
-    select id, owner_id, file_id, path, from_page, to_page, name, status from private.documents;
-grant select, insert, update on documents to external_user;
-grant select, insert, update, delete on documents to internal_worker;
+GRANT SELECT, UPDATE ON files TO internal_worker;
 
-create or replace view prompts as select * from private.prompts;
-grant select, insert, update on prompts to external_user;
+CREATE OR REPLACE VIEW documents AS
+SELECT
+    id,
+    owner_id,
+    file_id,
+    path,
+    from_page,
+    to_page,
+    name,
+    status
+FROM
+    private.documents;
 
-create or replace view sources as select * from private.sources;
-grant select, insert on sources to external_user;
+GRANT SELECT, INSERT, UPDATE ON documents TO external_user;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO internal_worker;
+
+CREATE OR REPLACE VIEW prompts AS
+SELECT
+    *
+FROM
+    private.prompts;
+
+GRANT SELECT, INSERT, UPDATE ON prompts TO external_user;
+
+CREATE OR REPLACE VIEW sources AS
+SELECT
+    *
+FROM
+    private.sources;
+
+GRANT SELECT, INSERT ON sources TO external_user;
 

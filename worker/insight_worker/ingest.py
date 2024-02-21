@@ -33,15 +33,13 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def analyze_file(id):
-    session = OAuth2Session()
-    res = session.get(f"{env.get('API_ENDPOINT')}/files?id=eq.{id}")
-    file = res.json()[0]
+def analyze_file(body):
+    file = body["after"]
 
     logging.info(f"Ingesting file {file['id']}")
     file_path = Path(TemporaryDirectory().name) / "file.pdf"
 
-    minio = get_minio(session.token["access_token"])
+    minio = get_minio()
     minio.fget_object(env.get("STORAGE_BUCKET"), file["path"], file_path)
 
     with Pdf.open(file_path) as pdf:
