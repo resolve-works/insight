@@ -1,21 +1,29 @@
 
-create or replace function set_updated_at() returns trigger as $$
-begin
-    new.updated_at = current_timestamp;
-    return new;
-end;
-$$ language plpgsql;
+CREATE OR REPLACE FUNCTION set_updated_at ()
+    RETURNS TRIGGER
+    AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$
+LANGUAGE PLPGSQL;
 
-create or replace function set_owner() returns trigger as $$
-declare
-    owner_id uuid := current_setting('request.jwt.claims', true)::json->>'sub';
-begin
-    new.owner_id = owner_id;
-    return new;
-end
-$$ language plpgsql;
+CREATE OR REPLACE FUNCTION set_owner ()
+    RETURNS TRIGGER
+    AS $$
+DECLARE
+    owner_id uuid := current_setting('request.jwt.claims', TRUE)::json ->> 'sub';
+BEGIN
+    NEW.owner_id = owner_id;
+    RETURN new;
+END
+$$
+LANGUAGE PLPGSQL;
 
-create or replace function answer_prompt(id uuid) returns void as $$
+CREATE OR REPLACE FUNCTION answer_prompt (id uuid)
+    RETURNS VOID
+    AS $$
     import os
     from llama_index import VectorStoreIndex
     from llama_index.vector_stores import PGVectorStore
@@ -48,11 +56,24 @@ create or replace function answer_prompt(id uuid) returns void as $$
     for node in response.source_nodes:
         source_data = [id, node.metadata['file_id'], node.metadata['index'], node.get_score()]
         node = plpy.execute(plan, source_data)
-$$ language plpython3u;
-grant execute on function answer_prompt to external_user;
+$$
+LANGUAGE PLPYTHON3U;
 
-create or replace function document(sources) returns setof documents rows 1 as $$
-  select * from documents where file_id = $1.file_id and from_page <= $1.index and to_page > $1.index
-$$ stable language sql;
-grant execute on function document to external_user;
+GRANT EXECUTE ON FUNCTION answer_prompt TO external_user;
+
+CREATE OR REPLACE FUNCTION document (sources)
+    RETURNS SETOF documents ROWS 1
+    AS $$
+    SELECT
+        *
+    FROM
+        documents
+    WHERE
+        file_id = $1.file_id
+        AND from_page <= $1.INDEX
+        AND to_page > $1.INDEX
+$$
+LANGUAGE SQL;
+
+GRANT EXECUTE ON FUNCTION document TO external_user;
 

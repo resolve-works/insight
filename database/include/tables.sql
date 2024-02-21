@@ -1,71 +1,72 @@
+CREATE TYPE file_status AS ENUM (
+    'uploading',
+    'analyzing',
+    'idle'
+);
 
-create type file_status as enum ('uploading', 'analyzing', 'idle');
-
-create table if not exists private.files (
-    id uuid default gen_random_uuid(),
-    owner_id uuid not null,
-
-    path text generated always as (owner_id::text || '/' || id::text || '.pdf') stored,
-    name text not null,
+CREATE TABLE IF NOT EXISTS private.files (
+    id uuid DEFAULT gen_random_uuid (),
+    owner_id uuid NOT NULL,
+    path text GENERATED ALWAYS AS (owner_id::text || '/' || id::text || '.pdf') STORED,
+    name text NOT NULL,
     pages integer,
-
-    status file_status not null default 'uploading',
-
-    created_at timestamp with time zone default current_timestamp,
-    updated_at timestamp with time zone default current_timestamp,
-
-    primary key (id)
+    status file_status NOT NULL DEFAULT 'uploading',
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
 );
-alter table private.files replica identity full;
 
-create type document_status as enum ('ingesting', 'idle');
+ALTER TABLE private.files REPLICA IDENTITY
+    FULL;
 
-create table private.documents (
-    id uuid default gen_random_uuid(),
-    owner_id uuid not null,
-    file_id uuid not null,
+CREATE TYPE document_status AS ENUM (
+    'ingesting',
+    'idle'
+);
 
+CREATE TABLE private.documents (
+    id uuid DEFAULT gen_random_uuid (),
+    owner_id uuid NOT NULL,
+    file_id uuid NOT NULL,
     name text,
-    path text generated always as (owner_id::text || '/' || file_id::text || '/' || id::text || '.pdf') stored,
-    from_page integer not null,
-    to_page integer not null,
-
-    status document_status not null default 'idle',
-
-    created_at timestamp with time zone default current_timestamp,
-    updated_at timestamp with time zone default current_timestamp,
-
-    primary key (id),
-    foreign key (file_id) references private.files (id) on delete restrict
+    path text GENERATED ALWAYS AS (owner_id::text || '/' || file_id::text || '/' || id::text || '.pdf') STORED,
+    from_page integer NOT NULL,
+    to_page integer NOT NULL,
+    status document_status NOT NULL DEFAULT 'idle',
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE RESTRICT
 );
-alter table private.documents replica identity full;
 
-create type prompt_status as enum ('answering', 'idle');
+ALTER TABLE private.documents REPLICA IDENTITY
+    FULL;
 
-create table if not exists private.prompts (
-    id uuid default gen_random_uuid(),
-    owner_id uuid not null,
+CREATE TYPE prompt_status AS enum (
+    'answering',
+    'idle'
+);
 
-    query text not null,
-    similarity_top_k integer not null default 3,
+CREATE TABLE IF NOT EXISTS private.prompts (
+    id uuid DEFAULT gen_random_uuid (),
+    owner_id uuid NOT NULL,
+    query text NOT NULL,
+    similarity_top_k integer NOT NULL DEFAULT 3,
     response text,
-
-    status prompt_status not null default 'answering',
-
-    created_at timestamp with time zone default current_timestamp,
-    updated_at timestamp with time zone default current_timestamp,
-
-    primary key (id)
+    status prompt_status NOT NULL DEFAULT 'answering',
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
 );
 
-
-create table if not exists private.sources (
-    prompt_id uuid not null,
-    file_id uuid not null,
-    index integer not null,
-    score float not null,
-
-    foreign key (prompt_id) references private.prompts(id) on delete cascade,
-    foreign key (file_id) references private.files(id) on delete cascade
+CREATE TABLE IF NOT EXISTS private.sources (
+    id bigserial,
+    prompt_id uuid NOT NULL,
+    file_id uuid NOT NULL,
+    index integer NOT NULL,
+    score float NOT NULL,
+    FOREIGN KEY (prompt_id) REFERENCES private.prompts (id) ON DELETE CASCADE,
+    FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE CASCADE,
+    PRIMARY KEY (id)
 );
 
