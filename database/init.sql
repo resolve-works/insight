@@ -21,6 +21,7 @@ CREATE ROLE :pg_worker_user noinherit LOGIN PASSWORD :'pg_worker_password';
 \ir include/triggers.sql
 GRANT usage ON SCHEMA public TO external_user;
 GRANT usage ON SCHEMA private TO external_user;
+GRANT usage, SELECT ON ALL sequences IN SCHEMA private TO external_user;
 GRANT usage ON SCHEMA public TO :pg_worker_user;
 GRANT usage ON SCHEMA private TO :pg_worker_user;
 GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA private TO :pg_worker_user;

@@ -48,5 +48,12 @@ export class Insight {
             throw new Error(`Could not patch ${path}: ${response.text}`)
         }
     }
+
+    async rpc(path: string, id: string) {
+        const response = await this.fetch(`/rpc${path}`, { method: 'POST', body: { id }})
+        if(response.status != 204) {
+            throw new Error(`Could not trigger ${path}: ${response.text}`)
+        }
+    }
 }
 
