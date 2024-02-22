@@ -24,18 +24,13 @@ use to communicate. We use [Keycloak](https://www.keycloak.org/). If Keycloak
 hasn't been configured yet:
 - Create a realm `insight`.
 - Create a client `insight` with device auth flow enabled. Under this client,
-  create the roles: `external_user` and `internal_worker`.
+  create the role: `external_user`.
 - Edit the "Client Scope" `roles`, add a "User Client Role" mapper to it "by
   configuration". Name the mapper `insight roles`, select the `insight` client.
   Set `roles` for "Token Claim Name" and make sure "Multivalued" and "Add to
   access token" are enabled.
-- Create a client `insight_worker` with service account flow enabled. Under this
-  clients "Service account role" menu, assign `insight:internal_worker`.
 - Under the realm settings, assign the `insight:external_user` and
   `account:view-groups` roles to the "Default roles" under "User registration".
-
-When keycloak has been configured you should save the "client credentials" of the
-`insight_worker` client to your `.env` file as `AUTH_CLIENT_SECRET`.
 
 Insights services need to know about the certificates the auth provider uses to
 validate the authentication tokens. To supply your `docker-compose` environment
