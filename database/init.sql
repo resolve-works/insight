@@ -7,13 +7,13 @@ CREATE SCHEMA IF NOT EXISTS private;
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS plpython3u;
 ALTER DEFAULT privileges REVOKE EXECUTE ON functions FROM public;
-CREATE ROLE external_anonymous nologin;
-CREATE ROLE external_user nologin;
-CREATE ROLE internal_worker nologin;
+-- Roles PostgREST can switch to based on JWT claims
 CREATE ROLE :pg_api_user noinherit LOGIN PASSWORD :'pg_api_password';
+CREATE ROLE external_anonymous nologin;
 GRANT external_anonymous TO :pg_api_user;
+CREATE ROLE external_user nologin;
 GRANT external_user TO :pg_api_user;
-GRANT internal_worker TO :pg_api_user;
+-- Role for worker processes
 CREATE ROLE :pg_worker_user noinherit LOGIN PASSWORD :'pg_worker_password';
 \ir include/tables.sql
 \ir include/views.sql
@@ -21,8 +21,6 @@ CREATE ROLE :pg_worker_user noinherit LOGIN PASSWORD :'pg_worker_password';
 \ir include/triggers.sql
 GRANT usage ON SCHEMA public TO external_user;
 GRANT usage ON SCHEMA private TO external_user;
-GRANT usage ON SCHEMA public TO internal_worker;
-GRANT usage ON SCHEMA private TO internal_worker;
 GRANT usage ON SCHEMA public TO :pg_worker_user;
 GRANT usage ON SCHEMA private TO :pg_worker_user;
 GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA private TO :pg_worker_user;
