@@ -1,11 +1,11 @@
 import click
 import logging
 import json
+import requests
 from os import environ as env
 from pika import ConnectionParameters, SelectConnection, PlainCredentials
 from .ingest import analyze_file, ingest_document
-from .delete import delete_document
-from .oauth import OAuth2Session
+from .opensearch import headers
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,9 +14,10 @@ logging.basicConfig(level=logging.INFO)
 def create_mapping():
     logging.info("Creating index")
 
-    res = OAuth2Session().put(
+    res = requests.put(
         f"{env.get('API_ENDPOINT')}/index",
         json={"mappings": {"properties": {"pages": {"type": "nested"}}}},
+        headers=headers,
     )
 
     if res.status_code == 200:

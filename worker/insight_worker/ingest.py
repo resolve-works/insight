@@ -3,7 +3,6 @@ import ocrmypdf
 from os import environ as env
 import fitz
 import requests
-from base64 import b64encode
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
@@ -12,13 +11,13 @@ from itertools import chain
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from .vectorstore import store_embeddings
-from .storage import get_minio
-from .oauth import OAuth2Session
+from .storage import minio
 from .models import Files, Documents
-
-engine = create_engine(env.get("POSTGRES_URI"))
+from .opensearch import headers
 
 logging.basicConfig(level=logging.INFO)
+
+engine = create_engine(env.get("POSTGRES_URI"))
 
 
 def ocrmypdf_process(input_file, output_file):
@@ -40,8 +39,9 @@ def ocrmypdf_process(input_file, output_file):
 
 
 def analyze_file(data):
+    logging.info(f"Analyzing file {data['id']}")
+
     file_path = Path(TemporaryDirectory().name) / "file.pdf"
-    minio = get_minio()
     minio.fget_object(env.get("STORAGE_BUCKET"), data["path"], file_path)
 
     with Pdf.open(file_path) as pdf:
@@ -63,6 +63,8 @@ def analyze_file(data):
 
 
 def ingest_document(data):
+    logging.info(f"Ingesting document {data['id']}")
+
     temp_path = Path(TemporaryDirectory().name)
     file_path = temp_path / "file.pdf"
     intermediate_path = temp_path / "intermediate.pdf"
@@ -72,7 +74,6 @@ def ingest_document(data):
         stmt = select(Files).where(Files.id == data["file_id"])
         file = session.scalars(stmt).one()
 
-    minio = get_minio()
     minio.fget_object(env.get("STORAGE_BUCKET"), file.path, file_path)
 
     # Extract Document from file
@@ -106,17 +107,12 @@ def ingest_document(data):
     store_embeddings(pages)
 
     body = {}
-    logging.info(f"Indexing document {data['id']}")
     body["filename"] = data["name"]
     body["pages"] = [
         {"document_id": data["id"], "index": index, "contents": contents}
         for index, contents in enumerate(page_contents)
     ]
 
-    token = b64encode(
-        f"{env.get('OPENSEARCH_USER')}:{env.get('OPENSEARCH_PASSWORD')}".encode()
-    )
-    headers = {"Authorization": f"Basic {token.decode()}"}
     res = requests.put(
         f"{env.get('API_ENDPOINT')}/index/_doc/{data['id']}",
         headers=headers,
@@ -130,3 +126,17 @@ def ingest_document(data):
         document = session.scalars(stmt).one()
         document.status = "idle"
         session.commit()
+
+
+def delete_document(data):
+    logging.info(f"Deleting document {data['id']}")
+
+    # Remove file from object storage
+    minio.remove_object(env.get("STORAGE_BUCKET"), data["path"])
+
+    # Remove indexed contents
+    res = requests.delete(
+        f"{env.get('API_ENDPOINT')}/index/_doc/{data['id']}", headers=headers
+    )
+    if res.status_code != 200:
+        raise Exception(res.text)

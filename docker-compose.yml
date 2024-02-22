@@ -54,11 +54,7 @@ services:
     environment:
       SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
-      # Needed for vector store at the moment, move to postgrest vector store
       POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres:5432/insight
-      AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
-      AUTH_CLIENT_ID: ${AUTH_WORKER_CLIENT_ID}
-      AUTH_CLIENT_SECRET: ${AUTH_WORKER_CLIENT_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       API_ENDPOINT: ${API_ENDPOINT}
       STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
