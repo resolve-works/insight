@@ -21,6 +21,7 @@ export const test = baseTest.extend<{}, { workerStorageState: string }>({
 
     // Perform authentication steps. Replace these actions with your own.
     await page.goto('https://insight:8080');
+    // This 'test' user should exist in the insight_test OIDC realm
     await page.getByLabel('Username or email').fill('test')
     await page.getByLabel('Password').fill('test');
     await page.getByRole('button', { name: 'Sign In' }).click();
