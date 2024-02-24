@@ -1,6 +1,6 @@
 
 <span>
-    <i {...$$props} />
+    <i role={$$props.class == 'gg-loadbar' ? 'progressbar' : ''} {...$$props} />
 </span>
 
 <style>

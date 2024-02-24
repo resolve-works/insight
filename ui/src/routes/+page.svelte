@@ -6,7 +6,7 @@
 
 
 <Page>
-    <h1>Insight FOIA search</h1>
+    <h1>Search documents</h1>
     <Search />
 </Page>
 
