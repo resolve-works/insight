@@ -87,7 +87,12 @@ def ingest_document(data):
     # Extract Document from file
     with Pdf.open(file_path) as file_pdf:
         pages = len(file_pdf.pages)
-        for p in chain(range(0, data["from_page"]), range(data["to_page"], pages)):
+        before_range = range(0, data["from_page"])
+        after_range = range(data["to_page"], pages)
+        pages_to_delete = before_range + after_range
+        # Reverse the range to remove last page first as the document shrinks
+        # when removing pages, leading to IndexErrors otherwise
+        for p in reversed(pages_to_delete):
             del file_pdf.pages[p]
         file_pdf.save(intermediate_path)
 

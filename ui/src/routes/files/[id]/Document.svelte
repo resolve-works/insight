@@ -39,7 +39,7 @@
 <div class="embed">
     <input 
         type="text" 
-        placeholder="Document name (leave empty to generate)"
+        placeholder="Document name"
         disabled={is_disabled}
         on:change={() => $changed = $changed}
         bind:value={document.changes.name}

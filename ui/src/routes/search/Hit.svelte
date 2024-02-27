@@ -7,11 +7,17 @@
 </script>
 
 <Card>
-    <h3>{filename}</h3>
+    <h3>
+        {#if filename}
+            {filename}
+        {:else}
+            <span class="unnamed">Unnamed document</span>
+        {/if}
+    </h3>
 
     {#each pages as page}
-        <a href="{page.url}">
-            <span>
+        <a href="{page.url.toString()}">
+            <span class="index">
                 <Icon class="gg-file" />
                 {page.index}
             </span>
@@ -26,7 +32,11 @@
 </Card>
 
 <style>
-    span {
+    .unnamed {
+        color: var(--text-color-page);
+    }
+
+    .index {
         display: grid;
         height: 2rem;
         grid-template-columns: 2rem auto;

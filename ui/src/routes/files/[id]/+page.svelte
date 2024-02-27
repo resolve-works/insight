@@ -40,11 +40,9 @@
             if('id' in document.original) {
                 // Existing documents
                 await insight.patch('/documents', document.original.id, changes)
-                await insight.rpc('/ingest_document', document.original.id)
             } else {
                 // New documents
-                const { id } = await insight.post('/documents', { ...changes, file_id: data.file_id, })
-                await insight.rpc('/ingest_document', id)
+                await insight.post('/documents', { ...changes, file_id: data.file_id, })
             }
         }
 
