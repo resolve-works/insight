@@ -49,6 +49,14 @@ export class Insight {
         }
     }
 
+    async delete(path: string, id: string) {
+        path = `${path}?id=eq.${id}`;
+        const response = await this.fetch(path, { method: 'DELETE' })
+        if(response.status != 204) {
+            throw new Error(`Could not delete ${path}: ${response.text}`)
+        }
+    }
+
     async rpc(path: string, id: string) {
         const response = await this.fetch(`/rpc${path}`, { method: 'POST', body: { id }})
         if(response.status != 204) {

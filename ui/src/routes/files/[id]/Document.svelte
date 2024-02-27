@@ -23,8 +23,7 @@
     }
 
     async function remove() {
-        // Mark model for deletion
-        await insight.patch('/documents', document.original.id, { status: 'deleting' })
+        await insight.delete('/documents', document.original.id)
         invalidate(url => url.pathname == '/api/v1/documents')
     }
 

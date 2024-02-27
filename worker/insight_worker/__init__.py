@@ -4,7 +4,7 @@ import json
 import requests
 from os import environ as env
 from pika import ConnectionParameters, SelectConnection, PlainCredentials
-from .ingest import analyze_file, ingest_document
+from .tasks import analyze_file, ingest_document, delete_file, delete_document
 from .opensearch import headers
 
 logging.basicConfig(level=logging.INFO)
@@ -40,13 +40,16 @@ def cli():
 
 def on_message(channel, method_frame, header_frame, body):
     body = json.loads(body)
-    after = body["after"]
 
     match method_frame.routing_key:
         case "analyze_file":
-            analyze_file(after)
+            analyze_file(body["after"])
+        case "delete_file":
+            delete_file(body["before"])
         case "ingest_document":
-            ingest_document(after)
+            ingest_document(body["after"])
+        case "delete_document":
+            delete_document(body["before"])
         case _:
             raise Exception(f"Unknown routing key: {method_frame.routing_key}")
 

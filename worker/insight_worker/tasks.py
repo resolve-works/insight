@@ -3,6 +3,8 @@ import ocrmypdf
 from os import environ as env
 import fitz
 import requests
+from minio import Minio
+from urllib.parse import urlparse
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
 from pathlib import Path
@@ -11,13 +13,19 @@ from itertools import chain
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from .vectorstore import store_embeddings
-from .storage import minio
 from .models import Files, Documents
 from .opensearch import headers
 
 logging.basicConfig(level=logging.INFO)
 
 engine = create_engine(env.get("POSTGRES_URI"))
+
+minio = Minio(
+    urlparse(env.get("STORAGE_ENDPOINT")).netloc,
+    access_key=env.get("STORAGE_ACCESS_KEY"),
+    secret_key=env.get("STORAGE_SECRET_KEY"),
+    region="insight",
+)
 
 
 def ocrmypdf_process(input_file, output_file):
@@ -126,6 +134,13 @@ def ingest_document(data):
         document = session.scalars(stmt).one()
         document.status = "idle"
         session.commit()
+
+
+def delete_file(data):
+    logging.info(f"Deleting file {data['id']}")
+
+    # Remove file from object storage
+    minio.remove_object(env.get("STORAGE_BUCKET"), data["path"])
 
 
 def delete_document(data):
