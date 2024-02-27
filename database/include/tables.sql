@@ -35,7 +35,7 @@ CREATE TABLE private.documents (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE RESTRICT
+    FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE CASCADE
 );
 
 ALTER TABLE private.documents REPLICA IDENTITY

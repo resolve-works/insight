@@ -11,7 +11,7 @@ SELECT
 FROM
     private.files;
 
-GRANT SELECT, INSERT, UPDATE ON files TO external_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON files TO external_user;
 
 CREATE OR REPLACE VIEW documents AS
 SELECT
@@ -25,7 +25,7 @@ SELECT
 FROM
     private.documents;
 
-GRANT SELECT, INSERT, UPDATE ON documents TO external_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO external_user;
 
 CREATE OR REPLACE VIEW prompts AS
 SELECT
