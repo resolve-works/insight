@@ -13,7 +13,7 @@
     // TODO - Poor mans event system
     onMount(() => {
         const interval = setInterval(() => {
-            invalidate(url => url.pathname == '/api/v1/files')
+            invalidate('api:files')
         }, 3000)
 
         return () => {

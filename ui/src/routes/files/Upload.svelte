@@ -39,7 +39,7 @@
             // TODO - Proper error handling. The web is unstable, uploads fail
 
             uploads.update(uploads => uploads.filter(f => f != upload))
-            invalidate(url => url.pathname == '/api/v1/files')
+            invalidate('api:files')
         });
 
         xhr.open("PUT", url, true);

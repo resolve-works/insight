@@ -80,7 +80,12 @@ export async function handle({event, resolve}) {
     throw auth_redirect(event)
 }
 
-export const handleFetch: HandleFetch = async ({ request, fetch }) => {
-    console.log('fetchin')
+export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
+    const url = new URL(request.url)
+
+    if(url.pathname.startsWith('/api/v1')) {
+        request.headers.append('Authorization', 'Bearer ' + event.locals.access_token)
+    }
+
 	return fetch(request);
 };

@@ -7,19 +7,19 @@
     import Document from './Document.svelte';
     import { existing, changed, created, documents } from './stores.ts'
     import { page } from '$app/stores';
+    import { enhance } from '$app/forms';
     import type { Insight } from '$lib/insight.ts';
 
     export let data;
     $: $existing = data.documents;
     $: is_changed = $documents.some(document => document.is_changed)
-    let is_disabled = false;
 
     const insight: Insight = getContext('insight');
 
     // TODO - Poor mans event system
     onMount(() => {
-        const interval = setInterval(() => {
-            invalidate(url => url.pathname == '/api/v1/documents')
+        const interval = setInterval(async () => {
+            await invalidate('api:files')
         }, 3000)
 
         return () => {
@@ -28,32 +28,9 @@
     })
 
     async function store() {
-        is_disabled = true;
-
-        for(const document of $documents.filter(document => document.is_changed)) {
-            const changes = {
-                ...document.changes,
-                // Pages are 0 indexed in database, 1 indexed in inputs as to not confuse the humans
-                from_page: document.changes.from_page - 1,
-            }
-
-            if('id' in document.original) {
-                // Existing documents
-                await insight.patch('/documents', document.original.id, changes)
-            } else {
-                // New documents
-                await insight.post('/documents', { ...changes, file_id: data.file_id, })
-            }
-        }
-
-        // Get new list of documents
-        await invalidate(url => url.pathname == '/api/v1/documents')
-
         // Clear stores that track form state
         $changed = {};
         $created = [];
-
-        is_disabled = false;
     }
 
     function add() {
@@ -74,16 +51,17 @@
         {/if}
     </header>
 
-    <div class="documents">
+    <form method="POST" action="?/store" use:enhance on:submit={store}>
         {#each $documents as document}
             <Document {document} pages={data.pages} />
         {/each}
 
-        <button on:click={add}>Add split</button>
+        <!--TODO progressive enhance-->
+        <button on:click|preventDefault={add}>Add split</button>
         {#if is_changed}
-            <button class="secondary" disabled={is_disabled} on:click={store}>Store changes</button>
+            <button class="secondary">Store changes</button>
         {/if}
-    </div>
+    </form>
 </aside>
 
 <style>

@@ -1,17 +1,13 @@
 
 <script lang="ts">
-    import { getContext } from 'svelte';
     import Icon from '$lib/Icon.svelte';
-    import { invalidate } from '$app/navigation';
+    import { enhance } from '$app/forms';
     import { created, changed } from './stores.ts'
     import type { DocumentInput } from './stores.ts'
     import { ssp, queryParam } from 'sveltekit-search-params'
-    import type { Insight } from '$lib/insight.ts'; 
-    
+
     export let pages: number
     export let document: DocumentInput;
-    
-    const insight: Insight = getContext('insight');
 
     // Document can be editted when it's new, or when it's not being ingested
     $: is_disabled = 'status' in document.original && document.original.status != 'idle'
@@ -20,11 +16,6 @@
     async function go_to_page(e: Event) {
         $page = parseInt((e.target as HTMLInputElement).value)
         $changed = $changed;
-    }
-
-    async function remove() {
-        await insight.delete('/documents', document.original.id)
-        invalidate(url => url.pathname == '/api/v1/documents')
     }
 
     function cancel_adding() {
@@ -37,10 +28,13 @@
 </script>
 
 <div class="embed">
+    <input type="hidden" name="id" disabled={is_disabled} value={document.original.id || ''} />
+
     <input 
         type="text" 
         placeholder="Document name"
         disabled={is_disabled}
+        name="name"
         on:change={() => $changed = $changed}
         bind:value={document.changes.name}
         class:changed={document.changes.name != document.original.name} 
@@ -52,6 +46,7 @@
             bind:value={document.changes.from_page} 
             on:change={go_to_page}
             disabled={is_disabled}
+            name="from_page"
             class:changed={document.changes.from_page != document.original.from_page} 
             min="1" 
             max={document.changes.to_page} 
@@ -62,6 +57,7 @@
             bind:value={document.changes.to_page} 
             on:change={go_to_page}
             disabled={is_disabled}
+            name="to_page"
             class:changed={document.changes.to_page != document.original.to_page} 
             min={document.changes.from_page}
             max={pages} 
@@ -76,7 +72,10 @@
                 {#if document.is_changed}
                     <button class="outline" on:click={cancel_changes}>Cancel changes</button>
                 {:else}
-                    <button class="outline" on:click={remove}>Remove</button>
+                    <form method="POST" action="?/remove" use:enhance>
+                        <input type="hidden" name="id" value={document.original.id} />
+                        <button class="outline">Remove</button>
+                    </form>
                 {/if}
             {/if}
         {:else}

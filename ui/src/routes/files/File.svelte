@@ -2,6 +2,7 @@
 <script lang=ts>
     import { getContext } from 'svelte';
     import { invalidate } from '$app/navigation';
+    import { enhance } from '$app/forms';
     import type { Insight } from '$lib/insight.ts'; 
     import Card from '$lib/Card.svelte';
     import Icon from '$lib/Icon.svelte';
@@ -14,11 +15,6 @@
     const insight: Insight = getContext('insight');
 
     $: is_idle = status == 'idle' && documents.every(document => document.status == 'idle');
-
-    async function remove() {
-        await insight.delete('/files', id)
-        invalidate(url => url.pathname == '/api/v1/files')
-    }
 </script>
 
 <Card>
@@ -30,9 +26,10 @@
         {#if ! is_idle}
             <Icon class="gg-loadbar" />
         {:else}
-            <button on:click={remove}>
-                <Icon class="gg-trash" />
-            </button>
+            <form method="POST" action="?/remove" use:enhance>
+                <input type="hidden" name="id" value={id} />
+                <button><Icon class="gg-trash" /></button>
+            </form>
         {/if}
     </h3>
 
