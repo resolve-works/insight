@@ -37,6 +37,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"amqplib": "^0.10.3",
 		"rollup": "^4.12.0"
 	}
 }

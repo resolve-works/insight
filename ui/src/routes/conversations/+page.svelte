@@ -32,12 +32,10 @@
     }
 
     onMount(() => {
-        console.log('mount')
         getEvents();
     })
 
     onDestroy(() => {
-        console.log('destroy')
         ac.abort(new StreamAbortedError());
     });
 </script>

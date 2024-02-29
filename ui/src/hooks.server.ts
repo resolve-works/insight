@@ -1,6 +1,5 @@
 
 import { env } from '$env/dynamic/public';
-import { XMLParser } from 'fast-xml-parser';
 import { redirect } from '@sveltejs/kit';
 import type { RequestEvent, HandleFetch } from '@sveltejs/kit';
 
