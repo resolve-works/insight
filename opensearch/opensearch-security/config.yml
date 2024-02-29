@@ -11,10 +11,19 @@ config:
       xff:
         enabled: false
     authc:
-      openid_auth_domain:
+      basic_internal_auth_domain:
         http_enabled: true
         transport_enabled: true
         order: 0
+        http_authenticator:
+          type: basic
+          challenge: false
+        authentication_backend:
+          type: internal
+      openid_auth_domain:
+        http_enabled: true
+        transport_enabled: true
+        order: 1
         http_authenticator:
           type: openid
           challenge: false
@@ -24,12 +33,3 @@ config:
             openid_connect_url: https://secure.ftm.nl/realms/insight/.well-known/openid-configuration
         authentication_backend:
           type: noop
-      basic_internal_auth_domain:
-        http_enabled: true
-        transport_enabled: true
-        order: 1
-        http_authenticator:
-          type: basic
-          challenge: false
-        authentication_backend:
-          type: internal
