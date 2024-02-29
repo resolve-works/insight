@@ -1,9 +1,6 @@
 
 <script lang=ts>
-    import { getContext } from 'svelte';
-    import { invalidate } from '$app/navigation';
     import { enhance } from '$app/forms';
-    import type { Insight } from '$lib/insight.ts'; 
     import Card from '$lib/Card.svelte';
     import Icon from '$lib/Icon.svelte';
 
@@ -11,8 +8,6 @@
     export let name: string;
     export let status: string;
     export let documents: { id: string, name: string, status: string }[] = []
-
-    const insight: Insight = getContext('insight');
 
     $: is_idle = status == 'idle' && documents.every(document => document.status == 'idle');
 </script>

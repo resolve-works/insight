@@ -1,6 +1,6 @@
 
 <script lang="ts">
-    import { onMount, getContext } from 'svelte';
+    import { onMount } from 'svelte';
     import { invalidate } from '$app/navigation';
     import Page from '$lib/Page.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
@@ -8,13 +8,10 @@
     import { existing, changed, created, documents } from './stores.ts'
     import { page } from '$app/stores';
     import { enhance } from '$app/forms';
-    import type { Insight } from '$lib/insight.ts';
 
     export let data;
     $: $existing = data.documents;
     $: is_changed = $documents.some(document => document.is_changed)
-
-    const insight: Insight = getContext('insight');
 
     // TODO - Poor mans event system
     onMount(() => {

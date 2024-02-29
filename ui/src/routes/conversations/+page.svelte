@@ -1,37 +1,11 @@
 
 <script lang="ts">
-    import { getContext } from 'svelte'; 
     import Page from '$lib/Page.svelte'
     import Card from '$lib/Card.svelte'
     import Icon from '$lib/Icon.svelte'
-    import { invalidate } from '$app/navigation';
-    import { tick } from 'svelte';
-    import type { Insight } from '$lib/insight.js';
-
-    let query_input: HTMLInputElement;
+    import { enhance } from '$app/forms';
 
     export let data;
-    let is_disabled = false
-
-    const insight: Insight = getContext('insight')
-
-    async function create_prompt(e: SubmitEvent) {
-        let form_data = new FormData(e.target);
-        // Strip empty keys
-        let data = Object.fromEntries(Array.from(form_data).filter(([key, value]) => !!value))
-        is_disabled = true;
-        
-        const prompt = await insight.post('/prompts', data)
-        // Clear form
-        e.target.reset()
-        await invalidate(url => url.pathname == '/api/v1/prompts')
-        await insight.rpc('/answer_prompt', prompt.id)
-        await invalidate(url => url.pathname == '/api/v1/prompts')
-        is_disabled = false
-        // Focus won't work on disabled inputs, wait for tick
-        await tick();
-        query_input.focus()
-    }
 </script>
 
 <Page>
@@ -78,10 +52,10 @@
             {/each}
         </div>
 
-        <form on:submit|preventDefault={create_prompt}>
-            <input type="text" bind:this={query_input} disabled={is_disabled} name="query" placeholder="What's your question?">
-            <input type="number" disabled={is_disabled} name="similarity_top_k" placeholder="Pages (default: 3)" min="0">
-            <input type="submit" disabled={is_disabled} value="Prompt" class="primary">
+        <form method="POST" use:enhance>
+            <input type="text" name="query" placeholder="What's your question?">
+            <input type="number" name="similarity_top_k" placeholder="Pages (default: 3)" min="0">
+            <input type="submit" value="Prompt" class="primary">
         </form>
     </div>
 </Page>
