@@ -93,6 +93,7 @@ services:
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 3s
+      timeout: 30s
     ports:
       - 15672:15672
     environment:

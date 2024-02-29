@@ -2,7 +2,9 @@
 import { env } from '$env/dynamic/public';
 import { XMLParser } from 'fast-xml-parser';
 import { redirect } from '@sveltejs/kit';
-import type { RequestEvent } from '@sveltejs/kit';
+import type { RequestEvent, HandleFetch } from '@sveltejs/kit';
+
+import { get_tokens_through_refresh, get_storage_tokens, InvalidRefreshTokenError } from '$lib/auth.ts';
 
 function auth_redirect(event: RequestEvent) {
     // No code or previous token, redirect to login
@@ -44,7 +46,7 @@ export async function handle({event, resolve}) {
         const tokens = await token_response.json();
         event.cookies.set('refresh_token', tokens.refresh_token, { path: '/' })
 
-        // redirect
+        // redirect to clear URL of params
         event.url.searchParams.delete('code');
         event.url.searchParams.delete('session_state');
         throw redirect(307, event.url)
@@ -53,52 +55,32 @@ export async function handle({event, resolve}) {
     // No code, do we have a refresh token?
     const refresh_token = event.cookies.get('refresh_token')
     if(refresh_token !== undefined) {
-        const data = { 
-            grant_type: 'refresh_token', 
-            client_id: env.PUBLIC_OIDC_CLIENT_ID, 
-            refresh_token, 
-            scope: 'profile email', 
+        try {
+            const tokens = await get_tokens_through_refresh(refresh_token)
+            const storage_tokens = await get_storage_tokens(tokens.access_token)
+            event.locals = { access_token: tokens.access_token, ...storage_tokens }
+
+            // Refresh token was good, store new response
+            event.cookies.set('refresh_token', tokens.refresh_token, { path: '/' })
+
+            // Resolve event with new tokens
+            return resolve(event)
+        } catch(error) {
+            if(error instanceof InvalidRefreshTokenError) {
+                // Remove stale token and redirect to login
+                event.cookies.delete('refresh_token', { path: '/' })
+                throw auth_redirect(event)
+            } else {
+                throw error;
+            }
         }
 
-        const token_response = await fetch(env.PUBLIC_OIDC_ENDPOINT + '/token', {
-            method: 'post',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams(data).toString(),
-        })
-
-        // Refresh token failed, remove & re-login
-        if(token_response.status === 400) {
-            event.cookies.delete('refresh_token')
-            throw auth_redirect(event)
-        }
-
-        // Everything good, store access token for access to API & search index
-        const tokens = await token_response.json();
-        event.cookies.set('refresh_token', tokens.refresh_token, { path: '/' })
-        event.locals.access_token = tokens.access_token;
-
-        // Parse token payload and remember user ID
-        // Convert base64URL JWT payload to normal base64
-        //const payload = event.locals.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        //const payload_data = JSON.parse(atob(payload))
-        //event.locals.sub = payload_data.sub;
-
-        // Fetch timed S3 credentials
-        const url = new URL(env.PUBLIC_STORAGE_ENDPOINT)
-        url.searchParams.set("Action", "AssumeRoleWithWebIdentity")
-        url.searchParams.set("Version", "2011-06-15")
-        url.searchParams.set("DurationSeconds", "3600")
-        url.searchParams.set("WebIdentityToken", tokens.access_token)
-        const s3_response = await fetch(url, { method: 'post' })
-
-        const parser = new XMLParser();
-        const body = parser.parse(await s3_response.text());
-        const { AccessKeyId: access_key_id, SecretAccessKey: secret_access_key, SessionToken: session_token } 
-            = body.AssumeRoleWithWebIdentityResponse.AssumeRoleWithWebIdentityResult.Credentials;
-        event.locals = { ...event.locals, access_key_id, secret_access_key, session_token }
-
-        return resolve(event)
     }
 
     throw auth_redirect(event)
 }
+
+export const handleFetch: HandleFetch = async ({ request, fetch }) => {
+    console.log('fetchin')
+	return fetch(request);
+};

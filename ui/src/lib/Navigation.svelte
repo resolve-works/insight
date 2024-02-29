@@ -31,7 +31,7 @@
     {/each}
 </ul>
 
-<a class="profile" href={logout_url}>
+<a class="profile" href={logout_url.toString()}>
     <span>Sign out</span>
     <Icon class="gg-log-out" />
 </a>
