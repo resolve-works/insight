@@ -3,7 +3,7 @@ import type { Actions } from './$types';
 export async function load({ fetch, depends }) {
     depends('api:files')
 
-    const res = await fetch('/api/v1/files?status=neq.uploading&select=id,name,status,created_at,updated_at,documents(id,name,status)&order=created_at.desc')
+    const res = await fetch('/api/v1/files?status=neq.uploading&select=id,name,status,documents(id,name,status)&order=created_at.desc')
 
     const files = await res.json()
     return { files }
