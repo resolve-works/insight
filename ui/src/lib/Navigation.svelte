@@ -1,4 +1,5 @@
 <script>
+    import { env } from '$env/dynamic/public';
     import { page } from '$app/stores';
     import Icon from '$lib/Icon.svelte';
 
@@ -7,6 +8,11 @@
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
         { href: "/files", name: "Files", class: "gg-folder"},
     ]
+
+    const logout_url = new URL(env.PUBLIC_OIDC_ENDPOINT)
+    logout_url.pathname += '/logout'
+    logout_url.searchParams.set('redirect_uri', encodeURIComponent($page.url.toString()))
+
 </script>
 
 <a class="logo" href="/">
@@ -25,7 +31,7 @@
     {/each}
 </ul>
 
-<a class="profile" href="/profile">
+<a class="profile" href={logout_url}>
     <span>Sign out</span>
     <Icon class="gg-log-out" />
 </a>

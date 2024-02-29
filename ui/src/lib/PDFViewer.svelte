@@ -23,7 +23,7 @@
         load_page = async (index: number) => {
             const page = await pdf.getPage(index)
 
-            const scale = 1.5;
+            const scale = 1;
             const viewport = page.getViewport({ scale: scale, });
             // Support HiDPI-screens.
             const outputScale = window.devicePixelRatio || 1;
