@@ -23,9 +23,8 @@ services:
     command: npm run dev -- --port=3000 --host=0.0.0.0
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
-      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
-      AUTH_AUTHORIZATION_ENDPOINT: ${AUTH_AUTHORIZATION_ENDPOINT}
-      AUTH_TOKEN_ENDPOINT: ${AUTH_TOKEN_ENDPOINT}
+      PUBLIC_OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      PUBLIC_OIDC_ENDPOINT: ${OIDC_ENDPOINT}
       PUBLIC_STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
       PUBLIC_STORAGE_BUCKET: ${STORAGE_BUCKET}
       PUBLIC_API_ENDPOINT: ${API_ENDPOINT}
@@ -149,7 +148,7 @@ services:
       MINIO_WORKER_PASSWORD: ${STORAGE_WORKER_SECRET_KEY}
       MINIO_IDENTITY_OPENID_CONFIG_URL: https://secure.ftm.nl/realms/insight/.well-known/openid-configuration
       MINIO_IDENTITY_OPENID_CLAIM_NAME: roles
-      MINIO_IDENTITY_OPENID_CLIENT_ID: ${AUTH_CLIENT_ID}
+      MINIO_IDENTITY_OPENID_CLIENT_ID: ${OIDC_CLIENT_ID}
     volumes:
       - minio-data:/data
 

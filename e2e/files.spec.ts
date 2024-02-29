@@ -12,15 +12,20 @@ test('uploads files', async ({ page }) => {
     await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 10000 });
 });
 
-test('test', async ({ page }) => {
+test('splits files', async ({ page }) => {
     await page.goto('/files/');
     await page.getByRole('link', { name: 'test.pdf' }).click();
 
-    // Split file
+    // Change first documents length
     await page.getByRole('spinbutton').nth(1).click();
     await page.getByRole('spinbutton').nth(1).fill('3');
+
+    // Add a second document
     await page.getByRole('button', { name: 'Add split' }).click();
     await page.getByRole('spinbutton').nth(2).click();
     await page.getByRole('spinbutton').nth(2).fill('4');
+
+    // Store & wait for processing
     await page.getByRole('button', { name: 'Store changes' }).click();
+    await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 10000 });
 });
