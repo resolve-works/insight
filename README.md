@@ -25,12 +25,19 @@ hasn't been configured yet:
 - Create a realm `insight`.
 - Create a client `insight` with device auth flow enabled. Under this client,
   create the role: `external_user`.
+- Create a client `rabbitmq` with all flows disabled. Under this client, create
+  the roles: `rabbitmq.read:*/*/*`, `rabbitmq.configure:*/*/*`
 - Edit the "Client Scope" `roles`, add a "User Client Role" mapper to it "by
   configuration". Name the mapper `insight roles`, select the `insight` client.
   Set `roles` for "Token Claim Name" and make sure "Multivalued" and "Add to
   access token" are enabled.
-- Under the realm settings, assign the `insight:external_user` and
-  `account:view-groups` roles to the "Default roles" under "User registration".
+- Edit the "Client Scope" `roles`, add a "User Client Role" mapper to it "by
+  configuration". Name the mapper `rabbitmq roles`, select the `rabbitmq` client.
+  Set `rabbitmq_roles` for "Token Claim Name" and make sure "Multivalued" and "Add to
+  access token" are enabled.
+- Under the realm settings, assign the following roles to the "Default roles"
+  under "User registration": `insight:external_user`, `account:view-groups`,
+  `rabbitmq:rabbitmq.read:*/*/*` and `rabbitmq:rabbitmq.configure:*/*/*`.
 
 Insights services need to know about the certificates the auth provider uses to
 validate the authentication tokens. To supply your `docker-compose` environment
