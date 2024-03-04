@@ -14,9 +14,20 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from llama_index import VectorStoreIndex
 from llama_index.vector_stores import PGVectorStore
-from .vectorstore import vector_store_index, store_embeddings
+from llama_index.schema import TextNode, NodeRelationship, RelatedNodeInfo
 from .models import Files, Documents, Prompts, Sources
 from .opensearch import headers
+
+vector_store = PGVectorStore.from_params(
+    connection_string=env.get("POSTGRES_URI"),
+    port=5432,
+    schema_name="private",
+    table_name="page",
+    perform_setup=False,
+    embed_dim=1536,
+)
+
+vector_store_index = VectorStoreIndex.from_vector_store(vector_store)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -119,7 +130,23 @@ def ingest_document(data):
         }
         for index, contents in enumerate(page_contents)
     ]
-    store_embeddings(pages)
+
+    nodes = [
+        TextNode(
+            text=page["contents"],
+            id_=f"{page['file_id']}_{page['index']}",
+            metadata={"file_id": page["file_id"], "index": page["index"]},
+        )
+        for page in pages
+    ]
+    for previous, current in zip(nodes[0:-1], nodes[1:]):
+        previous.relationships[NodeRelationship.NEXT] = RelatedNodeInfo(
+            node_id=current.node_id
+        )
+        current.relationships[NodeRelationship.PREVIOUS] = RelatedNodeInfo(
+            node_id=previous.node_id
+        )
+    vector_store_index.insert_nodes(nodes)
 
     body = {}
     body["filename"] = data["name"]
