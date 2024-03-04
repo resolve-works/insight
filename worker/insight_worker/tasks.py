@@ -12,8 +12,10 @@ from pikepdf import Pdf
 from itertools import chain
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-from .vectorstore import store_embeddings
-from .models import Files, Documents
+from llama_index import VectorStoreIndex
+from llama_index.vector_stores import PGVectorStore
+from .vectorstore import vector_store_index, store_embeddings
+from .models import Files, Documents, Prompts, Sources
 from .opensearch import headers
 
 logging.basicConfig(level=logging.INFO)
@@ -160,3 +162,26 @@ def delete_document(data):
     )
     if res.status_code != 200:
         raise Exception(res.text)
+
+
+def answer_prompt(data):
+    logging.info(f"Answering prompt {data['id']}")
+
+    query_engine = vector_store_index.as_query_engine(
+        similarity_top_k=data["similarity_top_k"]
+    )
+    response = query_engine.query(data["query"])
+
+    with Session(engine) as session:
+        stmt = select(Prompts).where(Prompts.id == data["id"])
+        prompt = session.scalars(stmt).one()
+        prompt.response = response.response
+
+        for node in response.source_nodes:
+            source = Sources(
+                file_id=node.metadata["file_id"],
+                index=node.metadata["index"],
+                score=node.get_score(),
+            )
+            prompt.sources.append(source)
+        session.commit()

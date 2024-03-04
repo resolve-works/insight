@@ -119,8 +119,7 @@ services:
         condition: service_healthy
 
   postgres:
-    build: postgres
-    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    image: pgvector/pgvector:pg16
     ports:
       - 5432:5432
     environment:
@@ -130,13 +129,11 @@ services:
       PG_API_PASSWORD: ${PG_API_PASSWORD}
       PG_WORKER_USER: ${PG_WORKER_USER}
       PG_WORKER_PASSWORD: ${PG_WORKER_PASSWORD}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
     healthcheck:
       test: pg_isready -U insight
       interval: 3s
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./database:/docker-entrypoint-initdb.d
 
   minio:

@@ -57,7 +57,16 @@ export async function handle({event, resolve}) {
         try {
             const tokens = await get_tokens_through_refresh(refresh_token)
             const storage_tokens = await get_storage_tokens(tokens.access_token)
-            event.locals = { access_token: tokens.access_token, ...storage_tokens }
+
+            // Parse JWT payload to get claims
+            const payload = tokens.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            const payload_data = JSON.parse(atob(payload))
+
+            event.locals = { 
+                access_token: tokens.access_token,
+                ...storage_tokens,
+                sub: payload_data.sub,
+            }
 
             // Refresh token was good, store new response
             event.cookies.set('refresh_token', tokens.refresh_token, { path: '/' })

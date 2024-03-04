@@ -4,7 +4,13 @@ import json
 import requests
 from os import environ as env
 from pika import ConnectionParameters, SelectConnection, PlainCredentials
-from .tasks import analyze_file, ingest_document, delete_file, delete_document
+from .tasks import (
+    analyze_file,
+    ingest_document,
+    delete_file,
+    delete_document,
+    answer_prompt,
+)
 from .opensearch import headers
 
 logging.basicConfig(level=logging.INFO)
@@ -50,6 +56,15 @@ def on_message(channel, method_frame, header_frame, body):
             ingest_document(body["after"])
         case "delete_document":
             delete_document(body["before"])
+        case "answer_prompt":
+            answer_prompt(body["after"])
+
+            # Notify user of our answer
+            channel.basic_publish(
+                exchange="",
+                routing_key=f"user-{body['after']['owner_id']}",
+                body=json.dumps(body["after"]),
+            )
         case _:
             raise Exception(f"Unknown routing key: {method_frame.routing_key}")
 

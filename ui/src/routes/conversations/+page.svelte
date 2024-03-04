@@ -1,6 +1,7 @@
 
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
+    import { invalidate } from "$app/navigation";
     import Page from '$lib/Page.svelte'
     import Card from '$lib/Card.svelte'
     import Icon from '$lib/Icon.svelte'
@@ -19,7 +20,7 @@
             const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
             while (true) {
                 const { value, done } = await reader.read();
-                console.log(value);
+                invalidate('api:conversations')
                 if (done) {
                     break;
                 }

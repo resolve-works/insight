@@ -48,46 +48,6 @@ END
 $$
 LANGUAGE PLPGSQL;
 
-CREATE OR REPLACE FUNCTION answer_prompt (id bigint)
-    RETURNS VOID
-    AS $$
-    import os
-    from llama_index import VectorStoreIndex
-    from llama_index.vector_stores import PGVectorStore
-
-    plan = plpy.prepare("select * from prompts where id=$1", ["bigint"])
-    prompt = plpy.execute(plan, [id])[0]
-
-    vector_store = PGVectorStore.from_params(
-        host="127.0.0.1",
-        port=5432,
-        user=os.environ.get('PG_WORKER_USER'),
-        password=os.environ.get("PG_WORKER_PASSWORD"),
-        database="insight",
-        schema_name="private",
-        table_name="page",
-        perform_setup=False,
-        embed_dim=1536,
-    )
-    vector_store_index = VectorStoreIndex.from_vector_store(vector_store)
-    query_engine = vector_store_index.as_query_engine(similarity_top_k=prompt['similarity_top_k'])
-    response = query_engine.query(prompt['query'])
-
-    plan = plpy.prepare("update prompts set response=$1 where id=$2", ["text", "bigint"])
-    plpy.execute(plan, [response.response, id])
-
-    plan = plpy.prepare(
-        "insert into sources (prompt_id, file_id, index, score) values ($1, $2, $3, $4)",
-        ["bigint", "uuid", "integer", "float"]
-    )
-    for node in response.source_nodes:
-        source_data = [id, node.metadata['file_id'], node.metadata['index'], node.get_score()]
-        node = plpy.execute(plan, source_data)
-$$
-LANGUAGE PLPYTHON3U;
-
-GRANT EXECUTE ON FUNCTION answer_prompt TO external_user;
-
 CREATE OR REPLACE FUNCTION document (sources)
     RETURNS SETOF documents ROWS 1
     AS $$

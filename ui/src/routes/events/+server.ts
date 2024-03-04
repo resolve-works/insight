@@ -5,7 +5,7 @@ export async function GET({ locals }) {
     const password = `${encodeURIComponent(locals.access_token)}`
     const connection = await amqplib.connect(`amqp://username:${password}@rabbitmq`);
 
-    const queue = 'test'
+    const queue = `user-${locals.sub}`
 
     const channel = await connection.createChannel();
     await channel.assertQueue(queue, { autoDelete: true });
@@ -15,8 +15,7 @@ export async function GET({ locals }) {
 		start(ctr) {
             channel.consume(queue, (message) => {
                 if (message !== null) {
-                    console.log(`Received: ${message.content.toString()}`);
-                    ctr.enqueue(`${message.content.toString()}\n\n`)
+                    ctr.enqueue(message.content)
                     channel.ack(message);
                 } else {
                     console.log('Consumer cancelled by server');

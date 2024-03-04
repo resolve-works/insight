@@ -4,6 +4,7 @@ declare global {
     namespace App {
 		// interface Error {}
         interface Locals {
+            sub: string,
             access_token: string;
             access_key_id: string;
             secret_access_key: string;
