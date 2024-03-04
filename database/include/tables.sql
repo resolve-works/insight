@@ -69,12 +69,13 @@ CREATE TABLE IF NOT EXISTS private.sources (
     PRIMARY KEY (id)
 );
 
-CREATE TABLE private.data_page (
+CREATE TABLE IF NOT EXISTS private.pages (
     id bigserial,
-    text character varying NOT NULL,
-    metadata_ json,
-    node_id character varying,
+    file_id uuid NOT NULL,
+    index integer NOT NULL,
+    text text NOT NULL,
     embedding vector (1536),
+    FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE CASCADE,
     PRIMARY KEY (id)
 );
 
