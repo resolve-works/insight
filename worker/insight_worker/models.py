@@ -1,27 +1,13 @@
 from typing import Any, List, Optional
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import BigInteger, DateTime, Double, Enum, ForeignKeyConstraint, Integer, JSON, PrimaryKeyConstraint, String, Text, Uuid, text
+from sqlalchemy import BigInteger, DateTime, Double, Enum, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, Text, Uuid, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 import uuid
 
 class Base(DeclarativeBase):
     pass
-
-
-class DataPage(Base):
-    __tablename__ = 'data_page'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='data_page_pkey'),
-        {'schema': 'private'}
-    )
-
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    text_: Mapped[str] = mapped_column('text', String)
-    metadata_: Mapped[Optional[dict]] = mapped_column(JSON)
-    node_id: Mapped[Optional[str]] = mapped_column(String)
-    embedding: Mapped[Optional[Any]] = mapped_column(Vector(1536))
 
 
 class Files(Base):
@@ -41,6 +27,7 @@ class Files(Base):
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
 
     documents: Mapped[List['Documents']] = relationship('Documents', back_populates='file')
+    pages_: Mapped[List['Pages']] = relationship('Pages', back_populates='file')
     sources: Mapped[List['Sources']] = relationship('Sources', back_populates='file')
 
 
@@ -82,6 +69,23 @@ class Documents(Base):
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
 
     file: Mapped['Files'] = relationship('Files', back_populates='documents')
+
+
+class Pages(Base):
+    __tablename__ = 'pages'
+    __table_args__ = (
+        ForeignKeyConstraint(['file_id'], ['private.files.id'], ondelete='CASCADE', name='pages_file_id_fkey'),
+        PrimaryKeyConstraint('id', name='pages_pkey'),
+        {'schema': 'private'}
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    file_id: Mapped[uuid.UUID] = mapped_column(Uuid)
+    index: Mapped[int] = mapped_column(Integer)
+    text_: Mapped[str] = mapped_column('text', Text)
+    embedding: Mapped[Optional[Any]] = mapped_column(Vector(1536))
+
+    file: Mapped['Files'] = relationship('Files', back_populates='pages_')
 
 
 class Sources(Base):

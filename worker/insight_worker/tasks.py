@@ -86,6 +86,21 @@ def analyze_file(data, notify_user):
     notify_user(data["owner_id"], "analyze_file", data["id"])
 
 
+def embedding(text):
+    url = "https://api.openai.com/v1/embeddings"
+    headers = {
+        "Authorization": f"Bearer {env.get('OPENAI_API_KEY')}",
+        "Content-Type": "application/json",
+    }
+
+    data = {"input": text, "model": "text-embedding-3-small"}
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code == 200:
+        return response.json()["data"]
+    else:
+        raise Exception(response.text)
+
+
 def ingest_document(data, notify_user):
     logging.info(f"Ingesting document {data['id']}")
 
@@ -125,22 +140,13 @@ def ingest_document(data, notify_user):
     page_contents = [page.get_text(sort=True) for page in document_pdf]
 
     # TODO - Remove embeddings of previous run
-    pages = [
-        {
-            "file_id": data["file_id"],
-            "index": data["from_page"] + index,
-            "contents": contents,
-        }
-        for index, contents in enumerate(page_contents)
-    ]
-
     nodes = [
         TextNode(
-            text=page["contents"],
-            id_=f"{page['file_id']}_{page['index']}",
-            metadata={"file_id": page["file_id"], "index": page["index"]},
+            text=contents,
+            id_=f"{data['file_id']}_{index}",
+            metadata={"file_id": data["file_id"], "index": index},
         )
-        for page in pages
+        for index, contents in enumerate(page_contents)
     ]
     for previous, current in zip(nodes[0:-1], nodes[1:]):
         previous.relationships[NodeRelationship.NEXT] = RelatedNodeInfo(
