@@ -1,3 +1,5 @@
+ALTER SYSTEM SET wal_level = logical;
+
 BEGIN;
 \set pg_api_user `echo $PG_API_USER`
 \set pg_api_password `echo $PG_API_PASSWORD`
@@ -5,7 +7,6 @@ BEGIN;
 \set pg_worker_password `echo $PG_WORKER_PASSWORD`
 CREATE SCHEMA IF NOT EXISTS private;
 CREATE EXTENSION IF NOT EXISTS vector;
-CREATE EXTENSION IF NOT EXISTS plpython3u;
 ALTER DEFAULT privileges REVOKE EXECUTE ON functions FROM public;
 -- Roles PostgREST can switch to based on JWT claims
 CREATE ROLE :pg_api_user noinherit LOGIN PASSWORD :'pg_api_password';
