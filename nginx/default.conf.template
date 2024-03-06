@@ -11,10 +11,6 @@ upstream minio {
     server minio:9000;
 }
 
-upstream opensearch {
-    server opensearch:9200;
-}
-
 server {
     listen 9000 ssl http2;
     ssl_certificate /etc/ssl/private/insight.pem;
@@ -48,13 +44,6 @@ server {
     ssl_certificate_key /etc/ssl/private/insight-key.pem;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
-
-    location /api/v1/index {
-        client_max_body_size 0;
-        proxy_buffering off;
-        proxy_request_buffering off;
-        proxy_pass https://opensearch/insight;
-    }
 
     location /api/v1/ {
         default_type  application/json;

@@ -15,7 +15,6 @@ services:
     depends_on:
       - minio
       - postgrest
-      - opensearch
       - ui
 
   ui:
@@ -23,11 +22,12 @@ services:
     command: npm run dev -- --port=3000 --host=0.0.0.0
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
-      PUBLIC_OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
       PUBLIC_OIDC_ENDPOINT: ${OIDC_ENDPOINT}
-      PUBLIC_STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
-      PUBLIC_STORAGE_BUCKET: ${STORAGE_BUCKET}
-      PUBLIC_API_ENDPOINT: ${API_ENDPOINT}
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      STORAGE_BUCKET: ${STORAGE_BUCKET}
+      RABBITMQ_HOST: rabbitmq
+      OPENSEARCH_HOST: opensearch
     volumes:
       - ./ui:/insight-ui
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
@@ -60,8 +60,10 @@ services:
       STORAGE_BUCKET: ${STORAGE_BUCKET}
       STORAGE_ACCESS_KEY: ${STORAGE_WORKER_ACCESS_KEY}
       STORAGE_SECRET_KEY: ${STORAGE_WORKER_SECRET_KEY}
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_USER: worker
       RABBITMQ_PASSWORD: 5Ytge8Xg4gI38sJXmi7q
+      OPENSEARCH_HOST: opensearch
       OPENSEARCH_USER: worker
       OPENSEARCH_PASSWORD: m0nOtnEhob0kSKaZyFbQ
     volumes:
@@ -74,7 +76,7 @@ services:
       - opensearch
 
   opensearch:
-    build: opensearch
+    image: opensearchproject/opensearch:latest
     ulimits:
       memlock:
         soft: -1
@@ -84,6 +86,15 @@ services:
       DISABLE_INSTALL_DEMO_CONFIG: True
     volumes:
       - opensearch-data:/usr/share/opensearch/data
+      - ./opensearch/opensearch-security/action_groups.yml:/usr/share/opensearch/config/opensearch-security/action_groups.yml
+      - ./opensearch/opensearch-security/allowlist.yml:/usr/share/opensearch/config/opensearch-security/allowlist.yml
+      - ./opensearch/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
+      - ./opensearch/opensearch-security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
+      - ./opensearch/opensearch-security/nodes_dn.yml:/usr/share/opensearch/config/opensearch-security/nodes_dn.yml
+      - ./opensearch/opensearch-security/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
+      - ./opensearch/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
+      - ./opensearch/opensearch-security/tenants.yml:/usr/share/opensearch/config/opensearch-security/tenants.yml
+      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
       - ./certs/rootCA.pem:/usr/share/opensearch/config/rootCA.pem
       - ./certs/opensearch.pem:/usr/share/opensearch/config/opensearch.pem
       - ./certs/opensearch-key.pem:/usr/share/opensearch/config/opensearch-key.pem
