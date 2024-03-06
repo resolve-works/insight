@@ -5,7 +5,7 @@ import { presignSignatureV4 } from 'minio/dist/esm/signing.mjs'
 /**
  * Sign a S3 storage path for method. Keep this on the server because of the crypto dependency
  */
-export default function sign(path: string, locals: App.Locals, method: string = 'GET') {
+export function sign(path: string, locals: App.Locals, method: string = 'GET') {
     const { access_key_id, secret_access_key, session_token } = locals;
     const url = new URL(env.PUBLIC_STORAGE_ENDPOINT)
 

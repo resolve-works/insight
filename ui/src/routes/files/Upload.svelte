@@ -14,16 +14,6 @@
     let loaded = 0;
 
     onMount(async () => {
-        const file = await insight.post('/files', { name: upload.name })
-
-        // Get presigned upload url
-        const response = await fetch('/sign', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ method: 'PUT', path: file.path })
-        })
-        const url = await response.json()
-
         // https://github.com/whatwg/fetch/issues/607
         // Fetch doesn't allow tracking progress for now
         const xhr = new XMLHttpRequest()
@@ -34,16 +24,14 @@
 
         // When upload is done, strip upload
         xhr.upload.addEventListener("loadend", async () => {
-            await insight.patch('/files', file.id, { status: 'analyzing' })
-
-            // TODO - Proper error handling. The web is unstable, uploads fail
-
             uploads.update(uploads => uploads.filter(f => f != upload))
             invalidate('api:files')
         });
 
-        xhr.open("PUT", url, true);
-        xhr.send(upload);
+        xhr.open("POST", '?/upload', true);
+        const data = new FormData();
+        data.append('files', upload)
+        xhr.send(data);
     })
 </script>
 

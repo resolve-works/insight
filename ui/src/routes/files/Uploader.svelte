@@ -1,10 +1,15 @@
 
 <script lang=ts>
     import Icon from '$lib/Icon.svelte';
+    import { enhance } from '$app/forms';
+    import { onMount } from 'svelte';
     import { uploads } from './stores.ts';
 
     let is_dragover = false;
+    let form: HTMLFormElement;
     let input: HTMLInputElement;
+    let button: HTMLButtonElement;
+    let submit_button: HTMLButtonElement;
 
     function upload(file: File) {
         uploads.update(uploads => [...uploads, file])
@@ -17,46 +22,56 @@
             return
         }
 
-        for(const file of e.dataTransfer.files) {
-            if(file.type != 'application/pdf') {
-                alert(`Unsupported file type: ${file.type}`);
-            }
-
-            upload(file)
-        }
+        input.files = e.dataTransfer.files;
+        input.dispatchEvent(new Event('change'));
     }
 
-    function select() {
-        if( ! input.files ) {
-            return;
-        }
-
-        for(const file of input.files) {
-            upload(file)
-        }
-
-        input.value = '';
+    // Add files to the uploads store to show nice progress objects to user
+    function submit({ formData, cancel }) {
+        uploads.update(uploads => [...uploads, ...formData.getAll('files')])
+        cancel()
+        return {}
     }
+
+    // Progressively enhance form to have drag & drop uploader with progress
+    onMount(() => {
+        button.classList.add('uploader')
+        input.classList.add('hidden')
+        submit_button.classList.add('hidden')
+    })
 </script>
 
-<input type="file" accept=".pdf" multiple bind:this={input} on:change={select} />
+<form method="POST" action="?/upload" enctype="multipart/form-data" bind:this={form} use:enhance={submit}>
+    <input name="files" type="file" accept=".pdf" multiple bind:this={input} on:change={() => form.requestSubmit()} />
+    <button 
+        class="hidden" 
+        bind:this={button} 
+        on:click|preventDefault={() => input.click()} 
+        on:drop|preventDefault={drop}
+        on:dragover|preventDefault
+        on:dragenter|preventDefault={() => is_dragover = true}
+        on:dragexit|preventDefault={() => is_dragover = false}
+        class:dragover={is_dragover}
+        >
+        <span>
+            <Icon class="gg-software-upload" />
+        </span>
 
-<button on:click={() => input.click()} on:drop|preventDefault={drop} on:dragover|preventDefault on:dragenter|preventDefault={() => is_dragover = true} on:dragexit|preventDefault={() => is_dragover = false} class:dragover={is_dragover}>
-    <span>
-        <Icon class="gg-software-upload" />
-    </span>
+        <h2><b>Choose PDF files</b> or drop them here</h2>
+    </button>
 
-    <h2><b>Choose PDF files</b> or drop them here</h2>
-</button>
+    <button class="primary" bind:this={submit_button}>
+        Upload
+    </button>
+</form>
 
 <style>
-    input {
+    :global(.hidden) {
         display: none;
     }
 
-    button {
+    :global(button.uploader) {
         padding: 3rem 1.5rem;
-        margin-bottom: 1rem;
         border: 3px dashed var(--color-page-border);
         display: grid;
         grid-template-columns: auto auto;
@@ -67,8 +82,12 @@
         width: 100%;
     }
 
-    button.dragover,
-    button:hover {
+    form {
+        margin-bottom: 1rem;
+    }
+
+    :global(button.dragover),
+    :global(button:hover) {
         color: var(--color-primary);
         border-color: var(--color-primary);
         cursor: pointer;

@@ -1,6 +1,6 @@
 import type { Actions } from './$types';
 
-import sign from '$lib/sign.ts';
+import { sign } from '$lib/sign.ts';
 
 export async function load({ params, fetch, locals, depends }) {
     depends('api:files')
