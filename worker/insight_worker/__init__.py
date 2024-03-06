@@ -11,7 +11,7 @@ from .tasks import (
     delete_document,
     answer_prompt,
 )
-from .opensearch import headers
+from .opensearch import opensearch_headers, opensearch_endpoint
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,9 +21,9 @@ def create_mapping():
     logging.info("Creating index")
 
     res = requests.put(
-        f"{env.get('API_ENDPOINT')}/index",
+        f"{opensearch_endpoint}/documents",
         json={"mappings": {"properties": {"pages": {"type": "nested"}}}},
-        headers=headers,
+        headers=opensearch_headers,
     )
 
     if res.status_code == 200:
@@ -89,7 +89,7 @@ def process_messages():
 
     # Get access token from Oauth provider
     parameters = ConnectionParameters(
-        host="rabbitmq",
+        host=env.get("RABBITMQ_HOST"),
         credentials=PlainCredentials(
             env.get("RABBITMQ_USER"), env.get("RABBITMQ_PASSWORD")
         ),

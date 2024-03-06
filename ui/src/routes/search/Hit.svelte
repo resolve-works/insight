@@ -3,7 +3,7 @@
     import Icon from '$lib/Icon.svelte';
     import Card from '$lib/Card.svelte';
     export let filename: string;
-    export let pages: { index: number, url: URL, highlights: string[] }[];
+    export let pages: { index: number, url: string, highlights: string[] }[];
 </script>
 
 <Card>

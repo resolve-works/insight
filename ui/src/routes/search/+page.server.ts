@@ -1,13 +1,14 @@
 
-export async function load({ url, parent, fetch }) {
-    const { access_token } = await parent();
+import { env } from '$env/dynamic/private'
+
+export async function load({ url, locals, fetch }) {
     const query = url.searchParams.get('query');
 
-    const res = await fetch('/api/v1/index/_search', {
+    const res = await fetch(`https://${env.OPENSEARCH_HOST}:9200/documents/_search`, {
         method: 'post',
         headers: { 
             'Content-Type': 'application/json', 
-            'Authorization': `Bearer ${access_token}` 
+            'Authorization': `Bearer ${locals.access_token}` 
         },
         body: JSON.stringify({
             "_source": {"excludes": ["pages"]},
@@ -51,7 +52,7 @@ export async function load({ url, parent, fetch }) {
 
                         return {
                             index,
-                            url: page_url,
+                            url: page_url.toString(),
                             highlights: page["highlight"]["pages.contents"],
                         }
                     })

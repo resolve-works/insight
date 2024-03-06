@@ -1,5 +1,6 @@
 
-import { env } from '$env/dynamic/public';
+import { env } from '$env/dynamic/private';
+import { env as public_env } from '$env/dynamic/public';
 import { redirect } from '@sveltejs/kit';
 import type { RequestEvent, HandleFetch } from '@sveltejs/kit';
 
@@ -7,10 +8,10 @@ import { get_tokens_through_refresh, get_storage_tokens, InvalidRefreshTokenErro
 
 function auth_redirect(event: RequestEvent) {
     // No code or previous token, redirect to login
-    const url = new URL(env.PUBLIC_OIDC_ENDPOINT + '/auth')
+    const url = new URL(public_env.PUBLIC_OIDC_ENDPOINT + '/auth')
     url.searchParams.set('scope', 'profile email')
     url.searchParams.set('response_type', 'code')
-    url.searchParams.set('client_id', env.PUBLIC_OIDC_CLIENT_ID)
+    url.searchParams.set('client_id', env.OIDC_CLIENT_ID)
     url.searchParams.set('redirect_uri', event.url.origin + event.url.pathname)
 
     return redirect(307, url)
@@ -28,11 +29,11 @@ export async function handle({event, resolve}) {
         const data = { 
             grant_type: 'authorization_code',
             redirect_uri: event.url.origin + event.url.pathname,
-            client_id: env.PUBLIC_OIDC_CLIENT_ID,
+            client_id: env.OIDC_CLIENT_ID,
             code, 
         }
 
-        const token_response = await fetch(env.PUBLIC_OIDC_ENDPOINT + '/token', {
+        const token_response = await fetch(public_env.PUBLIC_OIDC_ENDPOINT + '/token', {
             method: 'post',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams(data).toString(),
@@ -42,34 +43,37 @@ export async function handle({event, resolve}) {
             throw auth_redirect(event);
         }
 
-        const tokens = await token_response.json();
-        event.cookies.set('refresh_token', tokens.refresh_token, { path: '/' })
+        const { refresh_token } = await token_response.json();
+        event.cookies.set('refresh_token', refresh_token, { path: '/' })
 
         // redirect to clear URL of params
         event.url.searchParams.delete('code');
         event.url.searchParams.delete('session_state');
+        event.url.searchParams.delete('iss');
         throw redirect(307, event.url)
     }
 
+    // TODO - don't always refresh
     // No code, do we have a refresh token?
-    const refresh_token = event.cookies.get('refresh_token')
-    if(refresh_token !== undefined) {
+    if(event.cookies.get('refresh_token') !== undefined) {
         try {
-            const tokens = await get_tokens_through_refresh(refresh_token)
-            const storage_tokens = await get_storage_tokens(tokens.access_token)
+            const { access_token, refresh_token } 
+                = await get_tokens_through_refresh(event.cookies.get('refresh_token') as string) 
+                
+            const storage_tokens = await get_storage_tokens(access_token)
 
             // Parse JWT payload to get claims
-            const payload = tokens.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            const payload = access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
             const payload_data = JSON.parse(atob(payload))
 
             event.locals = { 
-                access_token: tokens.access_token,
+                access_token,
                 ...storage_tokens,
                 sub: payload_data.sub,
             }
 
             // Refresh token was good, store new response
-            event.cookies.set('refresh_token', tokens.refresh_token, { path: '/' })
+            event.cookies.set('refresh_token', refresh_token, { path: '/' })
 
             // Resolve event with new tokens
             return resolve(event)

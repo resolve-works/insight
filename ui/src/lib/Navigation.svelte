@@ -1,7 +1,10 @@
-<script>
+<script lang=ts>
     import { env } from '$env/dynamic/public';
     import { page } from '$app/stores';
     import Icon from '$lib/Icon.svelte';
+
+    export let id_token: string;
+    export let oidc_endpoint: string;
 
     const items = [
         { href: "/search", name: "Search", class: "gg-search" },
@@ -11,8 +14,6 @@
 
     const logout_url = new URL(env.PUBLIC_OIDC_ENDPOINT)
     logout_url.pathname += '/logout'
-    logout_url.searchParams.set('redirect_uri', encodeURIComponent($page.url.toString()))
-
 </script>
 
 <a class="logo" href="/">

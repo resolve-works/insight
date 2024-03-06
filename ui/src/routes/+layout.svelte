@@ -1,11 +1,5 @@
 <script>
-    import { setContext } from 'svelte';
-    import { Insight } from '$lib/insight.ts'
     import Navigation from '$lib/Navigation.svelte';
-
-    export let data;
-
-    setContext('insight', new Insight(data.access_token))
 </script>
 
 <div class="container">

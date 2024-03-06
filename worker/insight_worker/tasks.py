@@ -16,7 +16,7 @@ from llama_index import VectorStoreIndex
 from llama_index.vector_stores import PGVectorStore
 from llama_index.schema import TextNode, NodeRelationship, RelatedNodeInfo
 from .models import Files, Documents, Prompts, Sources
-from .opensearch import headers
+from .opensearch import opensearch_headers, opensearch_endpoint
 
 vector_store = PGVectorStore.from_params(
     connection_string=env.get("POSTGRES_URI"),
@@ -156,8 +156,8 @@ def ingest_document(data):
     ]
 
     res = requests.put(
-        f"{env.get('API_ENDPOINT')}/index/_doc/{data['id']}",
-        headers=headers,
+        f"{opensearch_endpoint}/documents/_doc/{data['id']}",
+        headers=opensearch_headers,
         json=body,
     )
     if res.status_code != 201:

@@ -1,12 +1,9 @@
 
 <script lang="ts">
-    import { onMount, getContext } from 'svelte';
+    import { onMount } from 'svelte';
     import Card from '$lib/Card.svelte';
     import { uploads } from './stores.ts';
     import { invalidate } from '$app/navigation';
-
-    import type { Insight } from '$lib/insight';
-    const insight: Insight = getContext('insight')
 
     export let upload: File
 

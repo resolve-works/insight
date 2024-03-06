@@ -1,9 +1,10 @@
 
+import { env } from '$env/dynamic/private';
 import amqplib from 'amqplib';
 
 export async function GET({ locals }) {
     const password = `${encodeURIComponent(locals.access_token)}`
-    const connection = await amqplib.connect(`amqp://username:${password}@rabbitmq`);
+    const connection = await amqplib.connect(`amqp://username:${password}@${env.RABBITMQ_HOST}`);
 
     const queue = `user-${locals.sub}`
 

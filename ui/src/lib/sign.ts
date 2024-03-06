@@ -1,5 +1,5 @@
 
-import { env } from '$env/dynamic/public';
+import { env } from '$env/dynamic/private';
 import { presignSignatureV4 } from 'minio/dist/esm/signing.mjs'
 
 /**
@@ -7,13 +7,13 @@ import { presignSignatureV4 } from 'minio/dist/esm/signing.mjs'
  */
 export function sign(path: string, locals: App.Locals, method: string = 'GET') {
     const { access_key_id, secret_access_key, session_token } = locals;
-    const url = new URL(env.PUBLIC_STORAGE_ENDPOINT)
+    const url = new URL(env.STORAGE_ENDPOINT)
 
     const request = {
         protocol: url.protocol,
         port: url.port,
         method,
-        path: '/' + env.PUBLIC_STORAGE_BUCKET + '/' + path,
+        path: '/' + env.STORAGE_BUCKET + '/' + path,
         headers: {
             host: url.host
         },
