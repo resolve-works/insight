@@ -32,7 +32,8 @@ services:
       - ./ui:/insight-ui
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   postgrest:
     image: postgrest/postgrest

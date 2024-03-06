@@ -13,8 +13,11 @@
 
     async function store() {
         // Clear stores that track form state
-        $changed = {};
-        $created = [];
+        return async ({ update }) => {
+			await update();
+            $changed = {};
+            $created = [];
+        }
     }
 
     function add() {
@@ -35,7 +38,7 @@
         {/if}
     </header>
 
-    <form method="POST" action="?/store" use:enhance on:submit={store}>
+    <form method="POST" action="?/store" use:enhance={store}>
         {#each $documents as document}
             <Document {document} pages={data.pages} />
         {/each}

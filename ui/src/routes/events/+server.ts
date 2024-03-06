@@ -11,9 +11,14 @@ export async function GET({ locals }) {
     const channel = await connection.createChannel();
     await channel.assertQueue(queue, { autoDelete: true });
 
+    let interval: ReturnType<typeof setInterval>;
+
     // Forward rabbitmq messages for user
 	const readable = new ReadableStream({
 		start(ctr) {
+            // Pinging ensures that our connection stays alive
+            interval = setInterval(() => ctr.enqueue(JSON.stringify({ message: 'ping' })), 30000)
+
             channel.consume(queue, (message) => {
                 if (message !== null) {
                     ctr.enqueue(message.content)
@@ -24,6 +29,7 @@ export async function GET({ locals }) {
             });
 		},
 		cancel() {
+            clearInterval(interval)
             connection.close()
 		}
 	});

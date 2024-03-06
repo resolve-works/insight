@@ -3,9 +3,6 @@
     import { page } from '$app/stores';
     import Icon from '$lib/Icon.svelte';
 
-    export let id_token: string;
-    export let oidc_endpoint: string;
-
     const items = [
         { href: "/search", name: "Search", class: "gg-search" },
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
