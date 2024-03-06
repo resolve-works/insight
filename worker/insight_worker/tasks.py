@@ -59,7 +59,7 @@ def ocrmypdf_process(input_file, output_file):
     )
 
 
-def analyze_file(data):
+def analyze_file(data, notify_user):
     logging.info(f"Analyzing file {data['id']}")
 
     file_path = Path(TemporaryDirectory().name) / "file.pdf"
@@ -82,8 +82,11 @@ def analyze_file(data):
         file.documents.append(document)
         session.commit()
 
+    # Notify user of our answer
+    notify_user(data["owner_id"], "analyze_file", data["id"])
 
-def ingest_document(data):
+
+def ingest_document(data, notify_user):
     logging.info(f"Ingesting document {data['id']}")
 
     temp_path = Path(TemporaryDirectory().name)
@@ -169,15 +172,18 @@ def ingest_document(data):
         document.status = "idle"
         session.commit()
 
+    # Notify user of our answer
+    notify_user(file.owner_id, "ingest_document", data["id"])
 
-def delete_file(data):
+
+def delete_file(data, notify_user):
     logging.info(f"Deleting file {data['id']}")
 
     # Remove file from object storage
     minio.remove_object(env.get("STORAGE_BUCKET"), data["path"])
 
 
-def delete_document(data):
+def delete_document(data, notify_user):
     logging.info(f"Deleting document {data['id']}")
 
     # Remove file from object storage
@@ -185,13 +191,13 @@ def delete_document(data):
 
     # Remove indexed contents
     res = requests.delete(
-        f"{env.get('API_ENDPOINT')}/index/_doc/{data['id']}", headers=headers
+        f"{opensearch_endpoint}/documents/_doc/{data['id']}", headers=opensearch_headers
     )
     if res.status_code != 200:
         raise Exception(res.text)
 
 
-def answer_prompt(data):
+def answer_prompt(data, notify_user):
     logging.info(f"Answering prompt {data['id']}")
 
     query_engine = vector_store_index.as_query_engine(
@@ -212,3 +218,5 @@ def answer_prompt(data):
             )
             prompt.sources.append(source)
         session.commit()
+
+    notify_user(data["owner_id"], "answer_prompt", data["id"])

@@ -2,11 +2,7 @@
 import { sign } from '$lib/sign.ts';
 
 export async function load({ params, fetch, locals }) {
-    const { access_token } = locals;
-
-    const res = await fetch(`/api/v1/documents?id=eq.${params.id}`, {
-        headers: { Authorization: `Bearer ${access_token}` }
-    })
+    const res = await fetch(`/api/v1/documents?id=eq.${params.id}`)
     const documents = await res.json();
     const document = documents[0]
 

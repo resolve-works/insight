@@ -47,24 +47,23 @@ def cli():
 def on_message(channel, method_frame, header_frame, body):
     body = json.loads(body)
 
+    notify_user = lambda owner_id, message, id: channel.basic_publish(
+        exchange="",
+        routing_key=f"user-{owner_id}",
+        body=json.dumps({"message": message, "id": id}),
+    )
+
     match method_frame.routing_key:
         case "analyze_file":
-            analyze_file(body["after"])
+            analyze_file(body["after"], notify_user)
         case "delete_file":
-            delete_file(body["before"])
+            delete_file(body["before"], notify_user)
         case "ingest_document":
-            ingest_document(body["after"])
+            ingest_document(body["after"], notify_user)
         case "delete_document":
-            delete_document(body["before"])
+            delete_document(body["before"], notify_user)
         case "answer_prompt":
-            answer_prompt(body["after"])
-
-            # Notify user of our answer
-            channel.basic_publish(
-                exchange="",
-                routing_key=f"user-{body['after']['owner_id']}",
-                body=json.dumps(body["after"]),
-            )
+            answer_prompt(body["after"], notify_user)
         case _:
             raise Exception(f"Unknown routing key: {method_frame.routing_key}")
 

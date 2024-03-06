@@ -1,7 +1,5 @@
 
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { invalidate } from '$app/navigation';
     import Page from '$lib/Page.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import Document from './Document.svelte';
@@ -12,17 +10,6 @@
     export let data;
     $: $existing = data.documents;
     $: is_changed = $documents.some(document => document.is_changed)
-
-    // TODO - Poor mans event system
-    onMount(() => {
-        const interval = setInterval(async () => {
-            await invalidate('api:files')
-        }, 3000)
-
-        return () => {
-            clearInterval(interval)
-        }
-    })
 
     async function store() {
         // Clear stores that track form state

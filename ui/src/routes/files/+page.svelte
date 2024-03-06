@@ -1,7 +1,5 @@
 
 <script>
-    import { onMount } from 'svelte'
-    import { invalidate } from '$app/navigation';
     import Page from '$lib/Page.svelte';
     import File from './File.svelte';
     import Uploader from './Uploader.svelte';
@@ -9,17 +7,6 @@
     import { uploads } from './stores.ts';
 
     export let data;
-
-    // TODO - Poor mans event system
-    onMount(() => {
-        const interval = setInterval(() => {
-            invalidate('api:files')
-        }, 3000)
-
-        return () => {
-            clearInterval(interval)
-        }
-    })
 </script>
 
 <Page>

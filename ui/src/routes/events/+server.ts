@@ -30,7 +30,9 @@ export async function GET({ locals }) {
 
 	return new Response(readable, {
 		headers: {
-			'content-type': 'text/event-stream',
+			'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no'
 		}
 	});
 }
