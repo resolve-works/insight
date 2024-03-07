@@ -6,7 +6,7 @@
     import type { DocumentInput } from './stores.ts'
     import { ssp, queryParam } from 'sveltekit-search-params'
 
-    export let pages: number
+    export let number_of_pages: number
     export let document: DocumentInput;
 
     // Document can be editted when it's new, or when it's not being ingested
@@ -60,7 +60,7 @@
             name="to_page"
             class:changed={document.changes.to_page != document.original.to_page} 
             min={document.changes.from_page}
-            max={pages} 
+            max={number_of_pages} 
             />
 
         {#if document.original.id}

@@ -22,12 +22,12 @@ class Files(Base):
     path: Mapped[str] = mapped_column(Text)
     name: Mapped[str] = mapped_column(Text)
     status: Mapped[str] = mapped_column(Enum('uploading', 'analyzing', 'idle', name='file_status'), server_default=text("'uploading'::file_status"))
-    pages: Mapped[Optional[int]] = mapped_column(Integer)
+    number_of_pages: Mapped[Optional[int]] = mapped_column(Integer)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
 
     documents: Mapped[List['Documents']] = relationship('Documents', back_populates='file')
-    pages_: Mapped[List['Pages']] = relationship('Pages', back_populates='file')
+    pages: Mapped[List['Pages']] = relationship('Pages', back_populates='file')
     sources: Mapped[List['Sources']] = relationship('Sources', back_populates='file')
 
 
@@ -82,10 +82,10 @@ class Pages(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     file_id: Mapped[uuid.UUID] = mapped_column(Uuid)
     index: Mapped[int] = mapped_column(Integer)
-    text_: Mapped[str] = mapped_column('text', Text)
+    contents: Mapped[str] = mapped_column(Text)
     embedding: Mapped[Optional[Any]] = mapped_column(Vector(1536))
 
-    file: Mapped['Files'] = relationship('Files', back_populates='pages_')
+    file: Mapped['Files'] = relationship('Files', back_populates='pages')
 
 
 class Sources(Base):

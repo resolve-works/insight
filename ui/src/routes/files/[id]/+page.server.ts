@@ -5,12 +5,12 @@ import { sign } from '$lib/sign.ts';
 export async function load({ params, fetch, locals, depends }) {
     depends('api:files')
 
-    const res = await fetch(`/api/v1/files?id=eq.${params.id}&select=path,pages,documents(id,name,path,from_page,to_page,status)`)
+    const res = await fetch(`/api/v1/files?id=eq.${params.id}&select=path,number_of_pages,documents(id,name,path,from_page,to_page,status)`)
     const files = await res.json();
-    const { path, documents, pages } = files[0]
+    const { path, documents, number_of_pages } = files[0]
 
     return { 
-        pages, 
+        number_of_pages, 
         // Humans index from 1
         //
         // When you say "to 137" to a human, they expect 137 to be in the

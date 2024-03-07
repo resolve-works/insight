@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS private.files (
     owner_id uuid NOT NULL,
     path text NOT NULL,
     name text NOT NULL,
-    pages integer,
+    number_of_pages integer,
     status file_status NOT NULL DEFAULT 'uploading',
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS private.pages (
     id bigserial,
     file_id uuid NOT NULL,
     index integer NOT NULL,
-    text text NOT NULL,
+    contents text NOT NULL,
     embedding vector (1536),
     FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE CASCADE,
     PRIMARY KEY (id)

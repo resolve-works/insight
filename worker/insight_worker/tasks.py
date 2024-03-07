@@ -1,9 +1,9 @@
 import logging
 import ocrmypdf
-from os import environ as env
 import fitz
-import requests
+import httpx
 from minio import Minio
+from os import environ as env
 from urllib.parse import urlparse
 from multiprocessing import Process
 from tempfile import TemporaryDirectory
@@ -12,22 +12,10 @@ from pikepdf import Pdf
 from itertools import chain
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-from llama_index import VectorStoreIndex
-from llama_index.vector_stores import PGVectorStore
-from llama_index.schema import TextNode, NodeRelationship, RelatedNodeInfo
-from .models import Files, Documents, Prompts, Sources
+from .models import Files, Documents, Prompts, Sources, Pages
 from .opensearch import opensearch_headers, opensearch_endpoint
+from .rag import embed
 
-vector_store = PGVectorStore.from_params(
-    connection_string=env.get("POSTGRES_URI"),
-    port=5432,
-    schema_name="private",
-    table_name="page",
-    perform_setup=False,
-    embed_dim=1536,
-)
-
-vector_store_index = VectorStoreIndex.from_vector_store(vector_store)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -66,39 +54,24 @@ def analyze_file(data, notify_user):
     minio.fget_object(env.get("STORAGE_BUCKET"), data["path"], file_path)
 
     with Pdf.open(file_path) as pdf:
-        pages = len(pdf.pages)
+        number_of_pages = len(pdf.pages)
 
     with Session(engine) as session:
         stmt = select(Files).where(Files.id == data["id"])
         file = session.scalars(stmt).one()
-        file.pages = pages
+        file.number_of_pages = number_of_pages
         file.status = "idle"
 
         document = Documents(
             name=data["name"],
             from_page=0,
-            to_page=pages,
+            to_page=number_of_pages,
         )
         file.documents.append(document)
         session.commit()
 
     # Notify user of our answer
     notify_user(data["owner_id"], "analyze_file", data["id"])
-
-
-def embedding(text):
-    url = "https://api.openai.com/v1/embeddings"
-    headers = {
-        "Authorization": f"Bearer {env.get('OPENAI_API_KEY')}",
-        "Content-Type": "application/json",
-    }
-
-    data = {"input": text, "model": "text-embedding-3-small"}
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code == 200:
-        return response.json()["data"]
-    else:
-        raise Exception(response.text)
 
 
 def ingest_document(data, notify_user):
@@ -117,9 +90,9 @@ def ingest_document(data, notify_user):
 
     # Extract Document from file
     with Pdf.open(file_path) as file_pdf:
-        pages = len(file_pdf.pages)
+        number_of_pages = len(file_pdf.pages)
         before_range = range(0, data["from_page"])
-        after_range = range(data["to_page"], pages)
+        after_range = range(data["to_page"], number_of_pages)
         pages_to_delete = list(chain(before_range, after_range))
         # Reverse the range to remove last page first as the document shrinks
         # when removing pages, leading to IndexErrors otherwise
@@ -136,41 +109,38 @@ def ingest_document(data, notify_user):
 
     # fitz is pyMuPDF used for extracting text layers
     document_pdf = fitz.open(document_path)
-    # Sort sorts the text nodes by position on the page instead of order in the PDF structure
-    page_contents = [page.get_text(sort=True) for page in document_pdf]
+    # Get all contents, sorted by position on page
+    contents = [page.get_text(sort=True) for page in document_pdf]
+    # Get the embeddings for those contents
+    embeddings = embed(contents)
 
-    # TODO - Remove embeddings of previous run
-    nodes = [
-        TextNode(
-            text=contents,
-            id_=f"{data['file_id']}_{index}",
-            metadata={"file_id": data["file_id"], "index": index},
-        )
-        for index, contents in enumerate(page_contents)
-    ]
-    for previous, current in zip(nodes[0:-1], nodes[1:]):
-        previous.relationships[NodeRelationship.NEXT] = RelatedNodeInfo(
-            node_id=current.node_id
-        )
-        current.relationships[NodeRelationship.PREVIOUS] = RelatedNodeInfo(
-            node_id=previous.node_id
-        )
-    vector_store_index.insert_nodes(nodes)
+    with Session(engine) as session:
+        pages = [
+            Pages(
+                contents=contents,
+                index=index,
+                embedding=embedding,
+                file_id=data["file_id"],
+            )
+            for index, (contents, embedding) in enumerate(zip(contents, embeddings))
+        ]
+        session.add_all(pages)
+        session.commit()
 
-    body = {}
-    body["filename"] = data["name"]
-    body["pages"] = [
-        {"document_id": data["id"], "index": index, "contents": contents}
-        for index, contents in enumerate(page_contents)
-    ]
+    # body = {}
+    # body["filename"] = data["name"]
+    # body["pages"] = [
+    # {"document_id": data["id"], "index": index, "contents": contents}
+    # for index, contents in enumerate(page_contents)
+    # ]
 
-    res = requests.put(
-        f"{opensearch_endpoint}/documents/_doc/{data['id']}",
-        headers=opensearch_headers,
-        json=body,
-    )
-    if res.status_code != 201:
-        raise Exception(res.text)
+    # res = httpx.put(
+    # f"{opensearch_endpoint}/documents/_doc/{data['id']}",
+    # headers=opensearch_headers,
+    # json=body,
+    # )
+    # if res.status_code != 201:
+    # raise Exception(res.text)
 
     with Session(engine) as session:
         stmt = select(Documents).where(Documents.id == data["id"])
@@ -196,7 +166,7 @@ def delete_document(data, notify_user):
     minio.remove_object(env.get("STORAGE_BUCKET"), data["path"])
 
     # Remove indexed contents
-    res = requests.delete(
+    res = httpx.delete(
         f"{opensearch_endpoint}/documents/_doc/{data['id']}", headers=opensearch_headers
     )
     if res.status_code != 200:

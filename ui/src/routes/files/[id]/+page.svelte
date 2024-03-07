@@ -21,7 +21,7 @@
     }
 
     function add() {
-        $created = [ ...$created, { from_page: 1, to_page: data.pages, name: '' }]
+        $created = [ ...$created, { from_page: 1, to_page: data.number_of_pages, name: '' }]
     }
 </script>
 
@@ -40,7 +40,7 @@
 
     <form method="POST" action="?/store" use:enhance={store}>
         {#each $documents as document}
-            <Document {document} pages={data.pages} />
+            <Document {document} number_of_pages={data.number_of_pages} />
         {/each}
 
         <!--TODO progressive enhance-->

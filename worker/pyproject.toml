@@ -18,14 +18,15 @@ pika = "^1.3.2"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.27"}
 psycopg2-binary = "^2.9.9"
 asyncpg = "^0.29.0"
-requests = "^2.31.0"
+httpx = "^0.27.0"
+tiktoken = "^0.6.0"
 
 [tool.poetry.scripts]
-insight-worker = "insight_worker:cli"
+insight-worker = "insight_worker.cli:cli"
 
 [tool.poetry.group.dev.dependencies]
-sqlacodegen = {extras = ["pgvector"], version = "^3.0.0rc4", allow-prereleases = true}
-watchdog = "^4.0.0"
+sqlacodegen = {extras = ["pgvector"], version = "^3.0.0rc5", allow-prereleases = true}
+pytest = "^8.0.2"
 
 [build-system]
 requires = ["poetry-core"]
