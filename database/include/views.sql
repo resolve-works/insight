@@ -4,7 +4,7 @@ SELECT
     owner_id,
     name,
     path,
-    pages,
+    number_of_pages,
     status,
     created_at,
     updated_at
