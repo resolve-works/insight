@@ -63,7 +63,7 @@ class Documents(Base):
     path: Mapped[str] = mapped_column(Text)
     from_page: Mapped[int] = mapped_column(Integer)
     to_page: Mapped[int] = mapped_column(Integer)
-    status: Mapped[str] = mapped_column(Enum('ingesting', 'idle', name='document_status'), server_default=text("'ingesting'::document_status"))
+    status: Mapped[str] = mapped_column(Enum('ingesting', 'indexing', 'idle', name='document_status'), server_default=text("'ingesting'::document_status"))
     name: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text('CURRENT_TIMESTAMP'))

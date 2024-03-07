@@ -109,6 +109,9 @@ def ingest_document(data, notify_user):
 
     # fitz is pyMuPDF used for extracting text layers
     document_pdf = fitz.open(document_path)
+
+    # TODO - https://github.com/followthemoney/insight/issues/55
+
     # Get all contents, sorted by position on page
     contents = [page.get_text(sort=True) for page in document_pdf]
     # Get the embeddings for those contents
@@ -118,7 +121,8 @@ def ingest_document(data, notify_user):
         pages = [
             Pages(
                 contents=contents,
-                index=index,
+                # Index pages in file instead of in document
+                index=data["from_page"] + index,
                 embedding=embedding,
                 file_id=data["file_id"],
             )
@@ -127,20 +131,52 @@ def ingest_document(data, notify_user):
         session.add_all(pages)
         session.commit()
 
-    # body = {}
-    # body["filename"] = data["name"]
-    # body["pages"] = [
-    # {"document_id": data["id"], "index": index, "contents": contents}
-    # for index, contents in enumerate(page_contents)
-    # ]
+    with Session(engine) as session:
+        stmt = select(Documents).where(Documents.id == data["id"])
+        document = session.scalars(stmt).one()
+        document.status = "indexing"
+        session.commit()
 
-    # res = httpx.put(
-    # f"{opensearch_endpoint}/documents/_doc/{data['id']}",
-    # headers=opensearch_headers,
-    # json=body,
-    # )
-    # if res.status_code != 201:
-    # raise Exception(res.text)
+    # Notify user of our answer
+    notify_user(file.owner_id, "ingest_document", data["id"])
+
+
+def index_document(data, notify_user):
+    logging.info(f"Indexing document {data['id']}")
+
+    with Session(engine) as session:
+        stmt = select(Files.owner_id).where(Files.id == data["file_id"])
+        owner_id = session.scalars(stmt).one()
+
+    with Session(engine) as session:
+        stmt = (
+            select(Pages.contents, Pages.index)
+            .where(Pages.file_id == data["file_id"])
+            .where(Pages.index >= data["from_page"])
+            .where(Pages.index < data["to_page"])
+            .order_by(Pages.index.asc())
+        )
+
+        pages = session.execute(stmt).all()
+
+    # Index files pages as document pages
+    res = httpx.put(
+        f"{opensearch_endpoint}/documents/_doc/{data['id']}",
+        headers=opensearch_headers,
+        json={
+            "filename": data["name"],
+            "pages": [
+                {
+                    "document_id": data["id"],
+                    "index": index - data["from_page"],
+                    "contents": contents,
+                }
+                for (contents, index) in pages
+            ],
+        },
+    )
+    if res.status_code != 201:
+        raise Exception(res.text)
 
     with Session(engine) as session:
         stmt = select(Documents).where(Documents.id == data["id"])
@@ -149,7 +185,7 @@ def ingest_document(data, notify_user):
         session.commit()
 
     # Notify user of our answer
-    notify_user(file.owner_id, "ingest_document", data["id"])
+    notify_user(owner_id, "index_document", data["id"])
 
 
 def delete_file(data, notify_user):

@@ -21,6 +21,7 @@ ALTER TABLE private.files REPLICA IDENTITY
 
 CREATE TYPE document_status AS ENUM (
     'ingesting',
+    'indexing',
     'idle'
 );
 

@@ -19,6 +19,7 @@
                 const mapping = {
                     analyze_file: ['api:files'],
                     ingest_document: ['api:files'],
+                    index_document: ['api:files'],
                     answer_prompt: ['api:conversations'],
                 }
 

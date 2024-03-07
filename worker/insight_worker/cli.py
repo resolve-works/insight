@@ -7,6 +7,7 @@ from pika import ConnectionParameters, SelectConnection, PlainCredentials
 from .tasks import (
     analyze_file,
     ingest_document,
+    index_document,
     delete_file,
     delete_document,
     answer_prompt,
@@ -55,6 +56,8 @@ def on_message(channel, method_frame, header_frame, body):
             delete_file(body["before"], notify_user)
         case "ingest_document":
             ingest_document(body["after"], notify_user)
+        case "index_document":
+            index_document(body["after"], notify_user)
         case "delete_document":
             delete_document(body["before"], notify_user)
         case "answer_prompt":
