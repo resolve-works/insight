@@ -28,7 +28,6 @@ class Files(Base):
 
     documents: Mapped[List['Documents']] = relationship('Documents', back_populates='file')
     pages: Mapped[List['Pages']] = relationship('Pages', back_populates='file')
-    sources: Mapped[List['Sources']] = relationship('Sources', back_populates='file')
 
 
 class Prompts(Base):
@@ -86,12 +85,13 @@ class Pages(Base):
     embedding: Mapped[Optional[Any]] = mapped_column(Vector(1536))
 
     file: Mapped['Files'] = relationship('Files', back_populates='pages')
+    sources: Mapped[List['Sources']] = relationship('Sources', back_populates='page')
 
 
 class Sources(Base):
     __tablename__ = 'sources'
     __table_args__ = (
-        ForeignKeyConstraint(['file_id'], ['private.files.id'], ondelete='CASCADE', name='sources_file_id_fkey'),
+        ForeignKeyConstraint(['page_id'], ['private.pages.id'], ondelete='CASCADE', name='sources_page_id_fkey'),
         ForeignKeyConstraint(['prompt_id'], ['private.prompts.id'], ondelete='CASCADE', name='sources_prompt_id_fkey'),
         PrimaryKeyConstraint('id', name='sources_pkey'),
         {'schema': 'private'}
@@ -99,9 +99,8 @@ class Sources(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     prompt_id: Mapped[int] = mapped_column(BigInteger)
-    file_id: Mapped[uuid.UUID] = mapped_column(Uuid)
-    index: Mapped[int] = mapped_column(Integer)
-    score: Mapped[float] = mapped_column(Double(53))
+    page_id: Mapped[int] = mapped_column(BigInteger)
+    similarity: Mapped[float] = mapped_column(Double(53))
 
-    file: Mapped['Files'] = relationship('Files', back_populates='sources')
+    page: Mapped['Pages'] = relationship('Pages', back_populates='sources')
     prompt: Mapped['Prompts'] = relationship('Prompts', back_populates='sources')

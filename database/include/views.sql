@@ -27,13 +27,24 @@ FROM
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO external_user;
 
+CREATE OR REPLACE VIEW pages AS
+SELECT
+    id,
+    file_id,
+    index,
+    contents
+FROM
+    private.pages;
+
+GRANT SELECT ON pages TO external_user;
+
 CREATE OR REPLACE VIEW prompts AS
 SELECT
     *
 FROM
     private.prompts;
 
-GRANT SELECT, INSERT, UPDATE ON prompts TO external_user;
+GRANT SELECT, INSERT ON prompts TO external_user;
 
 CREATE OR REPLACE VIEW sources AS
 SELECT
@@ -41,5 +52,5 @@ SELECT
 FROM
     private.sources;
 
-GRANT SELECT, INSERT ON sources TO external_user;
+GRANT SELECT ON sources TO external_user;
 

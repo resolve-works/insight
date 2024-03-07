@@ -48,7 +48,7 @@ END
 $$
 LANGUAGE PLPGSQL;
 
-CREATE OR REPLACE FUNCTION document (sources)
+CREATE OR REPLACE FUNCTION document (pages)
     RETURNS SETOF documents ROWS 1
     AS $$
     SELECT

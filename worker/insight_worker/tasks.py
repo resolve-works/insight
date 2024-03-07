@@ -10,11 +10,11 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from pikepdf import Pdf
 from itertools import chain
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import Session
 from .models import Files, Documents, Prompts, Sources, Pages
 from .opensearch import opensearch_headers, opensearch_endpoint
-from .rag import embed
+from .rag import embed, complete
 
 
 logging.basicConfig(level=logging.INFO)
@@ -212,21 +212,32 @@ def delete_document(data, notify_user):
 def answer_prompt(data, notify_user):
     logging.info(f"Answering prompt {data['id']}")
 
-    query_engine = vector_store_index.as_query_engine(
-        similarity_top_k=data["similarity_top_k"]
-    )
-    response = query_engine.query(data["query"])
+    embedding = next(embed([data["query"]]))
+
+    with Session(engine) as session:
+        stmt = (
+            select(
+                Pages.id,
+                Pages.embedding.cosine_distance(embedding).label("distance"),
+                Pages.contents,
+            )
+            .order_by(text("distance asc"))
+            .limit(data["similarity_top_k"])
+        )
+
+        pages = session.execute(stmt).all()
+
+    response = complete(data["query"], [contents for (_, _, contents) in pages])
 
     with Session(engine) as session:
         stmt = select(Prompts).where(Prompts.id == data["id"])
         prompt = session.scalars(stmt).one()
-        prompt.response = response.response
+        prompt.response = response
 
-        for node in response.source_nodes:
+        for page_id, distance, _ in pages:
             source = Sources(
-                file_id=node.metadata["file_id"],
-                index=node.metadata["index"],
-                score=node.get_score(),
+                page_id=page_id,
+                similarity=(1 - distance) if distance is not None else 0,
             )
             prompt.sources.append(source)
         session.commit()
