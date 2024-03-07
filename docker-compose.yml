@@ -86,7 +86,7 @@ services:
       discovery.type: single-node
       DISABLE_INSTALL_DEMO_CONFIG: True
     volumes:
-      - opensearch-data:/usr/share/opensearch/data
+      - opensearch:/usr/share/opensearch/data
       - ./opensearch/opensearch-security/action_groups.yml:/usr/share/opensearch/config/opensearch-security/action_groups.yml
       - ./opensearch/opensearch-security/allowlist.yml:/usr/share/opensearch/config/opensearch-security/allowlist.yml
       - ./opensearch/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
@@ -112,7 +112,7 @@ services:
       RABBITMQ_DEFAULT_USER: insight
       RABBITMQ_DEFAULT_PASS: insight
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq:/var/lib/rabbitmq
       - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
       - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
@@ -122,7 +122,7 @@ services:
     environment:
       ENABLE_DEBEZIUM_SCRIPTING: true
     volumes:
-      - debezium-data:/debezium/data
+      - debezium:/debezium/data
       - ./debezium/application.properties:/debezium/conf/application.properties
     depends_on:
       postgres:
@@ -145,7 +145,7 @@ services:
       test: pg_isready -U insight
       interval: 3s
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
       - ./database:/docker-entrypoint-initdb.d
 
   minio:
@@ -160,7 +160,7 @@ services:
       MINIO_IDENTITY_OPENID_CLAIM_NAME: roles
       MINIO_IDENTITY_OPENID_CLIENT_ID: ${OIDC_CLIENT_ID}
     volumes:
-      - minio-data:/data
+      - minio:/data
 
   # Minio client, runs once, sets up the buckets and policies
   mc:
@@ -197,9 +197,9 @@ secrets:
      file: .jwk
 
 volumes:
-  minio-data: {}
-  postgres-data: {}
-  opensearch-data: {}
-  rabbitmq-data: {}
-  debezium-data: {}
+  minio: {}
+  postgres: {}
+  opensearch: {}
+  rabbitmq: {}
+  debezium: {}
 
