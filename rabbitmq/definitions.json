@@ -28,6 +28,14 @@
       "arguments": {},
       "destination": "worker",
       "destination_type": "queue",
+      "routing_key": "index_document",
+      "source": "insight",
+      "vhost": "/"
+    },
+    {
+      "arguments": {},
+      "destination": "worker",
+      "destination_type": "queue",
       "routing_key": "delete_document",
       "source": "insight",
       "vhost": "/"
