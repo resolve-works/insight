@@ -83,7 +83,11 @@ export const actions = {
     // Remove a single document
     remove: async ({ request, fetch, locals }) => {
         const data = await request.formData();
-        await fetch(`/api/v1/documents?id=eq.${data.get('id')}`, { method: 'DELETE' })
+        await fetch(`/api/v1/documents?id=eq.${data.get('id')}`, { 
+            method: 'PATCH', 
+            body: JSON.stringify({ is_deleted: true }),
+            headers: { 'Content-Type': 'application/json' }
+        })
 
         const channel = await Channel.connect(locals.access_token)
         channel.publish('delete_document', { id:`${data.get('id')}` });

@@ -97,10 +97,7 @@ def upload(files):
                     content_type="application/pdf",
                 )
 
-                res = client.patch(
-                    f"{config['api']['endpoint']}/api/v1/files?id=eq.{file['id']}",
-                    data={"status": "analyzing"},
-                )
+                # TODO - trigger ingest
 
                 if res.status_code != 204:
                     logging.error(res.text)

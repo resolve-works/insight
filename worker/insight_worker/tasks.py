@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from pikepdf import Pdf
 from itertools import chain
-from sqlalchemy import create_engine, select, text, inspect
+from sqlalchemy import create_engine, select, text, delete
 from sqlalchemy.orm import Session
 from .models import Files, Documents, Prompts, Sources, Pages
 from .opensearch import opensearch_headers, opensearch_endpoint
@@ -28,13 +28,6 @@ minio = Minio(
     secret_key=env.get("STORAGE_SECRET_KEY"),
     region="insight",
 )
-
-
-def orm_object_to_dict(obj):
-    return {
-        column.key: getattr(obj, column.key)
-        for column in inspect(obj).mapper.column_attrs
-    }
 
 
 def ocrmypdf_process(input_file, output_file):
@@ -206,25 +199,53 @@ def index_document(id, channel):
         )
 
 
-def delete_file(data, channel):
-    logging.info(f"Deleting file {data['id']}")
+def delete_file(id, channel):
+    logging.info(f"Deleting file {id}")
 
-    # Remove file from object storage
-    minio.remove_object(env.get("STORAGE_BUCKET"), data["path"])
+    with Session(engine) as session:
+        stmt = select(Files.path).where(Files.id == id)
+        path = session.scalars(stmt).one()
+
+        # Remove file from object storage
+        minio.remove_object(env.get("STORAGE_BUCKET"), path)
+        # Remove directory containing all documents
+        minio.remove_object(env.get("STORAGE_BUCKET"), str(Path(path).parent))
+
+        # Remove indexed contents of documents
+        res = httpx.post(
+            f"{opensearch_endpoint}/documents/_delete_by_query",
+            headers=opensearch_headers,
+            json={"query": {"match": {"file_id": id}}},
+        )
+        if res.status_code != 200:
+            raise Exception(res.text)
+
+        stmt = delete(Files).where(Files.id == id)
+        session.execute(stmt)
+        session.commit()
 
 
-def delete_document(data, channel):
-    logging.info(f"Deleting document {data['id']}")
+def delete_document(id, channel):
+    logging.info(f"Deleting document {id}")
 
-    # Remove file from object storage
-    minio.remove_object(env.get("STORAGE_BUCKET"), data["path"])
+    with Session(engine) as session:
+        stmt = select(Documents.path).where(Documents.id == id)
+        path = session.scalars(stmt).one()
 
-    # Remove indexed contents
-    res = httpx.delete(
-        f"{opensearch_endpoint}/documents/_doc/{data['id']}", headers=opensearch_headers
-    )
-    if res.status_code != 200:
-        raise Exception(res.text)
+        # Remove file from object storage
+        minio.remove_object(env.get("STORAGE_BUCKET"), path)
+
+        # Remove indexed contents
+        res = httpx.delete(
+            f"{opensearch_endpoint}/documents/_doc/{id}",
+            headers=opensearch_headers,
+        )
+        if res.status_code != 200:
+            raise Exception(res.text)
+
+        stmt = delete(Documents).where(Documents.id == id)
+        session.execute(stmt)
+        session.commit()
 
 
 def answer_prompt(id, channel):

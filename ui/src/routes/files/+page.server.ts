@@ -54,7 +54,11 @@ export const actions = {
 
     remove: async ({ request, fetch, locals }) => {
         const data = await request.formData();
-        await fetch(`/api/v1/files?id=eq.${data.get('id')}`, { method: 'DELETE' })
+        await fetch(`/api/v1/files?id=eq.${data.get('id')}`, { 
+            method: 'PATCH', 
+            body: JSON.stringify({ is_deleted: true }),
+            headers: { 'Content-Type': 'application/json' }
+        })
 
         const channel = await Channel.connect(locals.access_token)
         channel.publish('delete_file', { id:`${data.get('id')}` });
