@@ -1,11 +1,5 @@
 
-upstream ui {
-    server ui:3000;
-}
 
-upstream postgrest {
-    server postgrest:3000;
-}
 
 upstream minio {
     server minio:9000;
@@ -13,8 +7,8 @@ upstream minio {
 
 server {
     listen 9000 ssl http2;
-    ssl_certificate /etc/ssl/private/insight.pem;
-    ssl_certificate_key /etc/ssl/private/insight-key.pem;
+    ssl_certificate /etc/ssl/insight.pem;
+    ssl_certificate_key /etc/ssl/insight-key.pem;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
@@ -38,10 +32,18 @@ server {
     }
 }
 
+upstream postgrest {
+    server postgrest:3000;
+}
+
+upstream ui {
+    server ui:3000;
+}
+
 server {
     listen 8080 ssl http2;
-    ssl_certificate /etc/ssl/private/insight.pem;
-    ssl_certificate_key /etc/ssl/private/insight-key.pem;
+    ssl_certificate /etc/ssl/insight.pem;
+    ssl_certificate_key /etc/ssl/insight-key.pem;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
