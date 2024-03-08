@@ -9,7 +9,7 @@
     export let status: string;
     export let documents: { id: string, name: string, status: string }[] = []
 
-    $: is_idle = status == 'idle' && documents.every(document => document.status == 'idle');
+    $: is_idle = ! status && documents.every(document => ! document.status);
 </script>
 
 <Card>

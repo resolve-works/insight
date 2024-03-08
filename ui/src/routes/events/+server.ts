@@ -1,15 +1,15 @@
 
-import { env } from '$env/dynamic/private';
-import amqplib from 'amqplib';
+import { amqp_connect } from '$lib/amqp.ts';
 
 export async function GET({ locals }) {
-    const password = `${encodeURIComponent(locals.access_token)}`
-    const connection = await amqplib.connect(`amqp://username:${password}@${env.RABBITMQ_HOST}`);
-
-    const queue = `user-${locals.sub}`
-
+    const connection = await amqp_connect(locals.access_token)
     const channel = await connection.createChannel();
+
+    // Make sure user queue exists
+    const queue = `user-${locals.sub}`
+    await channel.assertExchange(queue, 'fanout', { autoDelete: true })
     await channel.assertQueue(queue, { autoDelete: true });
+    await channel.bindQueue(queue, queue, '')
 
     let interval: ReturnType<typeof setInterval>;
 
@@ -21,7 +21,10 @@ export async function GET({ locals }) {
 
             channel.consume(queue, (message) => {
                 if (message !== null) {
-                    ctr.enqueue(message.content)
+                    ctr.enqueue(JSON.stringify({ 
+                        routing_key: message.fields.routingKey, 
+                        content: message.content.toString('utf8')
+                    }))
                     channel.ack(message);
                 } else {
                     console.log('Consumer cancelled by server');

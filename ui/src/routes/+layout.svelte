@@ -15,6 +15,7 @@
             while (true) {
                 const { value, done } = await reader.read();
                 const body = JSON.parse(value);
+                console.log(body)
 
                 const mapping = {
                     analyze_file: ['api:files'],
@@ -23,9 +24,9 @@
                     answer_prompt: ['api:conversations'],
                 }
 
-                if(body.message in mapping) {
+                if(body.routing_key in mapping) {
                     // @ts-ignore
-                    for(const key of mapping[body.message]) {
+                    for(const key of mapping[body.routing_key]) {
                         invalidate(key)
                     }
                 }

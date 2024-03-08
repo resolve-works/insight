@@ -5,6 +5,7 @@ SELECT
     name,
     path,
     number_of_pages,
+    is_uploaded,
     status,
     created_at,
     updated_at

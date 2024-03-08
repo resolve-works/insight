@@ -1,13 +1,11 @@
-import { env } from '$env/dynamic/public';
 import type { Actions } from './$types';
-import { Client } from 'minio';
-import { Readable } from 'stream';
 import { sign } from '$lib/sign';
+import { amqp_connect } from '$lib/amqp.js';
 
 export async function load({ fetch, depends }) {
     depends('api:files')
 
-    const res = await fetch('/api/v1/files?status=neq.uploading&select=id,name,status,documents(id,name,status)&order=created_at.desc')
+    const res = await fetch('/api/v1/files?is_uploaded=eq.true&select=id,name,status,documents(id,name,status)&order=created_at.desc')
 
     const files = await res.json()
     return { files }
@@ -45,9 +43,14 @@ export const actions = {
 
             const patch_response = await fetch(`/api/v1/files?id=eq.${file.id}`, {
                 method: 'PATCH',
-                body: JSON.stringify({ status: 'analyzing' }),
+                body: JSON.stringify({ is_uploaded: true }),
                 headers: { 'Content-Type': 'application/json', }
             })
+
+            const connection = await amqp_connect(locals.access_token)
+            const channel = await connection.createChannel();
+
+            channel.publish('insight', 'analyze_file', Buffer.from(file.id));
         }
     },
 

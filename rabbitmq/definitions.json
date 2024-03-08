@@ -75,13 +75,6 @@
       "user": "worker",
       "vhost": "/",
       "write": ".*"
-    },
-    {
-      "configure": ".*",
-      "read": ".*",
-      "user": "debezium",
-      "vhost": "/",
-      "write": ".*"
     }
   ],
   "policies": [],
@@ -113,13 +106,6 @@
       "limits": {},
       "name": "worker",
       "password_hash": "jlzPqq7MV9j8ht8Lt7EhLDVRnPFWRN2MXvNNO1T1AuwmyROu",
-      "tags": []
-    },
-    {
-      "hashing_algorithm": "rabbit_password_hashing_sha256",
-      "limits": {},
-      "name": "debezium",
-      "password_hash": "F3Slp2bntEk4ulVjh3RyJPOzsYodSIfhY6AhwakIqoerPjwi",
       "tags": []
     }
   ],

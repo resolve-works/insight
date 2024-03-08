@@ -117,19 +117,6 @@ services:
       - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
-  debezium:
-    image: debezium/server:latest
-    environment:
-      ENABLE_DEBEZIUM_SCRIPTING: true
-    volumes:
-      - debezium:/debezium/data
-      - ./debezium/application.properties:/debezium/conf/application.properties
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
   postgres:
     image: pgvector/pgvector:pg16
     ports:
@@ -201,5 +188,4 @@ volumes:
   postgres: {}
   opensearch: {}
   rabbitmq: {}
-  debezium: {}
 

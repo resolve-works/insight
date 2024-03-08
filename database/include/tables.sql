@@ -1,7 +1,5 @@
 CREATE TYPE file_status AS ENUM (
-    'uploading',
-    'analyzing',
-    'idle'
+    'analyzing'
 );
 
 CREATE TABLE IF NOT EXISTS private.files (
@@ -10,19 +8,16 @@ CREATE TABLE IF NOT EXISTS private.files (
     path text NOT NULL,
     name text NOT NULL,
     number_of_pages integer,
-    status file_status NOT NULL DEFAULT 'uploading',
+    status file_status DEFAULT 'analyzing',
+    is_uploaded boolean NOT NULL DEFAULT false,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
 
-ALTER TABLE private.files REPLICA IDENTITY
-    FULL;
-
 CREATE TYPE document_status AS ENUM (
     'ingesting',
-    'indexing',
-    'idle'
+    'indexing'
 );
 
 CREATE TABLE private.documents (
@@ -32,15 +27,12 @@ CREATE TABLE private.documents (
     path text NOT NULL,
     from_page integer NOT NULL,
     to_page integer NOT NULL,
-    status document_status NOT NULL DEFAULT 'ingesting',
+    status document_status DEFAULT 'ingesting',
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE CASCADE
 );
-
-ALTER TABLE private.documents REPLICA IDENTITY
-    FULL;
 
 CREATE TABLE IF NOT EXISTS private.pages (
     id bigserial,
@@ -53,8 +45,7 @@ CREATE TABLE IF NOT EXISTS private.pages (
 );
 
 CREATE TYPE prompt_status AS enum (
-    'answering',
-    'idle'
+    'answering'
 );
 
 CREATE TABLE IF NOT EXISTS private.prompts (
@@ -63,7 +54,7 @@ CREATE TABLE IF NOT EXISTS private.prompts (
     query text NOT NULL,
     similarity_top_k integer NOT NULL DEFAULT 3,
     response text,
-    status prompt_status NOT NULL DEFAULT 'answering',
+    status prompt_status DEFAULT 'answering',
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)

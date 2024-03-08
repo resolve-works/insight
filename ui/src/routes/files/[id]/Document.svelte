@@ -10,7 +10,7 @@
     export let document: DocumentInput;
 
     // Document can be editted when it's new, or when it's not being ingested
-    $: is_disabled = 'status' in document.original && document.original.status != 'idle'
+    $: is_disabled = !! document.original.status
 
 	let page = queryParam('page', ssp.number());
     async function go_to_page(e: Event) {
