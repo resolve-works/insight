@@ -8,10 +8,12 @@ services:
     ports:
       - 8080:8080
       - 9000:9000
+      - 5671:5671
     volumes:
-      - ./nginx:/etc/nginx/templates
-      - ./certs/insight.pem:/etc/ssl/private/insight.pem
-      - ./certs/insight-key.pem:/etc/ssl/private/insight-key.pem
+      - ./nginx/templates:/etc/nginx/templates
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certs/insight.pem:/etc/ssl/insight.pem
+      - ./certs/insight-key.pem:/etc/ssl/insight-key.pem
     depends_on:
       - minio
       - postgrest
@@ -26,7 +28,7 @@ services:
       PUBLIC_OIDC_ENDPOINT: ${OIDC_ENDPOINT}
       STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
       STORAGE_BUCKET: ${STORAGE_BUCKET}
-      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_HOST: insight
       OPENSEARCH_HOST: opensearch
     volumes:
       - ./ui:/insight-ui
@@ -53,7 +55,6 @@ services:
     command: /bin/bash -c 'update-ca-certificates && pip install "watchdog[watchmedo]" && watchmedo auto-restart -d=/usr/local/lib/python3.11/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages'
     environment:
       SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
-      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
       POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       API_ENDPOINT: ${API_ENDPOINT}
@@ -61,7 +62,7 @@ services:
       STORAGE_BUCKET: ${STORAGE_BUCKET}
       STORAGE_ACCESS_KEY: ${STORAGE_WORKER_ACCESS_KEY}
       STORAGE_SECRET_KEY: ${STORAGE_WORKER_SECRET_KEY}
-      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_HOST: insight
       RABBITMQ_USER: worker
       RABBITMQ_PASSWORD: 5Ytge8Xg4gI38sJXmi7q
       OPENSEARCH_HOST: opensearch

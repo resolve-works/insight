@@ -73,6 +73,7 @@ instead of our nginx gateway. To reach your local development setup, you'll need
 the `insight` DNS name for your host.
 ```
 mkcert -cert-file ./certs/insight.pem -key-file ./certs/insight-key.pem insight
+chmod -R 644 ./certs/insight*
 echo "127.0.0.1 insight" | sudo tee -a /etc/hosts
 ```
 

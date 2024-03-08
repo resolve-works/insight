@@ -1,9 +1,10 @@
 import click
 import logging
 import json
-import requests
+import httpx
+import ssl
 from os import environ as env
-from pika import ConnectionParameters, SelectConnection, PlainCredentials
+from pika import ConnectionParameters, SelectConnection, PlainCredentials, SSLOptions
 from .tasks import (
     analyze_file,
     ingest_document,
@@ -21,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 def create_mapping():
     logging.info("Creating index")
 
-    res = requests.put(
+    res = httpx.put(
         f"{opensearch_endpoint}/documents",
         json={"mappings": {"properties": {"pages": {"type": "nested"}}}},
         headers=opensearch_headers,
@@ -83,8 +84,11 @@ def cli():
 def process_messages():
     create_mapping()
 
+    context = ssl.create_default_context()
+
     # Get access token from Oauth provider
     parameters = ConnectionParameters(
+        ssl_options=SSLOptions(context),
         host=env.get("RABBITMQ_HOST"),
         credentials=PlainCredentials(
             env.get("RABBITMQ_USER"), env.get("RABBITMQ_PASSWORD")
