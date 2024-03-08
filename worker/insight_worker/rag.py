@@ -26,14 +26,17 @@ def batched(iterable, n):
 
 
 def embed(strings):
-    for batch in batched(strings, 2048):
+    for batch in batched(strings, 64):
         # Send tokens to external service instead of the whole text
         data = {
             "input": [encoding.encode(string) for string in batch],
             "model": "text-embedding-3-small",
         }
         response = httpx.post(
-            "https://api.openai.com/v1/embeddings", headers=headers, json=data
+            "https://api.openai.com/v1/embeddings",
+            headers=headers,
+            json=data,
+            timeout=30,
         )
         if response.status_code == 200:
             for embedding in response.json()["data"]:
