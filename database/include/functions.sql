@@ -24,7 +24,8 @@ CREATE OR REPLACE FUNCTION set_file_path ()
     RETURNS TRIGGER
     AS $$
 BEGIN
-    NEW.path = format('%s/%s.pdf', NEW.owner_id, NEW.id);
+    -- TODO - name files with name
+    NEW.path = format('%s/%s/%s.pdf', NEW.owner_id, NEW.id, NEW.id);
     RETURN NEW;
 END
 $$
@@ -42,7 +43,8 @@ BEGIN
         files
     WHERE
         id = NEW.file_id;
-    NEW.path = format('%s/%s/%s.pdf', owner_id, NEW.file_id, NEW.id);
+    -- TODO - name files with name
+    NEW.path = format('%s/%s/%s/%s.pdf', owner_id, NEW.file_id, NEW.id, NEW.id);
     RETURN NEW;
 END
 $$

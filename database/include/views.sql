@@ -8,9 +8,11 @@ SELECT
     is_uploaded,
     status,
     created_at,
-    updated_at
+    updated_at,
+    is_deleted
 FROM
-    private.files;
+    private.files 
+WHERE private.files.is_deleted = false;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON files TO external_user;
 
@@ -22,9 +24,11 @@ SELECT
     from_page,
     to_page,
     name,
-    status
+    status,
+    is_deleted
 FROM
-    private.documents;
+    private.documents 
+WHERE private.documents.is_deleted = false;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO external_user;
 

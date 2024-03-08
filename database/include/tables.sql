@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS private.files (
     number_of_pages integer,
     status file_status DEFAULT 'analyzing',
     is_uploaded boolean NOT NULL DEFAULT false,
+    is_deleted boolean NOT NULL DEFAULT false,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
@@ -28,6 +29,7 @@ CREATE TABLE private.documents (
     from_page integer NOT NULL,
     to_page integer NOT NULL,
     status document_status DEFAULT 'ingesting',
+    is_deleted boolean NOT NULL DEFAULT false,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
