@@ -1,6 +1,10 @@
 import click
 import requests
 import logging
+import ssl
+import urllib.parse
+import json
+from pika import BlockingConnection, ConnectionParameters, SSLOptions, PlainCredentials
 from minio import Minio
 from xml.etree import ElementTree
 from tqdm import tqdm
@@ -65,22 +69,41 @@ def upload(files):
                 unit_divisor=1024,
             ) as t:
                 reader_wrapper = CallbackIOWrapper(t.update, f, "read")
+                access_token = get_token()["access_token"]
 
+                # Get storage keys in exchange for JWT
                 res = requests.post(
                     f"https://{config['storage']['endpoint']}",
                     data={
                         "Action": "AssumeRoleWithWebIdentity",
                         "Version": "2011-06-15",
                         "DurationSeconds": "3600",
-                        "WebIdentityToken": get_token()["access_token"],
+                        "WebIdentityToken": access_token,
                     },
                 )
+
+                # Connect first, as upload could take long, and access_token is
+                # only valid for a short while
+                # TODO - Proper token refresh logic
+                context = ssl.create_default_context()
+                parameters = ConnectionParameters(
+                    ssl_options=SSLOptions(context),
+                    host=config["rabbitmq"]["host"],
+                    credentials=PlainCredentials(
+                        "username", urllib.parse.quote(access_token)
+                    ),
+                )
+
+                connection = BlockingConnection(parameters)
+                channel = connection.channel()
+
                 tree = ElementTree.fromstring(res.content)
                 ns = {"s3": "https://sts.amazonaws.com/doc/2011-06-15/"}
                 credentials = tree.find(
                     "./s3:AssumeRoleWithWebIdentityResult/s3:Credentials", ns
                 )
 
+                # Upload file to storage backend
                 minio = Minio(
                     config["storage"]["endpoint"],
                     access_key=credentials.find("s3:AccessKeyId", ns).text,
@@ -97,8 +120,24 @@ def upload(files):
                     content_type="application/pdf",
                 )
 
-                # TODO - trigger ingest
+                # Trigger ingest of file
+                channel.basic_publish(
+                    exchange="insight",
+                    routing_key="analyze_file",
+                    body=json.dumps({"id": file["id"]}),
+                )
 
+                res = client.patch(
+                    f"{config['api']['endpoint']}/api/v1/files?id=eq.{file['id']}",
+                    data={"is_uploaded": True},
+                )
                 if res.status_code != 204:
                     logging.error(res.text)
                     exit(1)
+
+                # Trigger ingest of file
+                channel.basic_publish(
+                    exchange=f"user-{file['owner_id']}",
+                    routing_key="upload_file",
+                    body=json.dumps({"id": file["id"]}),
+                )

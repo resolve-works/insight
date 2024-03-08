@@ -17,6 +17,7 @@
                 const body = JSON.parse(value);
 
                 const mapping = {
+                    upload_file: ['api:files'],
                     analyze_file: ['api:files'],
                     ingest_document: ['api:files'],
                     index_document: ['api:files'],

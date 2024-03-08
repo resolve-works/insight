@@ -19,6 +19,9 @@ if not config_file.exists():
         "endpoint": "insight:9000",
         "bucket": "insight",
     }
+    config["rabbitmq"] = {
+        "host": "insight",
+    }
     config.write(open(config_file, "w"))
 else:
     config.read(config_file)

@@ -86,7 +86,6 @@ def process_messages():
 
     context = ssl.create_default_context()
 
-    # Get access token from Oauth provider
     parameters = ConnectionParameters(
         ssl_options=SSLOptions(context),
         host=env.get("RABBITMQ_HOST"),
