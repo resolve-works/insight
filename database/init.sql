@@ -1,5 +1,3 @@
-ALTER SYSTEM SET wal_level = logical;
-
 BEGIN;
 \set pg_api_user `echo $PG_API_USER`
 \set pg_api_password `echo $PG_API_PASSWORD`
@@ -29,4 +27,3 @@ GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA private TO :pg_worker_user;
 GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA public TO :pg_worker_user;
 GRANT usage, SELECT ON ALL sequences IN SCHEMA private TO :pg_worker_user;
 COMMIT;
-
