@@ -1,6 +1,6 @@
 import type { Actions } from './$types';
 import { sign } from '$lib/sign';
-import { amqp_connect } from '$lib/amqp.js';
+import { Channel } from '$lib/amqp.js';
 
 export async function load({ fetch, depends }) {
     depends('api:files')
@@ -12,7 +12,6 @@ export async function load({ fetch, depends }) {
 }
 
 export const actions = {
-    // Remove a single file
     upload: async ({ request, fetch, locals }) => {
         const data = await request.formData();
         const uploads: File[] = data.getAll('files') as File[]
@@ -47,15 +46,18 @@ export const actions = {
                 headers: { 'Content-Type': 'application/json', }
             })
 
-            const connection = await amqp_connect(locals.access_token)
-            const channel = await connection.createChannel();
-
-            channel.publish('insight', 'analyze_file', Buffer.from(file.id));
+            const channel = await Channel.connect(locals.access_token)
+            channel.publish('analyze_file', { id: file.id });
+            channel.close()
         }
     },
 
-    remove: async ({ request, fetch }) => {
+    remove: async ({ request, fetch, locals }) => {
         const data = await request.formData();
         await fetch(`/api/v1/files?id=eq.${data.get('id')}`, { method: 'DELETE' })
+
+        const channel = await Channel.connect(locals.access_token)
+        channel.publish('delete_file', { id:`${data.get('id')}` });
+        channel.close()
     },
 } satisfies Actions;

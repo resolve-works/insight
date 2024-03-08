@@ -1,9 +1,9 @@
 
-import { amqp_connect } from '$lib/amqp.ts';
+import { connect } from '$lib/amqp.ts';
 
 export async function GET({ locals }) {
-    const connection = await amqp_connect(locals.access_token)
-    const channel = await connection.createChannel();
+    const connection = await connect(locals.access_token)
+    const channel = await connection.createChannel()
 
     // Make sure user queue exists
     const queue = `user-${locals.sub}`
@@ -23,7 +23,7 @@ export async function GET({ locals }) {
                 if (message !== null) {
                     ctr.enqueue(JSON.stringify({ 
                         routing_key: message.fields.routingKey, 
-                        content: message.content.toString('utf8')
+                        content: JSON.parse(message.content.toString()),
                     }))
                     channel.ack(message);
                 } else {

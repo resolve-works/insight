@@ -1,6 +1,7 @@
 import type { Actions } from './$types';
 
 import { sign } from '$lib/sign.ts';
+import { Channel } from '$lib/amqp.ts';
 
 export async function load({ params, fetch, locals, depends }) {
     depends('api:files')
@@ -23,7 +24,7 @@ export async function load({ params, fetch, locals, depends }) {
 
 export const actions = {
     // Store created & updated documents
-    store: async ({ request, fetch, params }) => {
+    store: async ({ request, fetch, params, locals }) => {
         const data = await request.formData();
 
         // This was something very abstract and complex, kept simple for a reason
@@ -42,35 +43,50 @@ export const actions = {
                 to_page: to_page[i],
             }
             // Add file id when creating, or ID when it's set to update
-            return id ? { id, ...document } : { file_id: params.id, ...document };
+            return id ? { id: id.toString(), ...document } : { file_id: params.id, ...document };
         })
 
+        const channel = await Channel.connect(locals.access_token)
+
         // Update existing documents
-        const updated_documents = documents.filter(document => 'id' in document);
-        for(const document of updated_documents) {
+        const to_be_updated = documents.filter(document => 'id' in document);
+        for(const document of to_be_updated) {
             await fetch(`/api/v1/documents?id=eq.${document.id}`, { 
                 method: 'PATCH', 
                 body: JSON.stringify(document),
                 headers: { 'Content-Type': 'application/json' }
             })
-            // TODO - error handling
+            channel.publish('ingest_document', { id: document.id });
         }
 
         // Bulk insert new ones
-        const created_documents = documents.filter(document => ! ('id' in document))
-        if(created_documents.length) {
-            await fetch('/api/v1/documents', {
+        const to_be_created = documents.filter(document => ! ('id' in document))
+        if(to_be_created.length) {
+            const response = await fetch('/api/v1/documents', {
                 method: 'POST',
-                body: JSON.stringify(created_documents),
-                headers: { 'Content-Type': 'application/json' }
+                body: JSON.stringify(to_be_created),
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation',
+                }
             })
-            // TODO - error handling
+
+            const created_documents = await response.json()
+            for(const document of created_documents) {
+                channel.publish('ingest_document', { id: document.id });
+            }
         }
+
+        channel.close()
     },
 
     // Remove a single document
-    remove: async ({ request, fetch }) => {
+    remove: async ({ request, fetch, locals }) => {
         const data = await request.formData();
         await fetch(`/api/v1/documents?id=eq.${data.get('id')}`, { method: 'DELETE' })
+
+        const channel = await Channel.connect(locals.access_token)
+        channel.publish('delete_document', { id:`${data.get('id')}` });
+        channel.close()
     },
 } satisfies Actions;

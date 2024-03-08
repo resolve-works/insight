@@ -2,6 +2,7 @@ import logging
 import ocrmypdf
 import fitz
 import httpx
+import json
 from minio import Minio
 from os import environ as env
 from urllib.parse import urlparse
@@ -77,12 +78,14 @@ def analyze_file(id, channel):
         session.commit()
 
         channel.basic_publish(
-            exchange="insight", routing_key="ingest_document", body=str(document.id)
+            exchange="insight",
+            routing_key="ingest_document",
+            body=json.dumps({"id": str(document.id)}),
         )
         channel.basic_publish(
             exchange=f"user-{file.owner_id}",
             routing_key="analyze_file",
-            body=str(file.id),
+            body=json.dumps({"id": str(file.id)}),
         )
 
 
@@ -144,12 +147,14 @@ def ingest_document(id, channel):
 
         # Trigger indexing
         channel.basic_publish(
-            exchange="insight", routing_key="index_document", body=str(document.id)
+            exchange="insight",
+            routing_key="index_document",
+            body=json.dumps({"id": str(document.id)}),
         )
         channel.basic_publish(
             exchange=f"user-{document.file.owner_id}",
             routing_key="ingest_document",
-            body=str(document.id),
+            body=json.dumps({"id": str(document.id)}),
         )
 
 
@@ -187,7 +192,7 @@ def index_document(id, channel):
                 ],
             },
         )
-        if res.status_code != 201:
+        if res.status_code not in [200, 201]:
             raise Exception(res.text)
 
         document.status = None
@@ -197,7 +202,7 @@ def index_document(id, channel):
         channel.basic_publish(
             exchange=f"user-{document.file.owner_id}",
             routing_key="index_document",
-            body=str(document.id),
+            body=json.dumps({"id": str(document.id)}),
         )
 
 
@@ -260,5 +265,5 @@ def answer_prompt(id, channel):
         channel.basic_publish(
             exchange=f"user-{prompt.owner_id}",
             routing_key="answer_prompt",
-            body=str(prompt.id),
+            body=json.dumps({"id": str(prompt.id)}),
         )

@@ -41,21 +41,21 @@ def create_mapping():
 
 
 def on_message(channel, method_frame, header_frame, body):
-    id = body.decode("utf-8")
+    data = json.loads(body)
 
     match method_frame.routing_key:
         case "analyze_file":
-            analyze_file(id, channel)
+            analyze_file(data["id"], channel)
         case "ingest_document":
-            ingest_document(id, channel)
+            ingest_document(data["id"], channel)
         case "index_document":
-            index_document(id, channel)
+            index_document(data["id"], channel)
         case "answer_prompt":
-            answer_prompt(id, channel)
+            answer_prompt(data["id"], channel)
         case "delete_file":
-            delete_file(id, channel)
+            delete_file(data["id"], channel)
         case "delete_document":
-            delete_document(id, channel)
+            delete_document(data["id"], channel)
         case _:
             raise Exception(f"Unknown routing key: {method_frame.routing_key}")
 
