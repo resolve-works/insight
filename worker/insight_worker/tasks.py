@@ -212,8 +212,10 @@ def delete_document(data, notify_user):
 def answer_prompt(data, notify_user):
     logging.info(f"Answering prompt {data['id']}")
 
+    # Embed query
     embedding = next(embed([data["query"]]))
 
+    # Get pages that have an embedding that is close to the query
     with Session(engine) as session:
         stmt = (
             select(
@@ -227,8 +229,10 @@ def answer_prompt(data, notify_user):
 
         pages = session.execute(stmt).all()
 
+    # Create response by sending pages to chat completion
     response = complete(data["query"], [contents for (_, _, contents) in pages])
 
+    # Store response and source pages
     with Session(engine) as session:
         stmt = select(Prompts).where(Prompts.id == data["id"])
         prompt = session.scalars(stmt).one()
