@@ -10,8 +10,8 @@ services:
       - 9000:9000
       - 5671:5671
     volumes:
-      - ./docker/nginx/templates:/etc/nginx/templates
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/templates:/etc/nginx/templates
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./certs/insight.pem:/etc/ssl/insight.pem
       - ./certs/insight-key.pem:/etc/ssl/insight-key.pem
     depends_on:
@@ -85,15 +85,15 @@ services:
       DISABLE_INSTALL_DEMO_CONFIG: True
     volumes:
       - opensearch:/usr/share/opensearch/data
-      - ./docker/opensearch/opensearch-security/action_groups.yml:/usr/share/opensearch/config/opensearch-security/action_groups.yml
-      - ./docker/opensearch/opensearch-security/allowlist.yml:/usr/share/opensearch/config/opensearch-security/allowlist.yml
-      - ./docker/opensearch/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
-      - ./docker/opensearch/opensearch-security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
-      - ./docker/opensearch/opensearch-security/nodes_dn.yml:/usr/share/opensearch/config/opensearch-security/nodes_dn.yml
-      - ./docker/opensearch/opensearch-security/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
-      - ./docker/opensearch/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
-      - ./docker/opensearch/opensearch-security/tenants.yml:/usr/share/opensearch/config/opensearch-security/tenants.yml
-      - ./docker/opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./opensearch/opensearch-security/action_groups.yml:/usr/share/opensearch/config/opensearch-security/action_groups.yml
+      - ./opensearch/opensearch-security/allowlist.yml:/usr/share/opensearch/config/opensearch-security/allowlist.yml
+      - ./opensearch/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
+      - ./opensearch/opensearch-security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
+      - ./opensearch/opensearch-security/nodes_dn.yml:/usr/share/opensearch/config/opensearch-security/nodes_dn.yml
+      - ./opensearch/opensearch-security/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
+      - ./opensearch/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
+      - ./opensearch/opensearch-security/tenants.yml:/usr/share/opensearch/config/opensearch-security/tenants.yml
+      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
       - ./certs/rootCA.pem:/usr/share/opensearch/config/rootCA.pem
       - ./certs/opensearch.pem:/usr/share/opensearch/config/opensearch.pem
       - ./certs/opensearch-key.pem:/usr/share/opensearch/config/opensearch-key.pem
@@ -111,9 +111,9 @@ services:
       RABBITMQ_DEFAULT_PASS: insight
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
-      - ./docker/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
-      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
   migrate:
     image: ghcr.io/followthemoney/insight-migrate:latest 
@@ -137,7 +137,7 @@ services:
       interval: 3s
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   minio:
     image: minio/minio
@@ -166,7 +166,7 @@ services:
       MINIO_WORKER_USER: ${STORAGE_WORKER_ACCESS_KEY}
       MINIO_WORKER_PASSWORD: ${STORAGE_WORKER_SECRET_KEY}
     volumes:
-      - ./docker/minio:/root/minio
+      - ./minio:/root/minio
       - ./certs/rootCA.pem:/root/.mc/certs/CAs/insight.pem
     depends_on:
       - nginx
