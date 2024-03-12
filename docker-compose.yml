@@ -99,7 +99,7 @@ services:
       - ./certs/opensearch-key.pem:/usr/share/opensearch/config/opensearch-key.pem
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.12-management
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 3s
