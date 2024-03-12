@@ -28,6 +28,7 @@ def batched(iterable, n):
 def embed(strings):
     for batch in batched(strings, 64):
         # Send tokens to external service instead of the whole text
+        # https://community.openai.com/t/embedding-tokens-vs-embedding-strings
         data = {
             "input": [encoding.encode(string) for string in batch],
             "model": "text-embedding-3-small",
