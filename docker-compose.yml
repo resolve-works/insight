@@ -40,7 +40,7 @@ services:
   postgrest:
     image: postgrest/postgrest
     environment:
-      PGRST_DB_URI: postgresql://${PG_POSTGREST_USER}:${PG_POSTGREST_PASSWORD}@postgres:5432/insight
+      PGRST_DB_URI: postgresql://insight_authenticator:${PG_POSTGREST_PASSWORD}@postgres:5432/insight
       PGRST_DB_SCHEMAS: public
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
       PGRST_JWT_ROLE_CLAIM_KEY: .roles[0]
@@ -58,7 +58,7 @@ services:
     command: /bin/bash -c 'update-ca-certificates && pip install "watchdog[watchmedo]" && watchmedo auto-restart -d=/usr/local/lib/python3.11/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages'
     environment:
       SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
-      POSTGRES_URI: postgresql://${PG_WORKER_USER}:${PG_WORKER_PASSWORD}@postgres:5432/insight
+      POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@postgres:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       API_ENDPOINT: ${API_ENDPOINT}
       STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
@@ -135,9 +135,7 @@ services:
     environment:
       POSTGRES_USER: ${PG_USER}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
-      PG_POSTGREST_USER: ${PG_POSTGREST_USER}
       PG_POSTGREST_PASSWORD: ${PG_POSTGREST_PASSWORD}
-      PG_WORKER_USER: ${PG_WORKER_USER}
       PG_WORKER_PASSWORD: ${PG_WORKER_PASSWORD}
     healthcheck:
       test: pg_isready -U insight

@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS private.files (
     PRIMARY KEY (id)
 );
 
+GRANT ALL PRIVILEGES ON private.files TO insight_worker;
+
 CREATE OR REPLACE FUNCTION set_file_path ()
     RETURNS TRIGGER
     AS $$
@@ -59,5 +61,6 @@ FROM
     private.files 
 WHERE private.files.is_deleted = false;
 
+GRANT ALL PRIVILEGES ON files TO insight_worker;
 GRANT SELECT, INSERT, UPDATE, DELETE ON files TO external_user;
 
