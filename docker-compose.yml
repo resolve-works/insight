@@ -21,7 +21,7 @@ services:
 
   ui:
     build: ui
-    command: npm run dev -- --port=3000 --host=0.0.0.0
+    command: /bin/sh -c "npm install && npm run dev -- --port=3000 --host=0.0.0.0"
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
@@ -74,6 +74,8 @@ services:
     volumes:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
+    depends_on:
+      - nginx
 
   opensearch:
     image: opensearchproject/opensearch:latest
@@ -185,7 +187,6 @@ services:
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
     volumes:
       - ./cli/insight_cli:/usr/local/lib/python3.11/site-packages/insight_cli
-      - ./data:/root/data
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
 
 secrets:
