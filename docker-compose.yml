@@ -10,8 +10,8 @@ services:
       - 9000:9000
       - 5671:5671
     volumes:
-      - ./nginx/templates:/etc/nginx/templates
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/templates:/etc/nginx/templates
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./certs/insight.pem:/etc/ssl/insight.pem
       - ./certs/insight-key.pem:/etc/ssl/insight-key.pem
     depends_on:
@@ -40,7 +40,7 @@ services:
   postgrest:
     image: postgrest/postgrest
     environment:
-      PGRST_DB_URI: postgresql://${PG_API_USER}:${PG_API_PASSWORD}@postgres:5432/insight
+      PGRST_DB_URI: postgresql://${PG_POSTGREST_USER}:${PG_POSTGREST_PASSWORD}@postgres:5432/insight
       PGRST_DB_SCHEMAS: public
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
       PGRST_JWT_ROLE_CLAIM_KEY: .roles[0]
@@ -48,7 +48,10 @@ services:
     secrets:
       - jwk
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   worker:
     build: worker
@@ -71,11 +74,6 @@ services:
     volumes:
       - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
-    depends_on:
-      - postgrest
-      - nginx
-      - rabbitmq
-      - opensearch
 
   opensearch:
     image: opensearchproject/opensearch:latest
@@ -88,15 +86,15 @@ services:
       DISABLE_INSTALL_DEMO_CONFIG: True
     volumes:
       - opensearch:/usr/share/opensearch/data
-      - ./opensearch/opensearch-security/action_groups.yml:/usr/share/opensearch/config/opensearch-security/action_groups.yml
-      - ./opensearch/opensearch-security/allowlist.yml:/usr/share/opensearch/config/opensearch-security/allowlist.yml
-      - ./opensearch/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
-      - ./opensearch/opensearch-security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
-      - ./opensearch/opensearch-security/nodes_dn.yml:/usr/share/opensearch/config/opensearch-security/nodes_dn.yml
-      - ./opensearch/opensearch-security/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
-      - ./opensearch/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
-      - ./opensearch/opensearch-security/tenants.yml:/usr/share/opensearch/config/opensearch-security/tenants.yml
-      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./docker/opensearch/opensearch-security/action_groups.yml:/usr/share/opensearch/config/opensearch-security/action_groups.yml
+      - ./docker/opensearch/opensearch-security/allowlist.yml:/usr/share/opensearch/config/opensearch-security/allowlist.yml
+      - ./docker/opensearch/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
+      - ./docker/opensearch/opensearch-security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
+      - ./docker/opensearch/opensearch-security/nodes_dn.yml:/usr/share/opensearch/config/opensearch-security/nodes_dn.yml
+      - ./docker/opensearch/opensearch-security/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
+      - ./docker/opensearch/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
+      - ./docker/opensearch/opensearch-security/tenants.yml:/usr/share/opensearch/config/opensearch-security/tenants.yml
+      - ./docker/opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
       - ./certs/rootCA.pem:/usr/share/opensearch/config/rootCA.pem
       - ./certs/opensearch.pem:/usr/share/opensearch/config/opensearch.pem
       - ./certs/opensearch-key.pem:/usr/share/opensearch/config/opensearch-key.pem
@@ -114,19 +112,31 @@ services:
       RABBITMQ_DEFAULT_PASS: insight
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
-      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./docker/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+
+  migrate:
+    image: migrate/migrate
+    entrypoint: []
+    command: /bin/sh -c "migrate -path=/migrations -database $$POSTGRES_URI up"
+    environment:
+      POSTGRES_URI: postgresql://${PG_USER}:${PG_PASSWORD}@postgres:5432/insight?sslmode=disable
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: pgvector/pgvector:pg16
     ports:
       - 5432:5432
     environment:
-      POSTGRES_USER: insight
-      POSTGRES_PASSWORD: insight
-      PG_API_USER: ${PG_API_USER}
-      PG_API_PASSWORD: ${PG_API_PASSWORD}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      PG_POSTGREST_USER: ${PG_POSTGREST_USER}
+      PG_POSTGREST_PASSWORD: ${PG_POSTGREST_PASSWORD}
       PG_WORKER_USER: ${PG_WORKER_USER}
       PG_WORKER_PASSWORD: ${PG_WORKER_PASSWORD}
     healthcheck:
@@ -134,7 +144,7 @@ services:
       interval: 3s
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ./database:/docker-entrypoint-initdb.d
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   minio:
     image: minio/minio
@@ -163,7 +173,7 @@ services:
       MINIO_WORKER_USER: ${STORAGE_WORKER_ACCESS_KEY}
       MINIO_WORKER_PASSWORD: ${STORAGE_WORKER_SECRET_KEY}
     volumes:
-      - ./minio:/root/minio
+      - ./docker/minio:/root/minio
       - ./certs/rootCA.pem:/root/.mc/certs/CAs/insight.pem
     depends_on:
       - nginx
