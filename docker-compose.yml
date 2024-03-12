@@ -20,8 +20,7 @@ services:
       - ui
 
   ui:
-    build: ui
-    command: /bin/sh -c "npm install && npm run dev -- --port=3000 --host=0.0.0.0"
+    image: ghcr.io/followthemoney/insight-ui:latest 
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
@@ -31,7 +30,6 @@ services:
       RABBITMQ_HOST: insight
       OPENSEARCH_HOST: opensearch
     volumes:
-      - ./ui:/insight-ui
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
     depends_on:
       rabbitmq:
@@ -54,8 +52,8 @@ services:
         condition: service_completed_successfully
 
   worker:
-    build: worker
-    command: /bin/bash -c 'update-ca-certificates && pip install "watchdog[watchmedo]" && watchmedo auto-restart -d=/usr/local/lib/python3.11/site-packages/insight_worker -p="*.py" -R insight-worker -- process-messages'
+    image: ghcr.io/followthemoney/insight-worker:latest 
+    command: /bin/bash -c 'update-ca-certificates && insight-worker process-messages'
     environment:
       SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
       POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@postgres:5432/insight
@@ -72,7 +70,6 @@ services:
       OPENSEARCH_USER: worker
       OPENSEARCH_PASSWORD: m0nOtnEhob0kSKaZyFbQ
     volumes:
-      - ./worker/insight_worker:/usr/local/lib/python3.11/site-packages/insight_worker
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
     depends_on:
       - nginx
@@ -177,17 +174,6 @@ services:
       - ./certs/rootCA.pem:/root/.mc/certs/CAs/insight.pem
     depends_on:
       - nginx
-
-  # Insight CLI, runs in container so it can reach minio in development
-  cli:
-    build: cli
-    command: bash -c 'update-ca-certificates && bash'
-    environment:
-      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
-      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
-    volumes:
-      - ./cli/insight_cli:/usr/local/lib/python3.11/site-packages/insight_cli
-      - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
 
 secrets:
    jwk:
