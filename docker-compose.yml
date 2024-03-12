@@ -117,12 +117,8 @@ services:
 
   migrate:
     image: migrate/migrate
-    entrypoint: []
-    command: /bin/sh -c "migrate -path=/migrations -database $$POSTGRES_URI up"
     environment:
       POSTGRES_URI: postgresql://${PG_USER}:${PG_PASSWORD}@postgres:5432/insight?sslmode=disable
-    volumes:
-      - ./migrations:/migrations
     depends_on:
       postgres:
         condition: service_healthy
