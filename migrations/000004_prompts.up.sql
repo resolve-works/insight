@@ -15,6 +15,10 @@ CREATE TABLE IF NOT EXISTS private.prompts (
     PRIMARY KEY (id)
 );
 
+GRANT ALL PRIVILEGES ON private.prompts TO insight_worker;
+GRANT ALL PRIVILEGES ON private.prompts_id_seq TO insight_worker;
+GRANT usage, SELECT ON private.prompts_id_seq TO external_user;
+
 CREATE TABLE IF NOT EXISTS private.sources (
     id bigserial,
     prompt_id bigint NOT NULL,
@@ -24,6 +28,10 @@ CREATE TABLE IF NOT EXISTS private.sources (
     FOREIGN KEY (page_id) REFERENCES private.pages (id) ON DELETE CASCADE,
     PRIMARY KEY (id)
 );
+
+GRANT ALL PRIVILEGES ON private.sources TO insight_worker;
+GRANT ALL PRIVILEGES ON private.sources_id_seq TO insight_worker;
+GRANT usage, SELECT ON private.sources_id_seq TO external_user;
 
 CREATE OR REPLACE TRIGGER set_prompt_owner
     BEFORE INSERT ON private.prompts

@@ -19,6 +19,8 @@ CREATE TABLE private.documents (
     FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE CASCADE
 );
 
+GRANT ALL PRIVILEGES ON private.documents TO insight_worker;
+
 CREATE TABLE IF NOT EXISTS private.pages (
     id bigserial,
     file_id uuid NOT NULL,
@@ -28,6 +30,10 @@ CREATE TABLE IF NOT EXISTS private.pages (
     FOREIGN KEY (file_id) REFERENCES private.files (id) ON DELETE CASCADE,
     PRIMARY KEY (id)
 );
+
+GRANT ALL PRIVILEGES ON private.pages TO insight_worker;
+GRANT ALL PRIVILEGES ON private.pages_id_seq TO insight_worker;
+GRANT usage, SELECT ON private.pages_id_seq TO external_user;
 
 CREATE OR REPLACE FUNCTION set_document_path ()
     RETURNS TRIGGER
@@ -72,6 +78,7 @@ FROM
     private.documents 
 WHERE private.documents.is_deleted = false;
 
+GRANT ALL PRIVILEGES ON documents TO insight_worker;
 GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO external_user;
 
 CREATE OR REPLACE VIEW pages AS
@@ -83,6 +90,7 @@ SELECT
 FROM
     private.pages;
 
+GRANT ALL PRIVILEGES ON pages TO insight_worker;
 GRANT SELECT ON pages TO external_user;
 
 CREATE OR REPLACE FUNCTION document (pages)
