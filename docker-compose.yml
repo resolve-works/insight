@@ -116,7 +116,7 @@ services:
       - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
   migrate:
-    image: migrate/migrate
+    image: ghcr.io/followthemoney/insight-migrate:latest 
     environment:
       POSTGRES_URI: postgresql://${PG_USER}:${PG_PASSWORD}@postgres:5432/insight?sslmode=disable
     depends_on:
