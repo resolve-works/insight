@@ -1,6 +1,0 @@
-[submodule "ui"]
-	path = ui
-	url = git@github.com:followthemoney/insight-ui.git
-[submodule "worker"]
-	path = worker
-	url = git@github.com:followthemoney/insight-worker.git
