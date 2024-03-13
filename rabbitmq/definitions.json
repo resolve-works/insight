@@ -2,7 +2,7 @@
   "bindings": [
     {
       "arguments": {},
-      "destination": "default",
+      "destination": "ingest",
       "destination_type": "queue",
       "routing_key": "analyze_file",
       "source": "insight",
@@ -80,7 +80,7 @@
     {
       "configure": ".*",
       "read": ".*",
-      "user": "worker",
+      "user": "insight_worker",
       "vhost": "/",
       "write": ".*"
     }
@@ -120,8 +120,8 @@
     {
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "limits": {},
-      "name": "worker",
-      "password_hash": "jlzPqq7MV9j8ht8Lt7EhLDVRnPFWRN2MXvNNO1T1AuwmyROu",
+      "name": "insight_worker",
+      "password_hash": "rbvDG+aU/HPfKx2+TCyPNxYgM9N2G+U03bi4hJ0j+qXu0DW0",
       "tags": []
     }
   ],

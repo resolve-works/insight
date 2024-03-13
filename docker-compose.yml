@@ -2,34 +2,19 @@
 version: '3'
 
 services:
-  nginx:
-    image: nginx
-    hostname: insight
-    ports:
-      - 8080:8080
-      - 9000:9000
-      - 5671:5671
-    volumes:
-      - ./nginx/templates:/etc/nginx/templates
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./certs/insight.pem:/etc/ssl/insight.pem
-      - ./certs/insight-key.pem:/etc/ssl/insight-key.pem
-    depends_on:
-      - minio
-      - postgrest
-      - ui
-
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.1.3
+    image: ghcr.io/followthemoney/insight-ui:v0.1.4
+    network_mode: host
     environment:
-      NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
+      ORIGIN: http://localhost:3000
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
-      API_ENDPOINT: ${API_ENDPOINT}
+      API_ENDPOINT: http://localhost:8080
       PUBLIC_OIDC_ENDPOINT: ${OIDC_ENDPOINT}
-      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: ${STORAGE_BUCKET}
-      RABBITMQ_HOST: insight
-      OPENSEARCH_HOST: opensearch
+      RABBITMQ_HOST: localhost
+      RABBITMQ_SSL: false
+      OPENSEARCH_ENDPOINT: http://localhost:9200
     volumes:
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
     depends_on:
@@ -44,6 +29,9 @@ services:
       PGRST_JWT_SECRET: "@/run/secrets/jwk"
       PGRST_JWT_ROLE_CLAIM_KEY: .roles[0]
       PGRST_DB_ANON_ROLE: external_anonymous
+      PGRST_SERVER_PORT: 8080
+    ports:
+      - 8080:8080
     secrets:
       - jwk
     depends_on:
@@ -53,45 +41,41 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.1
-    command: /bin/bash -c 'update-ca-certificates && insight-worker process-messages'
+    image: ghcr.io/followthemoney/insight-worker:v0.1.2
     environment:
       QUEUE: default
-      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
       POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@postgres:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      RABBITMQ_HOST: insight
-      RABBITMQ_USER: worker
-      RABBITMQ_PASSWORD: 5Ytge8Xg4gI38sJXmi7q
-      OPENSEARCH_HOST: opensearch
-      OPENSEARCH_USER: worker
-      OPENSEARCH_PASSWORD: m0nOtnEhob0kSKaZyFbQ
-    volumes:
-      - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_SSL: false
+      RABBITMQ_USER: insight_worker
+      RABBITMQ_PASSWORD: insight_worker
+      OPENSEARCH_ENDPOINT: http://opensearch:9200
+      OPENSEARCH_USER: insight_worker
+      OPENSEARCH_PASSWORD: insight_worker
     depends_on:
-      - nginx
+      rabbitmq:
+        condition: service_healthy
 
-  ingestor:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.1
-    command: /bin/bash -c 'update-ca-certificates && insight-worker process-messages'
+  ingest:
+    image: ghcr.io/followthemoney/insight-worker:v0.1.2
     environment:
       QUEUE: ingest
-      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
       POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@postgres:5432/insight
-      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      STORAGE_ENDPOINT: http://minio:9000
       STORAGE_BUCKET: ${STORAGE_BUCKET}
       STORAGE_ACCESS_KEY: ${STORAGE_WORKER_ACCESS_KEY}
       STORAGE_SECRET_KEY: ${STORAGE_WORKER_SECRET_KEY}
-      RABBITMQ_HOST: insight
-      RABBITMQ_USER: worker
-      RABBITMQ_PASSWORD: 5Ytge8Xg4gI38sJXmi7q
-      OPENSEARCH_HOST: opensearch
-      OPENSEARCH_USER: worker
-      OPENSEARCH_PASSWORD: m0nOtnEhob0kSKaZyFbQ
-    volumes:
-      - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_SSL: false
+      RABBITMQ_USER: insight_worker
+      RABBITMQ_PASSWORD: insight_worker
+      OPENSEARCH_ENDPOINT: http://opensearch:9200
+      OPENSEARCH_USER: insight_worker
+      OPENSEARCH_PASSWORD: insight_worker
     depends_on:
-      - nginx
+      rabbitmq:
+        condition: service_healthy
 
   opensearch:
     image: opensearchproject/opensearch:latest
@@ -126,6 +110,7 @@ services:
       interval: 3s
       timeout: 30s
     ports:
+      - 5672:5672
       - 15672:15672
     environment:
       RABBITMQ_DEFAULT_USER: insight
@@ -163,6 +148,8 @@ services:
   minio:
     image: minio/minio
     command: server /data
+    ports:
+      - 9000:9000
     environment:
       MINIO_ROOT_USER: ${STORAGE_ROOT_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${STORAGE_ROOT_SECRET_KEY}
@@ -181,16 +168,15 @@ services:
     command: ./mc.sh
     entrypoint: /bin/bash
     environment:
-      MINIO_ENDPOINT: ${STORAGE_ENDPOINT}
+      MINIO_ENDPOINT: http://minio:9000
       MINIO_ROOT_USER: ${STORAGE_ROOT_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${STORAGE_ROOT_SECRET_KEY}
       MINIO_WORKER_USER: ${STORAGE_WORKER_ACCESS_KEY}
       MINIO_WORKER_PASSWORD: ${STORAGE_WORKER_SECRET_KEY}
     volumes:
       - ./minio:/root/minio
-      - ./certs/rootCA.pem:/root/.mc/certs/CAs/insight.pem
     depends_on:
-      - nginx
+      - minio
 
 secrets:
    jwk:
