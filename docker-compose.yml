@@ -55,10 +55,28 @@ services:
     image: ghcr.io/followthemoney/insight-worker:latest 
     command: /bin/bash -c 'update-ca-certificates && insight-worker process-messages'
     environment:
+      QUEUE: default
       SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
       POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@postgres:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      API_ENDPOINT: ${API_ENDPOINT}
+      RABBITMQ_HOST: insight
+      RABBITMQ_USER: worker
+      RABBITMQ_PASSWORD: 5Ytge8Xg4gI38sJXmi7q
+      OPENSEARCH_HOST: opensearch
+      OPENSEARCH_USER: worker
+      OPENSEARCH_PASSWORD: m0nOtnEhob0kSKaZyFbQ
+    volumes:
+      - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
+    depends_on:
+      - nginx
+
+  ingestor:
+    image: ghcr.io/followthemoney/insight-worker:latest 
+    command: /bin/bash -c 'update-ca-certificates && insight-worker process-messages'
+    environment:
+      QUEUE: ingest
+      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+      POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@postgres:5432/insight
       STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
       STORAGE_BUCKET: ${STORAGE_BUCKET}
       STORAGE_ACCESS_KEY: ${STORAGE_WORKER_ACCESS_KEY}

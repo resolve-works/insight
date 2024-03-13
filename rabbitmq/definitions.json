@@ -2,7 +2,7 @@
   "bindings": [
     {
       "arguments": {},
-      "destination": "worker",
+      "destination": "default",
       "destination_type": "queue",
       "routing_key": "analyze_file",
       "source": "insight",
@@ -10,7 +10,7 @@
     },
     {
       "arguments": {},
-      "destination": "worker",
+      "destination": "ingest",
       "destination_type": "queue",
       "routing_key": "delete_file",
       "source": "insight",
@@ -18,7 +18,7 @@
     },
     {
       "arguments": {},
-      "destination": "worker",
+      "destination": "ingest",
       "destination_type": "queue",
       "routing_key": "ingest_document",
       "source": "insight",
@@ -26,15 +26,7 @@
     },
     {
       "arguments": {},
-      "destination": "worker",
-      "destination_type": "queue",
-      "routing_key": "index_document",
-      "source": "insight",
-      "vhost": "/"
-    },
-    {
-      "arguments": {},
-      "destination": "worker",
+      "destination": "ingest",
       "destination_type": "queue",
       "routing_key": "delete_document",
       "source": "insight",
@@ -42,7 +34,23 @@
     },
     {
       "arguments": {},
-      "destination": "worker",
+      "destination": "default",
+      "destination_type": "queue",
+      "routing_key": "index_document",
+      "source": "insight",
+      "vhost": "/"
+    },
+    {
+      "arguments": {},
+      "destination": "default",
+      "destination_type": "queue",
+      "routing_key": "embed_document",
+      "source": "insight",
+      "vhost": "/"
+    },
+    {
+      "arguments": {},
+      "destination": "default",
       "destination_type": "queue",
       "routing_key": "answer_prompt",
       "source": "insight",
@@ -83,7 +91,15 @@
       "arguments": {},
       "auto_delete": false,
       "durable": true,
-      "name": "worker",
+      "name": "default",
+      "type": "classic",
+      "vhost": "/"
+    },
+    {
+      "arguments": {},
+      "auto_delete": false,
+      "durable": true,
+      "name": "ingest",
       "type": "classic",
       "vhost": "/"
     }
