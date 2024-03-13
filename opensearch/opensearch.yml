@@ -6,10 +6,7 @@ plugins.security.ssl.transport.pemcert_filepath: opensearch.pem
 plugins.security.ssl.transport.pemkey_filepath: opensearch-key.pem
 plugins.security.ssl.transport.pemtrustedcas_filepath: rootCA.pem
 plugins.security.ssl.transport.enforce_hostname_verification: false
-plugins.security.ssl.http.enabled: true
-plugins.security.ssl.http.pemcert_filepath: opensearch.pem
-plugins.security.ssl.http.pemkey_filepath: opensearch-key.pem
-plugins.security.ssl.http.pemtrustedcas_filepath: rootCA.pem
+plugins.security.ssl.http.enabled: false
 plugins.security.allow_unsafe_democertificates: false
 plugins.security.allow_default_init_securityindex: true
 plugins.security.authcz.admin_dn:

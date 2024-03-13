@@ -24,6 +24,7 @@ services:
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      API_ENDPOINT: ${API_ENDPOINT}
       PUBLIC_OIDC_ENDPOINT: ${OIDC_ENDPOINT}
       STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
       STORAGE_BUCKET: ${STORAGE_BUCKET}
@@ -98,6 +99,8 @@ services:
       memlock:
         soft: -1
         hard: -1
+    ports:
+      - 9200:9200
     environment:
       discovery.type: single-node
       DISABLE_INSTALL_DEMO_CONFIG: True
@@ -134,7 +137,7 @@ services:
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
   migrate:
-    image: ghcr.io/followthemoney/insight-migrate:v0.1.0
+    image: ghcr.io/followthemoney/insight-migrate:v0.1.1
     environment:
       POSTGRES_URI: "postgresql://${PG_USER}:${PG_PASSWORD}@postgres:5432/insight?sslmode=disable&x-migrations-table=\"private\".\"schema_migrations\"&x-migrations-table-quoted=1"
     depends_on:
