@@ -20,7 +20,7 @@ services:
       - ui
 
   ui:
-    image: ghcr.io/followthemoney/insight-ui:latest 
+    image: ghcr.io/followthemoney/insight-ui:v0.1.3
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
@@ -52,7 +52,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/followthemoney/insight-worker:latest 
+    image: ghcr.io/followthemoney/insight-worker:v0.1.1
     command: /bin/bash -c 'update-ca-certificates && insight-worker process-messages'
     environment:
       QUEUE: default
@@ -71,7 +71,7 @@ services:
       - nginx
 
   ingestor:
-    image: ghcr.io/followthemoney/insight-worker:latest 
+    image: ghcr.io/followthemoney/insight-worker:v0.1.1
     command: /bin/bash -c 'update-ca-certificates && insight-worker process-messages'
     environment:
       QUEUE: ingest
@@ -134,9 +134,9 @@ services:
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
   migrate:
-    image: ghcr.io/followthemoney/insight-migrate:latest 
+    image: ghcr.io/followthemoney/insight-migrate:v0.1.0
     environment:
-      POSTGRES_URI: postgresql://${PG_USER}:${PG_PASSWORD}@postgres:5432/insight?sslmode=disable
+      POSTGRES_URI: "postgresql://${PG_USER}:${PG_PASSWORD}@postgres:5432/insight?sslmode=disable&x-migrations-table=\"private\".\"schema_migrations\"&x-migrations-table-quoted=1"
     depends_on:
       postgres:
         condition: service_healthy
