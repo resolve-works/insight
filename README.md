@@ -61,27 +61,15 @@ the `.env` file as `OPENAI_API_KEY`.
 
 ### Certificates
 
-To encrypt traffic, we'll need some cerificates. In our development environment,
-we will be using self-signed certificates. You can easily generate those with
-[`mkcert`](https://github.com/FiloSottile/mkcert). Make sure the root CA is
-installed and generate development certificates:
+Opensearch won't start without certificates for the transport layer it doesn't
+use when running in single-node mode. You can easily generate those with
+[`mkcert`](https://github.com/FiloSottile/mkcert). To generate development
+certificates:
 ```
-mkcert -install
 mkdir certs
 cp `mkcert -CAROOT`/rootCA.pem ./certs
 mkcert -cert-file ./certs/opensearch.pem -key-file ./certs/opensearch-key.pem opensearch 
 ```
-
-As requests can come from our browser, or from the containerized processes, we
-can't use the `localhost` hostname, as that will resolve to container localhost
-instead of our nginx gateway. To reach your local development setup, you'll need
-the `insight` DNS name for your host.
-```
-mkcert -cert-file ./certs/insight.pem -key-file ./certs/insight-key.pem insight
-chmod -R 644 ./certs/insight*
-echo "127.0.0.1 insight" | sudo tee -a /etc/hosts
-```
-
 
 ## Running
 

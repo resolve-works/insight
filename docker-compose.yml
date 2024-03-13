@@ -124,7 +124,7 @@ services:
   migrate:
     image: ghcr.io/followthemoney/insight-migrate:v0.1.1
     environment:
-      POSTGRES_URI: "postgresql://${PG_USER}:${PG_PASSWORD}@postgres:5432/insight?sslmode=disable&x-migrations-table=\"private\".\"schema_migrations\"&x-migrations-table-quoted=1"
+      POSTGRES_URI: "postgresql://insight:insight@postgres:5432/insight?sslmode=disable&x-migrations-table=\"private\".\"schema_migrations\"&x-migrations-table-quoted=1"
     depends_on:
       postgres:
         condition: service_healthy
@@ -134,8 +134,8 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_USER: ${PG_USER}
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_USER: insight
+      POSTGRES_PASSWORD: insight
       PG_POSTGREST_PASSWORD: ${PG_POSTGREST_PASSWORD}
       PG_WORKER_PASSWORD: ${PG_WORKER_PASSWORD}
     healthcheck:
