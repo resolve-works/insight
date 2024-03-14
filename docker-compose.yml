@@ -3,19 +3,21 @@ version: '3'
 
 services:
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.1.4
+    image: ghcr.io/followthemoney/insight-ui:v0.1.5
     network_mode: host
     environment:
       ORIGIN: http://localhost:3000
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
       API_ENDPOINT: http://localhost:8080
       PUBLIC_OIDC_ENDPOINT: ${OIDC_ENDPOINT}
-      STORAGE_ENDPOINT: https://localhost:9000
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      STORAGE_IDENTITY_ENDPOINT: ${STORAGE_IDENTITY_ENDPOINT}
+      STORAGE_IDENTITY_ROLE: ${STORAGE_IDENTITY_ROLE}
       STORAGE_REGION: ${STORAGE_REGION}
       STORAGE_BUCKET: ${STORAGE_BUCKET}
       RABBITMQ_HOST: localhost
       RABBITMQ_SSL: false
-      OPENSEARCH_ENDPOINT: http://localhost:9200
+      OPENSEARCH_ENDPOINT: ${OPENSEARCH_ENDPOINT}
     volumes:
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
     depends_on:
@@ -42,16 +44,17 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.3
+    image: ghcr.io/followthemoney/insight-worker:v0.1.4
+    network_mode: host
     environment:
       QUEUE: default
-      POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@postgres:5432/insight
+      POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@localhost:5432/insight
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_HOST: localhost
       RABBITMQ_SSL: false
       RABBITMQ_USER: insight_worker
       RABBITMQ_PASSWORD: insight_worker
-      OPENSEARCH_ENDPOINT: http://opensearch:9200
+      OPENSEARCH_ENDPOINT: ${OPENSEARCH_ENDPOINT}
       OPENSEARCH_USER: insight_worker
       OPENSEARCH_PASSWORD: insight_worker
     depends_on:
@@ -59,20 +62,21 @@ services:
         condition: service_healthy
 
   ingest:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.3
+    image: ghcr.io/followthemoney/insight-worker:v0.1.4
+    network_mode: host
     environment:
       QUEUE: ingest
-      POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@postgres:5432/insight
-      STORAGE_ENDPOINT: http://minio:9000
+      POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@localhost:5432/insight
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
       STORAGE_REGION: ${STORAGE_REGION}
       STORAGE_BUCKET: ${STORAGE_BUCKET}
       STORAGE_ACCESS_KEY: ${STORAGE_WORKER_ACCESS_KEY}
       STORAGE_SECRET_KEY: ${STORAGE_WORKER_SECRET_KEY}
-      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_HOST: localhost
       RABBITMQ_SSL: false
       RABBITMQ_USER: insight_worker
       RABBITMQ_PASSWORD: insight_worker
-      OPENSEARCH_ENDPOINT: http://opensearch:9200
+      OPENSEARCH_ENDPOINT: ${OPENSEARCH_ENDPOINT}
       OPENSEARCH_USER: insight_worker
       OPENSEARCH_PASSWORD: insight_worker
     depends_on:
