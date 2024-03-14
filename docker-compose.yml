@@ -10,7 +10,8 @@ services:
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
       API_ENDPOINT: http://localhost:8080
       PUBLIC_OIDC_ENDPOINT: ${OIDC_ENDPOINT}
-      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_ENDPOINT: https://localhost:9000
+      STORAGE_REGION: ${STORAGE_REGION}
       STORAGE_BUCKET: ${STORAGE_BUCKET}
       RABBITMQ_HOST: localhost
       RABBITMQ_SSL: false
@@ -63,6 +64,7 @@ services:
       QUEUE: ingest
       POSTGRES_URI: postgresql://insight_worker:${PG_WORKER_PASSWORD}@postgres:5432/insight
       STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_REGION: ${STORAGE_REGION}
       STORAGE_BUCKET: ${STORAGE_BUCKET}
       STORAGE_ACCESS_KEY: ${STORAGE_WORKER_ACCESS_KEY}
       STORAGE_SECRET_KEY: ${STORAGE_WORKER_SECRET_KEY}
