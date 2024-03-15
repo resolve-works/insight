@@ -2,6 +2,8 @@
 *.pyo
 .jwk
 .env
+.env.*
+!.env.example
 .DS_Store
 /data
 /certs
