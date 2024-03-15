@@ -3,7 +3,7 @@ version: '3'
 
 services:
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.1.5
+    image: ghcr.io/followthemoney/insight-ui:v0.1.6
     network_mode: host
     environment:
       ORIGIN: http://localhost:3000
@@ -44,7 +44,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.4
+    image: ghcr.io/followthemoney/insight-worker:v0.1.5
     network_mode: host
     environment:
       QUEUE: default
@@ -62,7 +62,7 @@ services:
         condition: service_healthy
 
   ingest:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.4
+    image: ghcr.io/followthemoney/insight-worker:v0.1.5
     network_mode: host
     environment:
       QUEUE: ingest
