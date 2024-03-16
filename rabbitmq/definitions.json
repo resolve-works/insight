@@ -73,7 +73,7 @@
     {
       "configure": ".*",
       "read": ".*",
-      "user": "insight",
+      "user": "admin",
       "vhost": "/",
       "write": ".*"
     },
@@ -111,7 +111,7 @@
     {
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "limits": {},
-      "name": "insight",
+      "name": "admin",
       "password_hash": "KRo4Dat76FR6etVdo0T7dlZXOd7IoinLrVxWtxl+YiXeijJZ",
       "tags": [
         "administrator"
