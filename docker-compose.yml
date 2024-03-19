@@ -3,7 +3,7 @@ version: '3'
 
 services:
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.1.7
+    image: ghcr.io/followthemoney/insight-ui:v0.1.8
     network_mode: host
     environment:
       ORIGIN: http://localhost:3000
