@@ -3,13 +3,13 @@ version: '3'
 
 services:
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.1.6
+    image: ghcr.io/followthemoney/insight-ui:v0.1.7
     network_mode: host
     environment:
       ORIGIN: http://localhost:3000
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
       API_ENDPOINT: http://localhost:8080
-      PUBLIC_OIDC_ENDPOINT: ${OIDC_ENDPOINT}
+      OIDC_ENDPOINT: ${OIDC_ENDPOINT}
       STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
       STORAGE_IDENTITY_ENDPOINT: ${STORAGE_IDENTITY_ENDPOINT}
       STORAGE_IDENTITY_ROLE: ${STORAGE_IDENTITY_ROLE}
@@ -44,7 +44,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.5
+    image: ghcr.io/followthemoney/insight-worker:v0.1.6
     network_mode: host
     environment:
       QUEUE: default
@@ -62,7 +62,7 @@ services:
         condition: service_healthy
 
   ingest:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.5
+    image: ghcr.io/followthemoney/insight-worker:v0.1.6
     network_mode: host
     environment:
       QUEUE: ingest
@@ -84,7 +84,7 @@ services:
         condition: service_healthy
 
   opensearch:
-    image: opensearchproject/opensearch:latest
+    image: opensearchproject/opensearch:2.12.0
     ulimits:
       memlock:
         soft: -1
