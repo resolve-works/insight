@@ -20,15 +20,14 @@ export const test = baseTest.extend<{}, { workerStorageState: string }>({
     }
 
     // Perform authentication steps. Replace these actions with your own.
-    await page.goto('https://insight:8080');
+    await page.goto('http://localhost:3000');
     // This 'test' user should exist in the insight_test OIDC realm
-    await page.getByLabel('Username or email').fill('test')
-    await page.getByLabel('Password').fill('test');
+    await page.getByLabel('Username or email').fill(process.env.INSIGHT_USER || '')
+    await page.getByLabel('Password', { exact: true }).fill(process.env.INSIGHT_PASSWORD || '');
     await page.getByRole('button', { name: 'Sign In' }).click();
 
     // Wait until the page receives the cookies.
-    await page.waitForURL('https://insight:8080');
-    // End of authentication steps.
+    await page.waitForURL('http://localhost:3000');
 
     await page.context().storageState({ path: fileName });
     await page.close();

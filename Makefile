@@ -1,4 +1,13 @@
 
+test:
+	npx playwright test
+
+test-headed:
+	npx playwright test --headed
+
+codegen:
+	npx playwright codegen http://localhost:3000 --viewport-size "1900, 1000"
+
 rabbitmq_dump_definitions:
 	docker-compose exec rabbitmq rabbitmqctl export_definitions - | jq
 
