@@ -60,6 +60,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      mc:
+        condition: service_completed_successfully
 
   ingest:
     image: ghcr.io/followthemoney/insight-worker:v0.1.7
@@ -82,6 +84,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      mc:
+        condition: service_completed_successfully
 
   opensearch:
     image: opensearchproject/opensearch:2.12.0
@@ -128,7 +132,7 @@ services:
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
   migrate:
-    image: ghcr.io/followthemoney/insight-migrate:v0.1.3
+    image: ghcr.io/followthemoney/insight-migrate:v0.1.4
     environment:
       POSTGRES_URI: "postgresql://insight:insight@postgres:5432/insight?sslmode=disable&x-migrations-table=\"private\".\"schema_migrations\"&x-migrations-table-quoted=1"
     depends_on:
@@ -154,6 +158,9 @@ services:
   minio:
     image: minio/minio
     command: server /data
+    healthcheck:
+      test: mc ready local
+      interval: 3s
     ports:
       - 9000:9000
     environment:
@@ -182,7 +189,8 @@ services:
     volumes:
       - ./minio:/root/minio
     depends_on:
-      - minio
+      minio:
+        condition: service_healthy
 
 secrets:
    jwk:
