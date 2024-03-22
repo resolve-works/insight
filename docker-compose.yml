@@ -132,7 +132,7 @@ services:
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
   migrate:
-    image: ghcr.io/followthemoney/insight-migrate:v0.1.4
+    image: ghcr.io/followthemoney/insight-migrate:v0.1.5
     environment:
       POSTGRES_URI: "postgresql://insight:insight@postgres:5432/insight?sslmode=disable&x-migrations-table=\"private\".\"schema_migrations\"&x-migrations-table-quoted=1"
     depends_on:
@@ -179,7 +179,7 @@ services:
     image: minio/mc
     working_dir: /root/minio
     command: ./mc.sh
-    entrypoint: /bin/bash
+    entrypoint: []
     environment:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ROOT_USER: ${STORAGE_ROOT_ACCESS_KEY}
