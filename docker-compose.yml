@@ -7,6 +7,7 @@ services:
     network_mode: host
     entrypoint: ["/opt/keycloak/bin/kc.sh", "start-dev"]
     healthcheck:
+      # Poor mans curl, checks if port is open
       test: /bin/bash -c "echo > /dev/tcp/localhost/8000"
       interval: 3s
       retries: 10
@@ -25,13 +26,13 @@ services:
   keycloak_init:
     image: quay.io/keycloak/keycloak
     network_mode: host
-    entrypoint: ["/opt/keycloak/bin/init.sh"]
+    entrypoint: ["/opt/keycloak_init/init.sh"]
     environment:
       KEYCLOAK_SERVER: http://localhost:8000
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     volumes:
-      - ./keycloak/init.sh:/opt/keycloak/bin/init.sh
+      - ./keycloak:/opt/keycloak_init
     depends_on:
       keycloak:
         condition: service_healthy

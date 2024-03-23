@@ -28,8 +28,8 @@ hasn't been configured yet:
 - Create a client `rabbitmq` with all flows disabled. Under this client, create
   the roles: 
   - `rabbitmq.configure:%2F/user-*/*`
-  - `rabbitmq.write:%2F/user-*/*`
   - `rabbitmq.read:%2F/user-*/*`
+  - `rabbitmq.write:%2F/user-*/*`
   - `rabbitmq.write:%2F/insight/*`
 - Edit the "Client Scope" `roles`, add a "User Client Role" mapper to it "by
   configuration". Name the mapper `insight roles`, select the `insight` client.

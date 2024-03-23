@@ -1,0 +1,23 @@
+{
+    "clientId": "insight",
+    "enabled": true,
+    "standardFlowEnabled": true,
+    "publicClient": true,
+    "attributes": {
+        "oauth2.device.authorization.grant.enabled": true
+    },
+    "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email",
+        "insight_roles"
+    ],
+    "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+    ]
+}

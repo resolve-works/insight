@@ -1,0 +1,9 @@
+{ 
+    "realm": "insight",
+    "enabled": true,
+    "defaultRoles": [ 
+        "offline_access", 
+        "uma_authorization", 
+        "insight_default" 
+    ] 
+}
