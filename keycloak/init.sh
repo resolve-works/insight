@@ -59,6 +59,9 @@ kcadm add-roles -r insight \
 
 # Test user for manual testing
 kcadm create users -r insight \
-    -s username=test -s firstName=John -s lastName=Doe -s email="test@test.test" -s enabled=true
-kcadm set-password -r insight --username test -p test
+    -s username=john -s firstName=John -s lastName=Doe -s email="john@example.com" -s enabled=true
+kcadm set-password -r insight --username john -p test
 
+kcadm create users -r insight \
+    -s username=jane -s firstName=Jane -s lastName=Doe -s email="jane@example.com" -s enabled=true
+kcadm set-password -r insight --username jane -p test
