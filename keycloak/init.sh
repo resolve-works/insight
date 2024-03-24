@@ -1,31 +1,64 @@
 #!/bin/bash
 
+TRUSTSTORE=/opt/keycloak/conf/truststores/insight.jks
+TRUSTPASS=insight
+
+function kcadm() { 
+    /opt/keycloak/bin/kcadm.sh $@ --truststore=$TRUSTSTORE --trustpass=$TRUSTPASS
+}
+
+# Create a java keystore from our CA cert
+keytool -importcert \
+    -trustcacerts \
+    -file /opt/keycloak/conf/truststores/insight.pem \
+    -keystore $TRUSTSTORE \
+    -alias "keycloak" -storepass $TRUSTPASS -noprompt
+
 # Server config
-/opt/keycloak/bin/kcadm.sh config credentials \
+kcadm config credentials \
     --server $KEYCLOAK_SERVER \
     --realm master \
     --user $KEYCLOAK_ADMIN \
     --password $KEYCLOAK_ADMIN_PASSWORD
 
-if /opt/keycloak/bin/kcadm.sh get realms/insight | grep -q "default-roles-insight"; then
+if kcadm get realms/insight | grep -q "default-roles-insight"; then
     echo "Keycloak already configured"
     exit 0
 fi
 
 # Create main insight realm, client and roles
-/opt/keycloak/bin/kcadm.sh create realms -s realm=insight -s enabled=true
-/opt/keycloak/bin/kcadm.sh create client-scopes -r insight -f /opt/keycloak_init/scope-insight-roles.json
+kcadm create realms -s realm=insight -s enabled=true
+kcadm create client-scopes -r insight -f /opt/keycloak_init/scope-insight-roles.json
 
-INSIGHT_CID=$(/opt/keycloak/bin/kcadm.sh create clients -r insight -f /opt/keycloak_init/client-insight.json -i)
-/opt/keycloak/bin/kcadm.sh create clients/$INSIGHT_CID/roles -r insight -s name=external_user
+INSIGHT_CID=$(kcadm create clients -r insight -f /opt/keycloak_init/client-insight.json -i)
+kcadm create clients/$INSIGHT_CID/roles -r insight -s name=external_user
 
 # Create rabbitmq client and roles
-RABBITMQ_CID=$(/opt/keycloak/bin/kcadm.sh create clients -r insight -f /opt/keycloak_init/client-rabbitmq.json -i)
-/opt/keycloak/bin/kcadm.sh create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.read:%2F/user-*/*"
-/opt/keycloak/bin/kcadm.sh create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.configure:%2F/user-*/*"
-/opt/keycloak/bin/kcadm.sh create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.write:%2F/user-*/*"
-/opt/keycloak/bin/kcadm.sh create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.write:%2F/insight/*"
+RABBITMQ_CID=$(kcadm create clients -r insight -f /opt/keycloak_init/client-rabbitmq.json -i)
+kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.read:%2F/user-*/*"
+kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.configure:%2F/user-*/*"
+kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.write:%2F/user-*/*"
+kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.write:%2F/insight/*"
 
 # Add created roles as default to realm
-/opt/keycloak/bin/kcadm.sh create roles -r insight -f /opt/keycloak_init/role-insight-default.json
-/opt/keycloak/bin/kcadm.sh update realms/insight -f /opt/keycloak_init/realm-insight.json
+kcadm add-roles -r insight \
+  --rname default-roles-insight \
+  --cclientid insight \
+  --rolename "external_user"
+kcadm add-roles -r insight \
+  --rname default-roles-insight \
+  --cclientid account \
+  --rolename "view-groups"
+kcadm add-roles -r insight \
+  --rname default-roles-insight \
+  --cclientid rabbitmq \
+  --rolename "rabbitmq.read:%2F/user-*/*" \
+  --rolename "rabbitmq.configure:%2F/user-*/*" \
+  --rolename "rabbitmq.write:%2F/user-*/*" \
+  --rolename "rabbitmq.write:%2F/insight/*"
+
+# Test user for manual testing
+kcadm create users -r insight \
+    -s username=test -s firstName=John -s lastName=Doe -s email="test@test.test" -s enabled=true
+kcadm set-password -r insight --username test -p test
+

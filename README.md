@@ -48,7 +48,7 @@ Insights services need to know about the certificates the auth provider uses to
 validate the authentication tokens. To supply your `docker-compose` environment
 with this token you can store it in a `.jwk` file:
 ```
-curl https://secure.ftm.nl/realms/insight/protocol/openid-connect/certs | jq -r ".keys[0]" > ./.jwk
+curl https://localhost:8000/realms/insight/protocol/openid-connect/certs | jq -r ".keys[0]" > ./.jwk
 ```
 
 You'll also want to create a user for yourself in the `insight` realm.
@@ -69,6 +69,7 @@ certificates:
 mkdir certs
 cp `mkcert -CAROOT`/rootCA.pem ./certs
 mkcert -cert-file ./certs/opensearch.pem -key-file ./certs/opensearch-key.pem opensearch 
+mkcert -cert-file ./certs/keycloak.pem -key-file ./certs/keycloak-key.pem keycloak localhost 
 ```
 
 ## Running
