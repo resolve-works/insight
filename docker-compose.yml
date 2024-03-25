@@ -100,7 +100,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.10
+    image: ghcr.io/followthemoney/insight-worker:v0.1.11
     network_mode: host
     environment:
       QUEUE: default
@@ -120,7 +120,7 @@ services:
         condition: service_completed_successfully
 
   ingest:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.10
+    image: ghcr.io/followthemoney/insight-worker:v0.1.11
     network_mode: host
     environment:
       QUEUE: ingest
