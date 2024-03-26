@@ -1,6 +1,4 @@
 
-version: '3'
-
 services:
   keycloak:
     image: quay.io/keycloak/keycloak
@@ -46,7 +44,7 @@ services:
       keycloak:
         condition: service_healthy
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.1.11
+    image: ghcr.io/followthemoney/insight-ui:v0.1.12
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
@@ -100,7 +98,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.11
+    image: ghcr.io/followthemoney/insight-worker:v0.1.12
     network_mode: host
     environment:
       QUEUE: default
@@ -120,7 +118,7 @@ services:
         condition: service_completed_successfully
 
   ingest:
-    image: ghcr.io/followthemoney/insight-worker:v0.1.11
+    image: ghcr.io/followthemoney/insight-worker:v0.1.12
     network_mode: host
     environment:
       QUEUE: ingest
