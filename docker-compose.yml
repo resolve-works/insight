@@ -44,7 +44,7 @@ services:
       keycloak:
         condition: service_healthy
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.1.14
+    image: ghcr.io/followthemoney/insight-ui:v0.1.15
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
@@ -119,6 +119,8 @@ services:
 
   ingest:
     image: ghcr.io/followthemoney/insight-worker:v0.1.13
+    deploy:
+      replicas: 3
     network_mode: host
     environment:
       QUEUE: ingest

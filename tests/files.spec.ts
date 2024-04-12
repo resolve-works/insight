@@ -1,20 +1,24 @@
 import path from 'path'
 import { test, expect } from '../playwright/fixtures';
 
-test('uploads files', async ({ page }) => {
-    await page.goto('/uploads/');
-    await page.locator('css=input[type=file]').setInputFiles(path.join(__dirname, 'test.pdf'));
+const FILENAME = 'test.pdf';
 
-    // Expect upload progress to show
-    await expect(page.getByRole('progressbar')).toBeVisible();
-    // Expect upload to be done and wait for ingest progress to be gone
-    await expect(page.getByRole('link', { name: 'test.pdf' })).toBeVisible();
-    await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 10000 });
-});
+const with_upload = test.extend({
+    page: async ({ page }, use) => {
+        await page.goto('/uploads/');
+        await page.locator('css=input[type=file]').setInputFiles(path.join(__dirname, FILENAME));
 
-test('splits files', async ({ page }) => {
-    await page.goto('/uploads/');
-    await page.getByRole('link', { name: 'test.pdf' }).click();
+        // Expect upload progress to show
+        await expect(page.getByRole('progressbar')).toBeVisible();
+        // Expect upload to be done and wait for ingest progress to be gone
+        await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 10000 });
+
+        await use(page)
+    }
+})
+
+with_upload('splits files', async ({ page }) => {
+    await page.getByRole('link', { name: FILENAME }).click();
 
     // Change first documents length
     await page.getByRole('spinbutton').nth(1).click();

@@ -44,10 +44,17 @@ class OIDCProvider {
         })
     }
 
-    async delete_user(username: string) {
-        console.log(`deleting ${username}`)
+    delete_user(url: string) {
+        return fetch(url, { 
+            method: 'DELETE' ,
+            headers: {
+                'Authorization': `Bearer ${this.access_token}`,
+            }
+        })
     }
 }
+
+export * from '@playwright/test'
 
 export const test = base.extend({
     page: async ({ page, baseURL }, use) => {
@@ -59,13 +66,20 @@ export const test = base.extend({
             throw new Error('Keycloak admin credentials not set');
         }
 
+        // Admin login to OIDC
         const provider = new OIDCProvider()
         await provider.authenticate(process.env.KEYCLOAK_ADMIN, process.env.KEYCLOAK_ADMIN_PASSWORD)
 
+        // Create a user
         const username = randomUUID();
         const password = "insight";
-        await provider.create_user(username, password)
+        const res = await provider.create_user(username, password)
+        const url = res.headers.get('location')
+        if( ! url ) {
+            throw new Error('User location not found in headers')
+        }
 
+        // Login as user in browser session
         await page.goto(baseURL);
         await page.getByLabel('Username or email').fill(username)
         await page.getByLabel('Password', { exact: true }).fill(password);
@@ -73,8 +87,9 @@ export const test = base.extend({
         await page.waitForURL(baseURL);
 
         await use(page);
-        
-        await provider.delete_user(username)
+
+        // Clean up
+        await provider.delete_user(url)
     }
 })
 
