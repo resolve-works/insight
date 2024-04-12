@@ -2,7 +2,7 @@ import path from 'path'
 import { test, expect } from '../playwright/fixtures';
 
 test('uploads files', async ({ page }) => {
-    await page.goto('/files/');
+    await page.goto('/uploads/');
     await page.locator('css=input[type=file]').setInputFiles(path.join(__dirname, 'test.pdf'));
 
     // Expect upload progress to show
@@ -13,7 +13,7 @@ test('uploads files', async ({ page }) => {
 });
 
 test('splits files', async ({ page }) => {
-    await page.goto('/files/');
+    await page.goto('/uploads/');
     await page.getByRole('link', { name: 'test.pdf' }).click();
 
     // Change first documents length

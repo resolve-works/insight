@@ -1,8 +1,8 @@
 
-test:
+run_test:
 	npx playwright test
 
-test-headed:
+run_test_headed:
 	npx playwright test --headed
 
 codegen:
