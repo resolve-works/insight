@@ -1,4 +1,7 @@
 
+backbone:
+	docker-compose up -d keycloak minio minio_init opensearch postgres postgrest rabbitmq
+
 run_test:
 	npx playwright test
 
@@ -6,7 +9,7 @@ run_test_headed:
 	npx playwright test --headed
 
 codegen:
-	npx playwright codegen http://localhost:3000 --viewport-size "1900, 1000"
+	npx playwright codegen -b firefox --ignore-https-errors http://localhost:3000
 
 rabbitmq_dump_definitions:
 	docker-compose exec rabbitmq rabbitmqctl export_definitions - | jq

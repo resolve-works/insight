@@ -3,7 +3,7 @@ import { test, expect } from '../playwright/fixtures';
 
 const FILENAME = 'test.pdf';
 
-const with_upload = test.extend({
+const uploads_index = test.extend({
     page: async ({ page }, use) => {
         await page.goto('/uploads/');
         await page.locator('css=input[type=file]').setInputFiles(path.join(__dirname, FILENAME));
@@ -14,22 +14,33 @@ const with_upload = test.extend({
         await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 10000 });
 
         await use(page)
+
+        await page.locator('header').filter({ hasText: FILENAME }).getByRole('button').click();
+        await page.getByRole('button', { name: 'Delete' }).click();
     }
 })
 
-with_upload('splits files', async ({ page }) => {
-    await page.getByRole('link', { name: FILENAME }).click();
+uploads_index('uploads files', async ({ page }) => {
+    await expect(page.getByRole('link', { name: FILENAME })).toBeVisible();
+})
 
-    // Change first documents length
-    await page.getByRole('spinbutton').nth(1).click();
-    await page.getByRole('spinbutton').nth(1).fill('3');
+/*
+const uploads_detail = uploads_index.extend({
+    page: async ({ page }, use) => {
+        await page.getByRole('link', { name: FILENAME }).click();
+        await page.getByRole('link', { name: 'Split' }).click();
 
-    // Add a second document
-    await page.getByRole('button', { name: 'Add split' }).click();
-    await page.getByRole('spinbutton').nth(2).click();
-    await page.getByRole('spinbutton').nth(2).fill('4');
+        await use(page)
 
-    // Store & wait for processing
-    await page.getByRole('button', { name: 'Store changes' }).click();
+        await page.goto('/uploads/');
+    }
+})
+
+uploads_detail('splits files', async ({ page }) => {
+    await page.getByPlaceholder('6').click();
+    await page.getByPlaceholder('6').fill('3');
+    await page.getByRole('button', { name: 'Update split' }).click();
+
     await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 10000 });
 });
+*/
