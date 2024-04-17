@@ -1,5 +1,8 @@
-import { test as base } from '@playwright/test';
+import path from 'path'
+import { test as base, expect } from '@playwright/test';
 import { randomUUID } from 'crypto';
+
+export const FILENAME = 'test.pdf';
 
 class OIDCProvider {
     access_token: string
@@ -90,6 +93,24 @@ export const test = base.extend({
 
         // Clean up
         await provider.delete_user(url)
+    }
+})
+
+export const uploads_index = test.extend({
+    page: async ({ page }, use) => {
+        await page.goto('/uploads/');
+        await page.locator('css=input[type=file]').setInputFiles(path.join(__dirname, FILENAME));
+
+        // Expect upload progress to show
+        await expect(page.getByRole('progressbar')).toBeVisible();
+        // Expect upload to be done and wait for ingest progress to be gone
+        await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 10000 });
+
+        await use(page)
+
+        await page.goto('/uploads/');
+        await page.locator('header').filter({ hasText: FILENAME }).getByRole('button').click();
+        await page.getByRole('button', { name: 'Delete' }).click();
     }
 })
 
