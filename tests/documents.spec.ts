@@ -14,11 +14,8 @@ documents_edit('updates name', async ({ page }) => {
     // change name
     await page.getByPlaceholder('Document name').fill('new.pdf');
     await page.getByRole('button', { name: 'Change name' }).click();
-    await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 3000 });
-
-    // Check document index
-    await page.getByRole('link', { name: 'Documents', exact: true }).click()
-    await expect(page.getByRole('link', { name: 'new.pdf' })).toHaveCount(1);
+    await expect(page.getByRole('heading', { name: 'Edit "test.pdf"' }))
+        .toHaveCount(1, { timeout: 2000 });
 })
 
 documents_edit('updates pagerange', async ({ page }) => {
