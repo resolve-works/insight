@@ -2,6 +2,9 @@
 backbone:
 	docker-compose up -d keycloak minio minio_init opensearch postgres postgrest rabbitmq
 
+install:
+	npm install && npx playwright install firefox
+
 run_test:
 	npx playwright test
 

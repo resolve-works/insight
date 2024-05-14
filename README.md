@@ -11,7 +11,7 @@ through the use of
 
 First copy the provided `.env.sample` environment file to a `.env` file:
 ```
-cp .env.sample .env
+cp .env.example .env
 ```
 
 You'll need to add a [OpenAI api key](https://platform.openai.com/api-keys) to
