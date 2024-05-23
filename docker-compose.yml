@@ -44,7 +44,7 @@ services:
       keycloak:
         condition: service_healthy
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.1.16
+    image: ghcr.io/followthemoney/insight-ui:v0.1.17
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
