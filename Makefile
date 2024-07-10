@@ -2,6 +2,9 @@
 backbone:
 	docker-compose up -d keycloak minio minio_init opensearch postgres postgrest rabbitmq
 
+workers:
+	docker-compose up -d worker ingest
+
 install_dependencies:
 	npm install && npx playwright install
 
@@ -13,6 +16,11 @@ run_test_headed:
 
 codegen:
 	npx playwright codegen --browser firefox --ignore-https-errors http://localhost:3000
+
+reset_database:
+	docker-compose exec postgres /bin/sh -c 'dropdb --username=$$POSTGRES_USER insight'
+	docker-compose exec postgres /bin/sh -c 'createdb --username=$$POSTGRES_USER insight'
+	docker-compose exec postgres /bin/sh -c 'psql --username=$$POSTGRES_USER -f /docker-entrypoint-initdb.d/init.sql'
 
 rabbitmq_dump_definitions:
 	docker-compose exec rabbitmq rabbitmqctl export_definitions - | jq
