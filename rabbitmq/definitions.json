@@ -4,31 +4,7 @@
       "arguments": {},
       "destination": "ingest",
       "destination_type": "queue",
-      "routing_key": "analyze_file",
-      "source": "insight",
-      "vhost": "/"
-    },
-    {
-      "arguments": {},
-      "destination": "ingest",
-      "destination_type": "queue",
-      "routing_key": "delete_file",
-      "source": "insight",
-      "vhost": "/"
-    },
-    {
-      "arguments": {},
-      "destination": "ingest",
-      "destination_type": "queue",
-      "routing_key": "ingest_document",
-      "source": "insight",
-      "vhost": "/"
-    },
-    {
-      "arguments": {},
-      "destination": "ingest",
-      "destination_type": "queue",
-      "routing_key": "delete_document",
+      "routing_key": "ingest_file",
       "source": "insight",
       "vhost": "/"
     },
@@ -36,7 +12,7 @@
       "arguments": {},
       "destination": "default",
       "destination_type": "queue",
-      "routing_key": "index_document",
+      "routing_key": "delete_inode",
       "source": "insight",
       "vhost": "/"
     },
@@ -44,7 +20,15 @@
       "arguments": {},
       "destination": "default",
       "destination_type": "queue",
-      "routing_key": "embed_document",
+      "routing_key": "index_inode",
+      "source": "insight",
+      "vhost": "/"
+    },
+    {
+      "arguments": {},
+      "destination": "default",
+      "destination_type": "queue",
+      "routing_key": "embed_file",
       "source": "insight",
       "vhost": "/"
     },
