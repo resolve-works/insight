@@ -5,6 +5,7 @@ CREATE DATABASE keycloak WITH OWNER=keycloak;
 
 CREATE SCHEMA IF NOT EXISTS private;
 CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS citext;
 
 -- Postgrest "authenticator" user that switches into different roles
 \set pg_postgrest_password `echo $PG_POSTGREST_PASSWORD`

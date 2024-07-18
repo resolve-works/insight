@@ -37,3 +37,7 @@ docker-compose up -d
 
 After which you can [create a user](https://localhost:8000) before [accessing
 the gui](http://localhost:3000).
+
+
+## Development
+

@@ -6,6 +6,12 @@ _meta:
   type: "internalusers"
   config_version: 2
 
+insight:
+  hash: "$2y$12$7IPR4u2iFT99iFBNa7VUqeLEX5C13leMo3QbfPu6QpGCFJfHL5p6q"
+  reserved: false
+  backend_roles:
+  - "all_access"
+
 insight_worker:
   hash: "$2y$12$K9gjuFyyz8Kio1sEcVjjweN/XKKl8rGFicDcleaVO7cKDltZjgJEi"
   reserved: false

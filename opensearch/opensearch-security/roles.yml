@@ -7,7 +7,7 @@ external_user:
   index_permissions:
     - index_patterns:
         - "inodes"
-      dls: "{ \"bool\": { \"must\": { \"match\": { \"path\": \"users/${attr.jwt.sub}/*\" } } } }"
+      dls: "{ \"bool\": { \"must\": { \"match\": { \"readable_by\": \"${attr.jwt.sub}\" } } } }"
       allowed_actions:
         - "indices:data/read"
         - "indices:data/read/search"
@@ -25,4 +25,5 @@ internal_worker:
         - "indices:data/read/search"
         - "write"
         - "indices:admin/create"
+        - "indices:admin/delete"
 

@@ -29,4 +29,4 @@ rabbitmq_hash_password:
 	docker run -it rabbitmq rabbitmqctl hash_password
 
 opensearch_hash_password:
-	docker run -it opensearchproject/opensearch /usr/share/opensearch/plugins/opensearch-security/tools/hash.sh
+	docker run -it opensearchproject/opensearch:2.12.0 /usr/share/opensearch/plugins/opensearch-security/tools/hash.sh

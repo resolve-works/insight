@@ -13,3 +13,8 @@ internal_worker:
   reserved: false
   backend_roles:
   - "internal_worker"
+
+all_access:
+  reserved: false
+  backend_roles:
+  - "all_access"
