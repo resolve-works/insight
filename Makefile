@@ -22,6 +22,9 @@ reset_database:
 	docker-compose exec postgres /bin/sh -c 'createdb --username=$$POSTGRES_USER insight'
 	docker-compose exec postgres /bin/sh -c 'psql --username=$$POSTGRES_USER -f /docker-entrypoint-initdb.d/init.sql'
 
+mc:
+	docker-compose run minio_init /bin/sh -c 'mc alias set insight $$MINIO_ENDPOINT $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD && /bin/sh'
+
 rabbitmq_dump_definitions:
 	docker-compose exec rabbitmq rabbitmqctl export_definitions - | jq
 

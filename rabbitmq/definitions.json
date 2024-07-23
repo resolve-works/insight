@@ -28,6 +28,14 @@
       "arguments": {},
       "destination": "default",
       "destination_type": "queue",
+      "routing_key": "move_inode",
+      "source": "insight",
+      "vhost": "/"
+    },
+    {
+      "arguments": {},
+      "destination": "default",
+      "destination_type": "queue",
       "routing_key": "embed_file",
       "source": "insight",
       "vhost": "/"
