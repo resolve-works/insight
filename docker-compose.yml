@@ -79,7 +79,7 @@ services:
         condition: service_completed_successfully
 
   postgrest:
-    image: postgrest/postgrest:v12.0.2
+    image: postgrest/postgrest:v12.2.2
     environment:
       PGRST_DB_URI: postgresql://insight_authenticator:${PG_POSTGREST_PASSWORD}@postgres:5432/insight
       PGRST_DB_SCHEMAS: public
