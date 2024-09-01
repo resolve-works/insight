@@ -39,14 +39,6 @@
       "routing_key": "embed_file",
       "source": "insight",
       "vhost": "/"
-    },
-    {
-      "arguments": {},
-      "destination": "default",
-      "destination_type": "queue",
-      "routing_key": "answer_prompt",
-      "source": "insight",
-      "vhost": "/"
     }
   ],
   "exchanges": [

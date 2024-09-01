@@ -60,6 +60,7 @@ services:
       RABBITMQ_HOST: localhost
       RABBITMQ_SSL: false
       OPENSEARCH_ENDPOINT: ${OPENSEARCH_ENDPOINT}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
       - ./certs/rootCA.pem:/usr/local/share/ca-certificates/insight.crt
     depends_on:
@@ -194,7 +195,7 @@ services:
         condition: service_healthy
 
   migrate:
-    image: ghcr.io/followthemoney/insight-migrate:v0.2.0
+    image: ghcr.io/followthemoney/insight-migrate:v0.2.1
     environment:
       POSTGRES_URI: "postgresql://insight:insight@postgres:5432/insight?sslmode=disable&x-migrations-table=\"private\".\"schema_migrations\"&x-migrations-table-quoted=1"
     depends_on:
