@@ -15,6 +15,6 @@ internal_worker:
   - "internal_worker"
 
 all_access:
-  reserved: false
+  reserved: true
   backend_roles:
   - "all_access"
