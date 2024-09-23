@@ -1,8 +1,6 @@
-import path from 'path'
-import { test as base, expect } from '@playwright/test';
-import { randomUUID } from 'crypto';
-
-export const FILENAME = 'test.pdf';
+import type {Page, Locator} from '@playwright/test';
+import {test as base} from '@playwright/test';
+import {randomUUID} from 'crypto';
 
 class OIDCProvider {
     access_token: string
@@ -17,13 +15,13 @@ class OIDCProvider {
 
         const res = await fetch('https://localhost:8000/realms/master/protocol/openid-connect/token', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/x-www-form-urlencoded' 
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: new URLSearchParams(data).toString(),
         });
 
-        const { access_token } = await res.json()
+        const {access_token} = await res.json()
         this.access_token = access_token
     }
 
@@ -34,7 +32,7 @@ class OIDCProvider {
             email: `${username}@example.com`,
             firstName: username,
             lastName: "insight",
-            credentials: [ { type: "password", value: password, temporary: false, } ]
+            credentials: [{type: "password", value: password, temporary: false, }]
         }
 
         return fetch('https://localhost:8000/admin/realms/insight/users', {
@@ -48,8 +46,8 @@ class OIDCProvider {
     }
 
     delete_user(url: string) {
-        return fetch(url, { 
-            method: 'DELETE' ,
+        return fetch(url, {
+            method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${this.access_token}`,
             }
@@ -57,15 +55,54 @@ class OIDCProvider {
     }
 }
 
+class FilesIndexPage {
+    page: Page;
+    inodes: Locator;
+
+    constructor(page: Page) {
+        this.page = page
+        this.inodes = this.page.getByTestId('inode');
+    }
+
+    async goto() {
+        await this.page.goto('/files/');
+    }
+
+    async create_folder(name: string) {
+        await this.page.getByRole('button', {name: 'Create Folder'}).click();
+        await this.page.getByPlaceholder('Folder name').fill(name)
+        await this.page.getByRole('button', {name: 'Create', exact: true}).click();
+    }
+
+    async upload_file(path: string) {
+        // Trigger upload
+        await this.page.locator('css=input[type=file]').setInputFiles(path);
+    }
+
+    async remove_all() {
+        while ((await this.inodes.count()) > 0) {
+            const inode = this.inodes.first()
+            await inode.getByTestId('inode-actions-toggle').click()
+            await inode.getByTestId('delete-inode').click()
+            await inode.waitFor({state: "hidden"})
+        }
+    }
+}
+
+
+type Fixtures = {
+    files_index_page: FilesIndexPage,
+}
+
 export * from '@playwright/test'
 
-export const test = base.extend({
-    page: async ({ page, baseURL }, use) => {
-        if( ! baseURL ) {
+export const test = base.extend<Fixtures>({
+    page: async ({page, baseURL}, use) => {
+        if (!baseURL) {
             throw new Error('baseURL unconfigured');
         }
 
-        if( ! process.env.KEYCLOAK_ADMIN || ! process.env.KEYCLOAK_ADMIN_PASSWORD ) {
+        if (!process.env.KEYCLOAK_ADMIN || !process.env.KEYCLOAK_ADMIN_PASSWORD) {
             throw new Error('Keycloak admin credentials not set');
         }
 
@@ -78,39 +115,29 @@ export const test = base.extend({
         const password = "insight";
         const res = await provider.create_user(username, password)
         const url = res.headers.get('location')
-        if( ! url ) {
+        if (!url) {
             throw new Error('User location not found in headers')
         }
 
         // Login as user in browser session
         await page.goto(baseURL);
         await page.getByLabel('Username or email').fill(username)
-        await page.getByLabel('Password', { exact: true }).fill(password);
-        await page.getByRole('button', { name: 'Sign In' }).click();
+        await page.getByLabel('Password', {exact: true}).fill(password);
+        await page.getByRole('button', {name: 'Sign In'}).click();
         await page.waitForURL(baseURL);
 
         await use(page);
 
         // Clean up
         await provider.delete_user(url)
+    },
+
+    files_index_page: async ({page}, use) => {
+        const files_index = new FilesIndexPage(page)
+        await files_index.goto()
+
+        await use(files_index)
+
+        await files_index.remove_all();
     }
 })
-
-export const uploads_index = test.extend({
-    page: async ({ page }, use) => {
-        await page.goto('/uploads/');
-        await page.locator('css=input[type=file]').setInputFiles(path.join(__dirname, FILENAME));
-
-        // Expect upload progress to show
-        await expect(page.getByRole('progressbar')).toBeVisible();
-        // Expect upload to be done and wait for ingest progress to be gone
-        await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 10000 });
-
-        await use(page)
-
-        await page.goto('/uploads/');
-        await page.locator('header').filter({ hasText: FILENAME }).getByRole('button').click();
-        await page.getByRole('button', { name: 'Delete' }).click();
-    }
-})
-

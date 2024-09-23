@@ -1,4 +1,7 @@
 
+dev:
+	docker-compose up -d
+
 backbone:
 	docker-compose up -d keycloak minio minio_init opensearch postgres postgrest rabbitmq
 
