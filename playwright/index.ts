@@ -2,7 +2,7 @@ import {test as base} from '@playwright/test';
 import {randomUUID} from 'crypto';
 import {OIDCProvider} from './oidc';
 import type {Fixtures} from './fixtures';
-import {FilesIndexPage} from './fixtures'
+import {FileIndexPage} from './fixtures'
 
 export * from '@playwright/test'
 
@@ -42,19 +42,36 @@ export const test = base.extend<Fixtures>({
         await provider.delete_user(url)
     },
 
-    files_index_page: async ({page}, use) => {
-        const files_index = new FilesIndexPage(page)
-        await files_index.goto()
+    file_index_page: async ({page}, use) => {
+        const file_index_page = new FileIndexPage(page)
+        await page.goto('/files')
 
-        await use(files_index)
+        await use(file_index_page)
 
-        // Could be we navigated away.
-        await files_index.goto();
-        await files_index.remove_all();
+        await page.goto('/files')
+        await file_index_page.remove_all();
     },
 
-    files_detail_page: async ({page}, use) => {
-        const files_index = new FilesIndexPage(page)
-        await files_index.goto()
+    folder_detail_page: async ({file_index_page, page}, use) => {
+        await file_index_page.create_folder()
+        await page.getByTestId('inode-title').click()
+
+        const folder_detail_page = new FileIndexPage(page)
+        await use(folder_detail_page)
+    },
+
+    file_edit_page: async ({file_index_page, page}, use) => {
+        await file_index_page.upload_file()
+        await page.getByTestId('inode-actions-toggle').click()
+        await page.getByTestId('edit-inode').click()
+
+        await use(page)
+    },
+
+    file_detail_page: async ({file_index_page, page}, use) => {
+        await file_index_page.upload_file()
+        await page.getByTestId('inode-title').click()
+
+        await use(page)
     },
 })

@@ -5,19 +5,7 @@ import type {Page, Locator} from '@playwright/test';
 const FOLDER = 'test folder'
 const FILE = 'test.pdf'
 
-export class SearchPage {
-    page: Page;
-
-    constructor(page: Page) {
-        this.page = page
-    }
-
-    async goto() {
-        await this.page.goto('/search')
-    }
-}
-
-export class FilesIndexPage {
+export class FileIndexPage {
     page: Page;
     inodes: Locator;
 
@@ -28,10 +16,6 @@ export class FilesIndexPage {
     constructor(page: Page) {
         this.page = page
         this.inodes = this.page.getByTestId('inode');
-    }
-
-    async goto() {
-        await this.page.goto('/files');
     }
 
     async create_folder(name: string = this.FOLDER) {
@@ -55,22 +39,10 @@ export class FilesIndexPage {
     }
 }
 
-export class FilesDetailPage {
-    page: Page;
-    file_id: BigInt;
-
-    constructor(page: Page, file_id: BigInt) {
-        this.page = page;
-        this.file_id = file_id;
-    }
-
-    async goto() {
-        await this.page.goto(`/files/${this.file_id}`)
-    }
-}
-
 export type Fixtures = {
-    files_index_page: FilesIndexPage,
-    files_detail_page: FilesDetailPage,
+    file_index_page: FileIndexPage,
+    folder_detail_page: FileIndexPage,
+    file_detail_page: Page,
+    file_edit_page: Page,
 }
 
