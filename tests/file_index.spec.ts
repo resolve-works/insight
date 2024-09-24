@@ -11,3 +11,8 @@ test('Upload file', async ({file_index_page, page}) => {
     await expect(page.getByTestId('inode-title')).toHaveCount(1)
 })
 
+test('Upload wrong file type')
+
+test('Upload corrupted file')
+
+

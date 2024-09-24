@@ -1,21 +1,19 @@
 
 import path from 'path';
-import type {Page, Locator} from '@playwright/test';
+import type {Page} from '@playwright/test';
 
 const FOLDER = 'test folder'
 const FILE = 'test.pdf'
 
 export class FileIndexPage {
     page: Page;
-    inodes: Locator;
 
     FOLDER = FOLDER;
     FILE = FILE;
     PATH = path.join(__dirname, FILE);
 
     constructor(page: Page) {
-        this.page = page
-        this.inodes = this.page.getByTestId('inode');
+        this.page = page;
     }
 
     async create_folder(name: string = this.FOLDER) {
@@ -30,8 +28,10 @@ export class FileIndexPage {
     }
 
     async remove_all() {
-        while ((await this.inodes.count()) > 0) {
-            const inode = this.inodes.first()
+        const inodes = this.page.getByTestId('inode');
+
+        while ((await inodes.count()) > 0) {
+            const inode = inodes.first()
             await inode.getByTestId('inode-actions-toggle').click()
             await inode.getByTestId('delete-inode').click()
             await inode.waitFor({state: "hidden"})
@@ -39,10 +39,23 @@ export class FileIndexPage {
     }
 }
 
+export class FileEditPage {
+    page: Page;
+
+    constructor(page: Page) {
+        this.page = page;
+    }
+
+    async update_name(name: string) {
+        await this.page.getByTestId('inode-name-input').fill(name)
+        await this.page.getByTestId('change-inode-name').click()
+    }
+}
+
 export type Fixtures = {
     file_index_page: FileIndexPage,
     folder_detail_page: FileIndexPage,
     file_detail_page: Page,
-    file_edit_page: Page,
+    file_edit_page: FileEditPage,
 }
 

@@ -2,7 +2,7 @@ import {test as base} from '@playwright/test';
 import {randomUUID} from 'crypto';
 import {OIDCProvider} from './oidc';
 import type {Fixtures} from './fixtures';
-import {FileIndexPage} from './fixtures'
+import {FileIndexPage, FileEditPage} from './fixtures'
 
 export * from '@playwright/test'
 
@@ -65,7 +65,7 @@ export const test = base.extend<Fixtures>({
         await page.getByTestId('inode-actions-toggle').click()
         await page.getByTestId('edit-inode').click()
 
-        await use(page)
+        await use(new FileEditPage(page))
     },
 
     file_detail_page: async ({file_index_page, page}, use) => {
