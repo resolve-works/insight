@@ -55,6 +55,18 @@ class OIDCProvider {
     }
 }
 
+class SearchPage {
+    page: Page;
+
+    constructor(page: Page) {
+        this.page = page
+    }
+
+    async goto() {
+        await this.page.goto('/search')
+    }
+}
+
 class FilesIndexPage {
     page: Page;
     inodes: Locator;
@@ -65,7 +77,7 @@ class FilesIndexPage {
     }
 
     async goto() {
-        await this.page.goto('/files/');
+        await this.page.goto('/files');
     }
 
     async create_folder(name: string) {
@@ -80,6 +92,7 @@ class FilesIndexPage {
     }
 
     async remove_all() {
+        await this.goto()
         while ((await this.inodes.count()) > 0) {
             const inode = this.inodes.first()
             await inode.getByTestId('inode-actions-toggle').click()
@@ -88,7 +101,6 @@ class FilesIndexPage {
         }
     }
 }
-
 
 type Fixtures = {
     files_index_page: FilesIndexPage,

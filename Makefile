@@ -14,8 +14,8 @@ install_dependencies:
 run_test:
 	npx playwright test
 
-run_test_headed:
-	npx playwright test --headed
+test_ui:
+	npx playwright test --ui
 
 codegen:
 	npx playwright codegen --browser firefox --ignore-https-errors http://localhost:3000
