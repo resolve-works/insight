@@ -29,3 +29,8 @@ test('Upload special characters file', async ({file_index_page, page}) => {
     await expect(page.getByTestId('inode-loader')).toHaveCount(0);
 })
 
+test('Upload same file twice', async ({file_index_page, page}) => {
+    await file_index_page.upload_file()
+    await file_index_page.upload_file()
+    await expect(page.getByTestId('upload-error')).toHaveCount(1);
+})
