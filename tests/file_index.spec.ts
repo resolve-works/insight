@@ -22,3 +22,10 @@ test('Upload corrupted file', async ({file_index_page, page}) => {
     await expect(page.getByTestId('inode-error')).toHaveAttribute('title', 'corrupted_file')
 })
 
+test('Upload special characters file', async ({file_index_page, page}) => {
+    await file_index_page.upload_file(path.join(__dirname, 'test\(0\).pdf'))
+    // Wait for processing to trigger first, then to finish
+    await expect(page.getByTestId('inode-loader')).toHaveCount(1);
+    await expect(page.getByTestId('inode-loader')).toHaveCount(0);
+})
+
