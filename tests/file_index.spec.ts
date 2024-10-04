@@ -31,6 +31,7 @@ test('Upload special characters file', async ({file_index_page, page}) => {
 
 test('Upload same file twice', async ({file_index_page, page}) => {
     await file_index_page.upload_file()
+    await expect(page.getByTestId('inode-title')).toHaveCount(1);
     await file_index_page.upload_file()
     await expect(page.getByTestId('upload-error')).toHaveCount(1);
 })
