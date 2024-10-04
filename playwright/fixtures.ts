@@ -10,21 +10,21 @@ export class FileIndexPage {
 
     FOLDER = FOLDER;
     FILE = FILE;
-    PATH = path.join(__dirname, FILE);
+    PATH = path.join(__dirname, '..', 'test_data', FILE);
 
     constructor(page: Page) {
         this.page = page;
     }
 
     async create_folder(name: string = this.FOLDER) {
-        await this.page.getByRole('button', {name: 'Create Folder'}).click();
-        await this.page.getByPlaceholder('Folder name').fill(name)
-        await this.page.getByRole('button', {name: 'Create', exact: true}).click();
+        await this.page.getByTestId('show-folder-form').click();
+        await this.page.getByTestId('folder-name-input').fill(name)
+        await this.page.getByTestId('create-folder').click();
     }
 
     async upload_file(path: string = this.PATH) {
         // Trigger upload
-        await this.page.locator('css=input[type=file]').setInputFiles(path);
+        await this.page.getByTestId('files-input').setInputFiles(path);
     }
 
     async remove_all() {
@@ -52,10 +52,28 @@ export class FileEditPage {
     }
 }
 
+
+export class ConversationDetailPage {
+    page: Page;
+
+    constructor(page: Page) {
+        this.page = page;
+    }
+
+    async prompt(query: string, similarity_top_k: number | undefined = undefined) {
+        await this.page.getByTestId('query-input').fill(query)
+        if (similarity_top_k) {
+            await this.page.getByTestId('similarity-top-k-input').fill(similarity_top_k.toString())
+        }
+        await this.page.getByTestId('create-prompt').click()
+    }
+}
+
 export type Fixtures = {
     file_index_page: FileIndexPage,
-    folder_detail_page: FileIndexPage,
     file_detail_page: Page,
     file_edit_page: FileEditPage,
+    folder_detail_page: FileIndexPage,
+    conversation_detail_page: ConversationDetailPage,
 }
 

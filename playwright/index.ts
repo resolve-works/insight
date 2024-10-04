@@ -1,8 +1,8 @@
-import {test as base} from '@playwright/test';
+import {test as base, expect} from '@playwright/test';
 import {randomUUID} from 'crypto';
 import {OIDCProvider} from './oidc';
 import type {Fixtures} from './fixtures';
-import {FileIndexPage, FileEditPage} from './fixtures'
+import {FileIndexPage, FileEditPage, ConversationDetailPage} from './fixtures'
 
 export * from '@playwright/test'
 
@@ -52,16 +52,9 @@ export const test = base.extend<Fixtures>({
         await file_index_page.remove_all();
     },
 
-    folder_detail_page: async ({file_index_page, page}, use) => {
-        await file_index_page.create_folder()
-        await page.getByTestId('inode-title').click()
-
-        const folder_detail_page = new FileIndexPage(page)
-        await use(folder_detail_page)
-    },
-
     file_edit_page: async ({file_index_page, page}, use) => {
         await file_index_page.upload_file()
+        await expect(page.getByTestId('inode')).toHaveCount(1)
         await page.getByTestId('inode-actions-toggle').click()
         await page.getByTestId('edit-inode').click()
 
@@ -74,4 +67,23 @@ export const test = base.extend<Fixtures>({
 
         await use(page)
     },
+
+    folder_detail_page: async ({file_index_page, page}, use) => {
+        await file_index_page.create_folder()
+        await page.getByTestId('inode-title').click()
+
+        const folder_detail_page = new FileIndexPage(page)
+        await use(folder_detail_page)
+    },
+
+    conversation_detail_page: async ({page}, use) => {
+        await page.goto('/files')
+        await page.getByTestId('start-conversation').click()
+
+        const conversation_detail_page = new ConversationDetailPage(page)
+
+        await use(conversation_detail_page)
+
+        // TODO - Clean up conversation
+    }
 })
