@@ -27,6 +27,10 @@ export class FileIndexPage {
         await this.page.getByTestId('files-input').setInputFiles(path);
     }
 
+    async start_conversation() {
+        await this.page.getByTestId('start-conversation').click()
+    }
+
     async remove_all() {
         const inodes = this.page.getByTestId('inode');
 
@@ -74,6 +78,7 @@ export type Fixtures = {
     file_detail_page: Page,
     file_edit_page: FileEditPage,
     folder_detail_page: FileIndexPage,
+    empty_conversation_detail_page: ConversationDetailPage,
     conversation_detail_page: ConversationDetailPage,
 }
 

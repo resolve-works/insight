@@ -76,14 +76,18 @@ export const test = base.extend<Fixtures>({
         await use(folder_detail_page)
     },
 
-    conversation_detail_page: async ({page}, use) => {
-        await page.goto('/files')
-        await page.getByTestId('start-conversation').click()
-
+    empty_conversation_detail_page: async ({file_index_page, page}, use) => {
+        await file_index_page.start_conversation()
         const conversation_detail_page = new ConversationDetailPage(page)
-
         await use(conversation_detail_page)
+    },
 
-        // TODO - Clean up conversation
+    conversation_detail_page: async ({file_index_page, page}, use) => {
+        await file_index_page.upload_file()
+        await expect(page.getByTestId('inode-loader')).toHaveCount(1);
+        await expect(page.getByTestId('inode-loader')).toHaveCount(0);
+        await file_index_page.start_conversation()
+        const conversation_detail_page = new ConversationDetailPage(page)
+        await use(conversation_detail_page)
     }
 })
