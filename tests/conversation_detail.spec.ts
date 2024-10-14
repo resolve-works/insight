@@ -8,6 +8,16 @@ test('Create prompt', async ({ empty_conversation_detail_page, page }) => {
 	await expect(page.getByTestId('machine-message')).toHaveCount(2);
 });
 
+test('Empty prompt', async ({ empty_conversation_detail_page, page }) => {
+	await empty_conversation_detail_page.prompt('');
+	await expect(page.getByTestId('error-message')).toHaveCount(1);
+});
+
+test('High similarity', async ({ empty_conversation_detail_page, page }) => {
+	await empty_conversation_detail_page.prompt('test', 100);
+	await expect(page.getByTestId('error-message')).toHaveCount(1);
+});
+
 test('Exceed context of embedding model', async ({ empty_conversation_detail_page, page }) => {
 	const query = 'This is a test string, ';
 	// Exceed openai limit
