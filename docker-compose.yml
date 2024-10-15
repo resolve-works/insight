@@ -1,8 +1,7 @@
-
 services:
   keycloak:
     image: quay.io/keycloak/keycloak
-    entrypoint: ["/opt/keycloak/bin/kc.sh", "start-dev"]
+    entrypoint: ['/opt/keycloak/bin/kc.sh', 'start-dev']
     healthcheck:
       # Poor mans curl, checks if port is open
       test: /bin/bash -c "echo > /dev/tcp/localhost/8000"
@@ -32,7 +31,7 @@ services:
   keycloak_init:
     image: quay.io/keycloak/keycloak
     network_mode: host
-    entrypoint: ["/opt/keycloak_init/init.sh"]
+    entrypoint: ['/opt/keycloak_init/init.sh']
     environment:
       KEYCLOAK_SERVER: https://localhost:8000
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
@@ -44,7 +43,7 @@ services:
       keycloak:
         condition: service_healthy
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.2.3
+    image: ghcr.io/followthemoney/insight-ui:v0.2.4
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
@@ -71,7 +70,12 @@ services:
   postgrest_init:
     image: alpine/curl
     entrypoint: []
-    command: ["/bin/sh", "-c" ,"apk add jq && /usr/bin/curl --cacert /etc/ssl/insight/insight.pem https://keycloak:8000/realms/insight/protocol/openid-connect/certs | jq -r '.keys[] | select(.alg == \"RS256\")' > /opt/jwks/insight"]
+    command:
+      [
+        '/bin/sh',
+        '-c',
+        'apk add jq && /usr/bin/curl --cacert /etc/ssl/insight/insight.pem https://keycloak:8000/realms/insight/protocol/openid-connect/certs | jq -r ''.keys[] | select(.alg == "RS256")'' > /opt/jwks/insight'
+      ]
     volumes:
       - jwks:/opt/jwks
       - ./certs/rootCA.pem:/etc/ssl/insight/insight.pem
@@ -84,7 +88,7 @@ services:
     environment:
       PGRST_DB_URI: postgresql://insight_authenticator:${PG_POSTGREST_PASSWORD}@postgres:5432/insight
       PGRST_DB_SCHEMAS: public
-      PGRST_JWT_SECRET: "@/opt/jwks/insight"
+      PGRST_JWT_SECRET: '@/opt/jwks/insight'
       PGRST_JWT_ROLE_CLAIM_KEY: .roles[0]
       PGRST_DB_ANON_ROLE: external_anonymous
       PGRST_SERVER_PORT: 8080
@@ -99,7 +103,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/followthemoney/insight-worker:v0.2.3
+    image: ghcr.io/followthemoney/insight-worker:v0.2.4
     network_mode: host
     environment:
       QUEUE: default
@@ -124,7 +128,7 @@ services:
         condition: service_completed_successfully
 
   ingest:
-    image: ghcr.io/followthemoney/insight-worker:v0.2.3
+    image: ghcr.io/followthemoney/insight-worker:v0.2.4
     deploy:
       replicas: 3
     network_mode: host
@@ -200,9 +204,9 @@ services:
         condition: service_healthy
 
   migrate:
-    image: ghcr.io/followthemoney/insight-migrate:v0.2.4
+    image: ghcr.io/followthemoney/insight-migrate:v0.2.5
     environment:
-      POSTGRES_URI: "postgresql://insight:insight@postgres:5432/insight?sslmode=disable&x-migrations-table=\"private\".\"schema_migrations\"&x-migrations-table-quoted=1"
+      POSTGRES_URI: 'postgresql://insight:insight@postgres:5432/insight?sslmode=disable&x-migrations-table="private"."schema_migrations"&x-migrations-table-quoted=1'
     depends_on:
       postgres:
         condition: service_healthy
@@ -266,8 +270,8 @@ services:
         condition: service_healthy
 
 secrets:
-   jwk:
-     file: .jwk
+  jwk:
+    file: .jwk
 
 volumes:
   minio: {}
