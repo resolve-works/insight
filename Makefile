@@ -12,7 +12,7 @@ install_dependencies:
 	npm install && npx playwright install
 
 run_test:
-	npx playwright test
+	npx playwright test -j 4
 
 test_ui:
 	npx playwright test --ui

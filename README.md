@@ -48,3 +48,10 @@ After which you can [create a user](https://localhost:8000) before [accessing
 the gui](http://localhost:3000).
 
 ## Development
+
+Playwright tests are included
+
+```
+make install_dependencies
+make run_test
+```

@@ -1,3 +1,3 @@
 import { test } from '../playwright';
 
-test('Select text layer');
+//test('Select text layer');
