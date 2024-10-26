@@ -27,7 +27,8 @@ if kcadm get realms/insight | grep -q "default-roles-insight"; then
 fi
 
 # Create main insight realm, client and roles
-kcadm create realms -s realm=insight -s enabled=true
+# We manually disable HSTS as it breaks our localhost setup: https://github.com/keycloak/keycloak/issues/32366
+kcadm create realms -f /opt/keycloak_init/realm-insight.json
 kcadm create client-scopes -r insight -f /opt/keycloak_init/scope-insight-roles.json
 
 INSIGHT_CID=$(kcadm create clients -r insight -f /opt/keycloak_init/client-insight.json -i)

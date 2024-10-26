@@ -42,6 +42,7 @@ services:
     depends_on:
       keycloak:
         condition: service_healthy
+
   ui:
     image: ghcr.io/followthemoney/insight-ui:v0.2.4
     network_mode: host

@@ -1,0 +1,7 @@
+{
+	"realm": "insight",
+	"enabled": true,
+	"browserSecurityHeaders": {
+		"strictTransportSecurity": "max-age=0; includeSubDomains"
+	}
+}
