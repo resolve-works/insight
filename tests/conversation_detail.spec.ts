@@ -1,4 +1,24 @@
-import { test, expect } from '../playwright';
+import { test as base, expect } from '../playwright';
+import { ConversationDetailPage } from '../playwright/fixtures';
+
+export const test = base.extend<{ empty_conversation_detail_page: ConversationDetailPage }>({
+	empty_conversation_detail_page: async ({ file_index_page, page }, use) => {
+		await file_index_page.start_conversation();
+		const conversation_detail_page = new ConversationDetailPage(page);
+		await use(conversation_detail_page);
+	}
+
+	/*
+	conversation_detail_page: async ({ file_index_page, page }, use) => {
+		await file_index_page.upload_file();
+		await expect(page.getByTestId('inode-loader')).toHaveCount(1);
+		await expect(page.getByTestId('inode-loader')).toHaveCount(0);
+		await file_index_page.start_conversation();
+		const conversation_detail_page = new ConversationDetailPage(page);
+		await use(conversation_detail_page);
+	}
+    */
+});
 
 test('Create prompt', async ({ empty_conversation_detail_page, page }) => {
 	const query = 'Return a single word';
@@ -27,5 +47,5 @@ test('Exceed context of embedding model', async ({ empty_conversation_detail_pag
 
 // TODO
 // I tested this locally with a big PDF because we need quite a bit of data in
-// the system to exceed the context of the completion model (gpt-4-turbo).
+// the system to exceed the context of the completion model.
 //test('Exceed context of completion model')

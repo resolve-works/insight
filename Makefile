@@ -15,7 +15,7 @@ run_test:
 	npx playwright test -j 4
 
 test_ui:
-	npx playwright test --ui
+	npx playwright test --ui -j 4
 
 codegen:
 	npx playwright codegen --browser firefox --ignore-https-errors http://localhost:3000
