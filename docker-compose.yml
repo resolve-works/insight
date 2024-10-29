@@ -44,7 +44,7 @@ services:
         condition: service_healthy
 
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.2.4
+    image: ghcr.io/followthemoney/insight-ui:v0.3.0
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
@@ -205,7 +205,7 @@ services:
         condition: service_healthy
 
   migrate:
-    image: ghcr.io/followthemoney/insight-migrate:v0.2.6
+    image: ghcr.io/followthemoney/insight-migrate:v0.3.1
     environment:
       POSTGRES_URI: 'postgresql://insight:insight@postgres:5432/insight?sslmode=disable&x-migrations-table="private"."schema_migrations"&x-migrations-table-quoted=1'
     depends_on:

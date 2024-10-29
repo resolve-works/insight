@@ -12,10 +12,10 @@ install_dependencies:
 	npm install && npx playwright install
 
 run_test:
-	npx playwright test -j 4
+	npx playwright test -j 1
 
 test_ui:
-	npx playwright test --ui -j 4
+	npx playwright test --ui -j 1
 
 codegen:
 	npx playwright codegen --browser firefox --ignore-https-errors http://localhost:3000
