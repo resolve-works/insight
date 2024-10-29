@@ -1,5 +1,5 @@
-import { test as base, expect } from '../playwright';
-import { ConversationDetailPage } from '../playwright/fixtures';
+import { test as base, expect } from '../../playwright';
+import { ConversationDetailPage } from '../../playwright/fixtures';
 
 export const test = base.extend<{ empty_conversation_detail_page: ConversationDetailPage }>({
 	empty_conversation_detail_page: async ({ file_index_page, page }, use) => {

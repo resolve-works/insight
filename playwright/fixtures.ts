@@ -21,9 +21,9 @@ export class FileIndexPage {
 		await this.page.getByTestId('create-folder').click();
 	}
 
-	async upload_file(path: string = this.PATH) {
+	async upload_file(file_path: string = this.PATH) {
 		// Trigger upload
-		await this.page.getByTestId('files-input').setInputFiles(path);
+		await this.page.getByTestId('files-input').setInputFiles(file_path);
 	}
 
 	async start_conversation() {
@@ -51,7 +51,12 @@ export class FileEditPage {
 
 	async update_name(name: string) {
 		await this.page.getByTestId('inode-name-input').fill(name);
-		await this.page.getByTestId('change-inode-name').click();
+		await this.page.getByTestId('update-inode').click();
+	}
+
+	async update_public_state(is_public: boolean) {
+		await this.page.getByTestId('inode-is-public-input').setChecked(is_public);
+		await this.page.getByTestId('update-inode').click();
 	}
 }
 

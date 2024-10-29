@@ -1,4 +1,4 @@
-import { test, expect } from '../playwright';
+import { test, expect } from '../../playwright';
 import path from 'path';
 
 test('Create folder', async ({ file_index_page, page }) => {
@@ -19,17 +19,17 @@ test('Upload file', async ({ file_index_page, page }) => {
 });
 
 test('Upload wrong file type', async ({ file_index_page, page }) => {
-	await file_index_page.upload_file(path.join(__dirname, 'file_index.spec.ts'));
+	await file_index_page.upload_file(path.join(__dirname, 'index.spec.ts'));
 	await expect(page.getByTestId('inode-error')).toHaveAttribute('title', 'unsupported_file_type');
 });
 
 test('Upload corrupted file', async ({ file_index_page, page }) => {
-	await file_index_page.upload_file(path.join(__dirname, '..', 'test_data', 'corrupted.pdf'));
+	await file_index_page.upload_file(path.join(__dirname, '..', '..', 'test_data', 'corrupted.pdf'));
 	await expect(page.getByTestId('inode-error')).toHaveAttribute('title', 'corrupted_file');
 });
 
 test('Upload special characters file', async ({ file_index_page, page }) => {
-	await file_index_page.upload_file(path.join(__dirname, '..', 'test_data', 'test(0).pdf'));
+	await file_index_page.upload_file(path.join(__dirname, '..', '..', 'test_data', 'test(0).pdf'));
 	// Wait for processing to trigger first, then to finish
 	await expect(page.getByTestId('inode-loader')).toHaveCount(1);
 	await expect(page.getByTestId('inode-loader')).toHaveCount(0);
