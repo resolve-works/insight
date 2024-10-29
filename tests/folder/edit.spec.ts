@@ -84,4 +84,25 @@ test('Mark public files in folder as private', async ({
 	await expect(page.getByTestId('inode-is-public-input')).toBeChecked({ checked: false });
 });
 
-// TODO - remove public file from folder
+test('Remove public file from folder', async ({ folder_detail_page, folder_edit_page, page }) => {
+	// Upload file
+	await folder_detail_page.upload_file();
+	await expect(page.getByTestId('inode-title')).toHaveCount(1);
+
+	// Go to file edit page & set public
+	await page.getByTestId('inode-actions').click();
+	await page.getByTestId('edit-inode').click();
+	await folder_edit_page.update_public_state(true);
+
+	// Go back to folder and delete file
+	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
+	await page.getByTestId('inode-title').click();
+	await page.getByTestId('inode-actions').click();
+	await page.getByTestId('delete-inode').click();
+
+	// Go to folder edit and check public state
+	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
+	await page.getByTestId('inode-actions').click();
+	await page.getByTestId('edit-inode').click();
+	await expect(page.getByTestId('inode-is-public-input')).toBeChecked({ checked: false });
+});
