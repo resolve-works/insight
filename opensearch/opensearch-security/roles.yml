@@ -1,29 +1,34 @@
 ---
 _meta:
-  type: "roles"
+  type: 'roles'
   config_version: 2
 
 external_user:
   index_permissions:
     - index_patterns:
-        - "inodes"
-      dls: "{ \"bool\": { \"must\": { \"match\": { \"readable_by\": \"${attr.jwt.sub}\" } } } }"
+        - 'inodes'
+      dls: '{ "bool": { "must": { "match": { "readable_by": "${attr.jwt.sub}" } } } }'
       allowed_actions:
-        - "indices:data/read"
-        - "indices:data/read/search"
+        - 'indices:data/read'
+        - 'indices:data/read/search'
+    - index_patterns:
+        - 'inodes'
+      dls: '{ "bool": { "must": { "match": { "is_public": true } } } }'
+      allowed_actions:
+        - 'indices:data/read'
+        - 'indices:data/read/search'
 
 internal_worker:
   cluster_permissions:
-    - "indices:data/write/bulk"
-    - "indices:data/read*"
-    - "indices:admin/mappings/fields/get*"
+    - 'indices:data/write/bulk'
+    - 'indices:data/read*'
+    - 'indices:admin/mappings/fields/get*'
   index_permissions:
     - index_patterns:
-        - "inodes"
+        - 'inodes'
       allowed_actions:
-        - "indices:data/read"
-        - "indices:data/read/search"
-        - "write"
-        - "indices:admin/create"
-        - "indices:admin/delete"
-
+        - 'indices:data/read'
+        - 'indices:data/read/search'
+        - 'write'
+        - 'indices:admin/create'
+        - 'indices:admin/delete'

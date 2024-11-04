@@ -2,6 +2,9 @@
 dev:
 	docker-compose up -d
 
+ui:
+	docker-compose up -d ui
+
 backbone:
 	docker-compose up -d keycloak minio minio_init opensearch postgres postgrest rabbitmq
 
@@ -36,3 +39,6 @@ rabbitmq_hash_password:
 
 opensearch_hash_password:
 	docker run -it opensearchproject/opensearch:2.12.0 /usr/share/opensearch/plugins/opensearch-security/tools/hash.sh
+
+elasticvue:
+	docker run -d -p 3001:8080 --name elasticvue cars10/elasticvue 
