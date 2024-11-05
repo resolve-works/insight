@@ -1,3 +1,4 @@
+ALTER SYSTEM SET wal_level = logical;
 
 \set pg_keycloak_password `echo $PG_KEYCLOAK_PASSWORD`
 CREATE ROLE keycloak noinherit LOGIN PASSWORD :'pg_keycloak_password';
@@ -10,6 +11,10 @@ CREATE EXTENSION IF NOT EXISTS citext;
 -- Postgrest "authenticator" user that switches into different roles
 \set pg_postgrest_password `echo $PG_POSTGREST_PASSWORD`
 CREATE ROLE insight_authenticator noinherit LOGIN PASSWORD :'pg_postgrest_password';
+
+-- Debezium replication user
+\set pg_debezium_password `echo $PG_DEBEZIUM_PASSWORD`
+CREATE ROLE debezium WITH LOGIN REPLICATION PASSWORD :'pg_debezium_password';
 
 -- Postgrest anonymous user for unauthenticated requests
 CREATE ROLE external_anonymous nologin;

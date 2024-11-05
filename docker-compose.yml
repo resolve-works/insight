@@ -2,6 +2,10 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak
     entrypoint: ['/opt/keycloak/bin/kc.sh', 'start-dev']
+    deploy:
+      resources:
+        limits:
+          memory: 500M
     healthcheck:
       # Poor mans curl, checks if port is open
       test: /bin/bash -c "echo > /dev/tcp/localhost/8000"
@@ -156,6 +160,10 @@ services:
 
   opensearch:
     image: opensearchproject/opensearch:2.12.0
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     ulimits:
       memlock:
         soft: -1
@@ -165,6 +173,8 @@ services:
     environment:
       discovery.type: single-node
       DISABLE_INSTALL_DEMO_CONFIG: True
+      # Limit memory usage
+      OPENSEARCH_JAVA_OPTS: '-Xms512m -Xmx512m'
     volumes:
       - opensearch:/usr/share/opensearch/data
       - ./opensearch/opensearch-security/action_groups.yml:/usr/share/opensearch/config/opensearch-security/action_groups.yml
@@ -204,6 +214,28 @@ services:
       keycloak:
         condition: service_healthy
 
+  debezium:
+    image: debezium/server:3.0.0.Final
+    environment:
+      ENABLE_DEBEZIUM_SCRIPTING: true
+      DEBEZIUM_SOURCE_DATABASE_HOSTNAME: postgres
+      DEBEZIUM_SOURCE_DATABASE_PORT: 5432
+      DEBEZIUM_SOURCE_DATABASE_USER: insight
+      DEBEZIUM_SOURCE_DATABASE_PASSWORD: insight
+      DEBEZIUM_SOURCE_DATABASE_DBNAME: insight
+      DEBEZIUM_SINK_RABBITMQ_CONNECTION_HOST: rabbitmq
+      DEBEZIUM_SINK_RABBITMQ_CONNECTION_PORT: 5672
+      DEBEZIUM_SINK_RABBITMQ_CONNECTION_USERNAME: debezium
+      DEBEZIUM_SINK_RABBITMQ_CONNECTION_PASSWORD: debezium
+    volumes:
+      - debezium:/debezium/data
+      - ./debezium/application.properties:/debezium/config/application.properties
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
   migrate:
     image: ghcr.io/followthemoney/insight-migrate:v0.3.1
     environment:
@@ -224,6 +256,7 @@ services:
       POSTGRES_PASSWORD: insight
       PG_KEYCLOAK_PASSWORD: ${PG_KEYCLOAK_PASSWORD}
       PG_POSTGREST_PASSWORD: ${PG_POSTGREST_PASSWORD}
+      PG_DEBEZIUM_PASSWORD: ${PG_DEBEZIUM_PASSWORD}
       PG_WORKER_PASSWORD: ${PG_WORKER_PASSWORD}
     volumes:
       - postgres:/var/lib/postgresql/data
@@ -279,4 +312,5 @@ volumes:
   postgres: {}
   opensearch: {}
   rabbitmq: {}
+  debezium: {}
   jwks: {}

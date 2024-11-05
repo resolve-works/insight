@@ -4,7 +4,7 @@
 			"arguments": {},
 			"destination": "ingest",
 			"destination_type": "queue",
-			"routing_key": "ingest_file",
+			"routing_key": "ingest_inode",
 			"source": "insight",
 			"vhost": "/"
 		},
@@ -12,7 +12,7 @@
 			"arguments": {},
 			"destination": "default",
 			"destination_type": "queue",
-			"routing_key": "delete_inode",
+			"routing_key": "embed_inode",
 			"source": "insight",
 			"vhost": "/"
 		},
@@ -28,7 +28,7 @@
 			"arguments": {},
 			"destination": "default",
 			"destination_type": "queue",
-			"routing_key": "update_inode",
+			"routing_key": "move_inode",
 			"source": "insight",
 			"vhost": "/"
 		},
@@ -36,7 +36,15 @@
 			"arguments": {},
 			"destination": "default",
 			"destination_type": "queue",
-			"routing_key": "embed_file",
+			"routing_key": "share_inode",
+			"source": "insight",
+			"vhost": "/"
+		},
+		{
+			"arguments": {},
+			"destination": "default",
+			"destination_type": "queue",
+			"routing_key": "delete_inode",
 			"source": "insight",
 			"vhost": "/"
 		}
@@ -65,6 +73,13 @@
 			"configure": ".*",
 			"read": ".*",
 			"user": "insight_worker",
+			"vhost": "/",
+			"write": ".*"
+		},
+		{
+			"configure": ".*",
+			"read": ".*",
+			"user": "debezium",
 			"vhost": "/",
 			"write": ".*"
 		}
@@ -104,6 +119,13 @@
 			"limits": {},
 			"name": "insight_worker",
 			"password_hash": "rbvDG+aU/HPfKx2+TCyPNxYgM9N2G+U03bi4hJ0j+qXu0DW0",
+			"tags": []
+		},
+		{
+			"hashing_algorithm": "rabbit_password_hashing_sha256",
+			"limits": {},
+			"name": "debezium",
+			"password_hash": "XXjPsJdjcZo3eTPH9emr0Ozu84+6eW0SS1NexDqViAuXTqYK",
 			"tags": []
 		}
 	],

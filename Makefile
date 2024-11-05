@@ -6,7 +6,7 @@ ui:
 	docker-compose up -d ui
 
 backbone:
-	docker-compose up -d keycloak minio minio_init opensearch postgres postgrest rabbitmq
+	docker-compose up -d keycloak minio minio_init opensearch postgres postgrest rabbitmq debezium
 
 workers:
 	docker-compose up -d worker ingest
