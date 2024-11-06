@@ -1,13 +1,18 @@
 {
-   "Version": "2012-10-17",
-   "Statement": [
-      {
-         "Effect": "Allow",
-         "Action": [
-             "s3:PutObject",
-             "s3:GetObject"
-         ],
-         "Resource": "arn:aws:s3:::insight/users/${jwt:sub}/*"
-      }
-   ]
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": ["s3:PutObject", "s3:GetObject"],
+			"Resource": "arn:aws:s3:::insight/users/${jwt:sub}/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": ["s3:GetObject"],
+			"Resource": "arn:aws:s3:::insight/users/*",
+			"Condition": {
+				"StringEquals": { "s3:ExistingObjectTag/is_public": "True" }
+			}
+		}
+	]
 }
