@@ -5,7 +5,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 500M
+          memory: 1G
     healthcheck:
       # Poor mans curl, checks if port is open
       test: /bin/bash -c "echo > /dev/tcp/localhost/8000"
@@ -48,7 +48,7 @@ services:
         condition: service_healthy
 
   ui:
-    image: ghcr.io/followthemoney/insight-ui:v0.3.0
+    image: ghcr.io/followthemoney/insight-ui:v0.3.1
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
@@ -108,7 +108,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/followthemoney/insight-worker:v0.2.5
+    image: ghcr.io/followthemoney/insight-worker:v0.3.0
     network_mode: host
     environment:
       QUEUE: default
@@ -133,7 +133,7 @@ services:
         condition: service_completed_successfully
 
   ingest:
-    image: ghcr.io/followthemoney/insight-worker:v0.2.5
+    image: ghcr.io/followthemoney/insight-worker:v0.3.0
     deploy:
       replicas: 3
     network_mode: host
@@ -163,7 +163,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 2G
     ulimits:
       memlock:
         soft: -1
@@ -237,7 +237,7 @@ services:
         condition: service_healthy
 
   migrate:
-    image: ghcr.io/followthemoney/insight-migrate:v0.3.4
+    image: ghcr.io/followthemoney/insight-migrate:v0.3.5
     environment:
       POSTGRES_URI: 'postgresql://insight:insight@postgres:5432/insight?sslmode=disable&x-migrations-table="private"."schema_migrations"&x-migrations-table-quoted=1'
     depends_on:
