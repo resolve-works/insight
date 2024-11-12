@@ -6,6 +6,10 @@ to search through a set of documents by keyword, and to prompt a
 through the use of
 [RAG](https://research.ibm.com/blog/retrieval-augmented-generation-RAG).
 
+The initial development of Insight was funded by Follow the Money
+([ftm.nl](https://ftm.nl)/ [ftm.eu](https://ftm.eu)) to process large amount of
+FOIA requests.
+
 ## Setting up
 
 First copy the provided `.env.sample` environment file to a `.env` file:
