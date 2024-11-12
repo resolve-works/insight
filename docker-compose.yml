@@ -108,7 +108,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/resolve-works/insight-worker:v0.3.1
+    image: ghcr.io/resolve-works/insight-worker:v0.3.2
     network_mode: host
     environment:
       QUEUE: default
@@ -133,7 +133,7 @@ services:
         condition: service_completed_successfully
 
   ingest:
-    image: ghcr.io/resolve-works/insight-worker:v0.3.1
+    image: ghcr.io/resolve-works/insight-worker:v0.3.2
     deploy:
       replicas: 3
     network_mode: host
