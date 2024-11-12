@@ -36,10 +36,9 @@ kcadm create clients/$INSIGHT_CID/roles -r insight -s name=external_user
 
 # Create rabbitmq client and roles
 RABBITMQ_CID=$(kcadm create clients -r insight -f /opt/keycloak_init/client-rabbitmq.json -i)
-kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.read:%2F/user-*/*"
-kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.configure:%2F/user-*/*"
-kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.write:%2F/user-*/*"
-kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.write:%2F/insight/*"
+kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.read:%2F/user*/*"
+kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.configure:%2F/user*/*"
+kcadm create clients/$RABBITMQ_CID/roles -r insight -s name="rabbitmq.write:%2F/user*/*"
 
 # Add created roles as default to realm
 kcadm add-roles -r insight \
@@ -53,10 +52,9 @@ kcadm add-roles -r insight \
 kcadm add-roles -r insight \
   --rname default-roles-insight \
   --cclientid rabbitmq \
-  --rolename "rabbitmq.read:%2F/user-*/*" \
-  --rolename "rabbitmq.configure:%2F/user-*/*" \
-  --rolename "rabbitmq.write:%2F/user-*/*" \
-  --rolename "rabbitmq.write:%2F/insight/*"
+  --rolename "rabbitmq.read:%2F/user*/*" \
+  --rolename "rabbitmq.configure:%2F/user*/*" \
+  --rolename "rabbitmq.write:%2F/user*/*"
 
 # Test user for manual testing
 kcadm create users -r insight \

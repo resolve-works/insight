@@ -1,6 +1,6 @@
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak
+    image: quay.io/keycloak/keycloak:26.0
     entrypoint: ['/opt/keycloak/bin/kc.sh', 'start-dev']
     deploy:
       resources:
@@ -33,7 +33,7 @@ services:
         condition: service_healthy
 
   keycloak_init:
-    image: quay.io/keycloak/keycloak
+    image: quay.io/keycloak/keycloak:26.0
     network_mode: host
     entrypoint: ['/opt/keycloak_init/init.sh']
     environment:

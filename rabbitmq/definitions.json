@@ -57,6 +57,14 @@
 			"name": "insight",
 			"type": "direct",
 			"vhost": "/"
+		},
+		{
+			"arguments": {},
+			"auto_delete": false,
+			"durable": true,
+			"name": "user",
+			"type": "topic",
+			"vhost": "/"
 		}
 	],
 	"global_parameters": [],
