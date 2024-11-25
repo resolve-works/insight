@@ -2,10 +2,6 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     entrypoint: ['/opt/keycloak/bin/kc.sh', 'start-dev']
-    deploy:
-      resources:
-        limits:
-          memory: 1G
     healthcheck:
       # Poor mans curl, checks if port is open
       test: /bin/bash -c "echo > /dev/tcp/localhost/8000"
