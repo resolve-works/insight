@@ -15,9 +15,8 @@ prompts in a conversational form, together with good keyword search.
   <img src="images/files.png" width="200" />
 </p>
 
-The initial development of Insight was funded by Follow the Money
-([ftm.nl](https://ftm.nl)/ [ftm.eu](https://ftm.eu)) to process large amount of
-FOIA requests.
+The initial development of Insight was funded by [Follow the
+Money](https://ftm.nl) to process large amount of FOIA requests.
 
 ## Setting up a development environment
 
