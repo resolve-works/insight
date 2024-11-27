@@ -1,18 +1,27 @@
 # Insight
 
-Insight turns data into information, by putting it into context. It allows you
-to search through a set of documents by keyword, and to prompt a
-[LLM](https://en.wikipedia.org/wiki/Large_language_model) about sets documents
-through the use of
-[RAG](https://research.ibm.com/blog/retrieval-augmented-generation-RAG).
+Insight allows you to search through a set of PDF documents by keyword, and to
+prompt a [LLM](https://en.wikipedia.org/wiki/Large_language_model) about sets
+documents through the use of
+[RAG](https://research.ibm.com/blog/retrieval-augmented-generation-RAG). It is
+designed with the idea of stripping away what you're not interested in, in order
+to arrive at what you might be interested in. It tries to accomplish this
+by semantically matching information from user-supplied document sets with user
+prompts in a conversational form, together with good keyword search.
+
+<p float="left">
+  <img src="images/search.png" width="200" />
+  <img src="images/conversation.png" width="200" /> 
+  <img src="images/files.png" width="200" />
+</p>
 
 The initial development of Insight was funded by Follow the Money
 ([ftm.nl](https://ftm.nl)/ [ftm.eu](https://ftm.eu)) to process large amount of
 FOIA requests.
 
-## Setting up
+## Setting up a development environment
 
-First copy the provided `.env.sample` environment file to a `.env` file:
+Copy the provided `.env.sample` environment file to a `.env` file:
 
 ```
 cp .env.example .env
@@ -40,8 +49,6 @@ mkcert -cert-file ./certs/opensearch.pem -key-file ./certs/opensearch-key.pem op
 mkcert -cert-file ./certs/keycloak.pem -key-file ./certs/keycloak-key.pem keycloak localhost
 ```
 
-## Running
-
 After configuration, you can run the development environment:
 
 ```
@@ -51,9 +58,9 @@ docker-compose up -d
 After which you can [create a user](https://localhost:8000) before [accessing
 the gui](http://localhost:3000).
 
-## Development
+## Testing
 
-Playwright tests are included
+Playwright integration tests are included
 
 ```
 make install_dependencies
