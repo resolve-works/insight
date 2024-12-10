@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { Locator } from '@playwright/test';
 import path from 'path';
 import type { Page } from '@playwright/test';
 
@@ -20,14 +20,20 @@ export class FileIndexPage extends BasePage {
 	FILE = 'test.pdf';
 	FOLDER = 'folder';
 
-	private async get_href_for_inode(name: string) {
-		const href = await this.page
-			.getByTestId('inode-link')
-			.filter({ hasText: name })
-			.first()
-			.getAttribute('href');
+	private get_inode(name: string): Locator {
+		return this.page
+			.locator('[data-testid=inode]', {
+				has: this.page.locator(`text="${name}"`)
+			})
+			.and(
+				this.page.locator('[data-testid=inode]', {
+					has: this.page.locator('[data-testid=delete-inode]')
+				})
+			);
+	}
 
-		expect(href).not.toBeNull();
+	private async get_href_for_inode(inode: Locator): Promise<string> {
+		const href = await inode.getByTestId('inode-link').getAttribute('href');
 		return href!;
 	}
 
@@ -35,20 +41,18 @@ export class FileIndexPage extends BasePage {
 		await this.page.getByTestId('show-folder-form').click();
 		await this.page.getByTestId('folder-name-input').fill(name);
 		await this.page.getByTestId('create-folder').click();
-		return this.get_href_for_inode(name);
+		await this.page.getByTestId('create-folder-form').waitFor({ state: 'hidden' });
+		return this.get_href_for_inode(this.get_inode(name));
 	}
 
 	async upload_file(name: string = this.FILE): Promise<string> {
 		const file_path = path.join(__dirname, '..', 'test_data', name);
 		await this.page.getByTestId('files-input').setInputFiles(file_path);
-		return this.get_href_for_inode(name);
+		return this.get_href_for_inode(this.get_inode(name));
 	}
 
 	private async delete_inode(name: string) {
-		const inode = this.page.locator('[data-testid=inode]', {
-			has: this.page.locator(`text="${name}"`)
-		});
-
+		const inode = this.get_inode(name);
 		await inode.getByTestId('inode-actions-toggle').click();
 		await inode.getByTestId('delete-inode').click();
 	}

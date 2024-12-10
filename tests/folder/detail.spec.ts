@@ -1,6 +1,6 @@
 import { test, expect } from '.';
 
-test('Upload file in folder', async ({ folder_detail_page, page }) => {
+test('file_upload', async ({ folder_detail_page, page }) => {
 	await folder_detail_page.goto();
 	await folder_detail_page.upload_file();
 
