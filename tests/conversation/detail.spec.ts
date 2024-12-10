@@ -20,7 +20,7 @@ export const test = base.extend<{ empty_conversation_detail_page: ConversationDe
     */
 });
 
-test('Create prompt', async ({ empty_conversation_detail_page, page }) => {
+test('create_prompt', async ({ empty_conversation_detail_page, page }) => {
 	const query = 'Return a single word';
 	await empty_conversation_detail_page.prompt(query);
 	await expect(page.getByTestId('human-message')).toContainText(query);
@@ -28,17 +28,17 @@ test('Create prompt', async ({ empty_conversation_detail_page, page }) => {
 	await expect(page.getByTestId('machine-message')).toHaveCount(2);
 });
 
-test('Empty prompt', async ({ empty_conversation_detail_page, page }) => {
+test('error_on_empty_prompt', async ({ empty_conversation_detail_page, page }) => {
 	await empty_conversation_detail_page.prompt('');
 	await expect(page.getByTestId('error-message')).toHaveCount(1);
 });
 
-test('High similarity', async ({ empty_conversation_detail_page, page }) => {
+test('error_on_to_many_pages', async ({ empty_conversation_detail_page, page }) => {
 	await empty_conversation_detail_page.prompt('test', 100);
 	await expect(page.getByTestId('error-message')).toHaveCount(1);
 });
 
-test('Exceed context of embedding model', async ({ empty_conversation_detail_page, page }) => {
+test('error_on_exceed_embedding_context', async ({ empty_conversation_detail_page, page }) => {
 	const query = 'This is a test string, ';
 	// Exceed openai limit
 	await empty_conversation_detail_page.prompt(query.repeat(8192 / 5));

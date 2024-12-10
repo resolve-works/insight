@@ -62,6 +62,7 @@ export class FileIndexPage extends BasePage {
 
 	async remove_all() {
 		const inode_actions = this.page.getByTestId('inode-actions');
+		console.log(inode_actions.count());
 
 		while ((await inode_actions.count()) > 0) {
 			const actions = inode_actions.first();
