@@ -68,12 +68,12 @@ export const test = base.extend<{ file_index_page: FileIndexPage }>({
 	page: authenticated_page,
 
 	file_index_page: async ({ page }, use) => {
-		const file_index_page = new FileIndexPage(page);
-		await page.goto('/files');
+		const file_index_page = new FileIndexPage(page, '/files');
+		await file_index_page.goto();
 
 		await use(file_index_page);
 
-		await page.goto('/files');
+		await file_index_page.goto();
 		await file_index_page.remove_all();
 	}
 });

@@ -10,13 +10,19 @@ type Fixtures = {
 
 export const test = base.extend<Fixtures>({
 	folder_detail_page: async ({ file_index_page, page }, use) => {
-		// Create folder and navigate to it
-		await file_index_page.create_folder();
-		await page.getByTestId('inode-title').click();
-		await expect(page.getByTestId('title')).toContainText(file_index_page.FOLDER);
+		const folder = 'folder_detail';
+		// Create folder and get the link for it
+		await file_index_page.create_folder(folder);
+		const href = await page
+			.getByTestId('inode-link')
+			.filter({ hasText: folder })
+			.first()
+			.getAttribute('href');
 
-		// Use it as a index page
-		const folder_detail_page = new FileIndexPage(page);
+		expect(href).not.toBeNull();
+
+		// Create new index page for folder
+		const folder_detail_page = new FileIndexPage(page, href);
 		await use(folder_detail_page);
 	},
 
