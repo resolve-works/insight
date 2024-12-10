@@ -3,7 +3,6 @@ import { FileEditPage } from '../../playwright/fixtures';
 
 test('marks_children_public', async ({ folder_detail_page, page }) => {
 	// Upload file
-	await folder_detail_page.goto();
 	const file_path = await folder_detail_page.upload_file();
 
 	// Go to folder edit page & set public
@@ -18,7 +17,6 @@ test('marks_children_public', async ({ folder_detail_page, page }) => {
 
 test('marks_self_public', async ({ folder_detail_page, page }) => {
 	// Upload file
-	await folder_detail_page.goto();
 	const file_path = await folder_detail_page.upload_file();
 
 	// Go to file edit page & set public
@@ -33,7 +31,6 @@ test('marks_self_public', async ({ folder_detail_page, page }) => {
 
 test('marks_self_private_after_unpublish', async ({ folder_detail_page, page }) => {
 	// Upload files
-	await folder_detail_page.goto();
 	const first_file_path = await folder_detail_page.upload_file();
 	const second_file_path = await folder_detail_page.upload_file('test(0).pdf');
 
@@ -63,8 +60,7 @@ test('marks_self_private_after_unpublish', async ({ folder_detail_page, page }) 
 
 test('marks_self_private_after_delete', async ({ folder_detail_page, page }) => {
 	// Upload file
-	await folder_detail_page.goto();
-	await folder_detail_page.upload_file();
+	await folder_detail_page.upload_file(folder_detail_page.FILE);
 
 	// Go to file edit page & set public
 	const folder_edit_page = new FileEditPage(page, folder_detail_page.path + '/edit');
@@ -73,7 +69,7 @@ test('marks_self_private_after_delete', async ({ folder_detail_page, page }) => 
 
 	// Go back to folder and delete file
 	await folder_detail_page.goto();
-	await folder_detail_page.delete_file();
+	await folder_detail_page.delete_inode(folder_detail_page.FILE);
 
 	// Go to folder edit and check public state
 	await folder_edit_page.goto();

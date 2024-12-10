@@ -20,7 +20,7 @@ export class FileIndexPage extends BasePage {
 	FILE = 'test.pdf';
 	FOLDER = 'folder';
 
-	private get_inode(name: string): Locator {
+	get_inode(name: string): Locator {
 		return this.page
 			.locator('[data-testid=inode]', {
 				has: this.page.locator(`text="${name}"`)
@@ -32,7 +32,7 @@ export class FileIndexPage extends BasePage {
 			);
 	}
 
-	private async get_href_for_inode(inode: Locator): Promise<string> {
+	async get_href_for_inode(inode: Locator): Promise<string> {
 		const href = await inode.getByTestId('inode-link').getAttribute('href');
 		return href!;
 	}
@@ -41,7 +41,6 @@ export class FileIndexPage extends BasePage {
 		await this.page.getByTestId('show-folder-form').click();
 		await this.page.getByTestId('folder-name-input').fill(name);
 		await this.page.getByTestId('create-folder').click();
-		await this.page.getByTestId('create-folder-form').waitFor({ state: 'hidden' });
 		return this.get_href_for_inode(this.get_inode(name));
 	}
 
@@ -51,18 +50,10 @@ export class FileIndexPage extends BasePage {
 		return this.get_href_for_inode(this.get_inode(name));
 	}
 
-	private async delete_inode(name: string) {
+	async delete_inode(name: string) {
 		const inode = this.get_inode(name);
 		await inode.getByTestId('inode-actions-toggle').click();
 		await inode.getByTestId('delete-inode').click();
-	}
-
-	delete_folder(name: string = this.FOLDER) {
-		return this.delete_inode(name);
-	}
-
-	delete_file(name: string = this.FILE) {
-		return this.delete_inode(name);
 	}
 
 	async start_conversation() {

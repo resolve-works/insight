@@ -4,7 +4,7 @@ import { ConversationDetailPage } from '../../playwright/fixtures';
 export const test = base.extend<{ empty_conversation_detail_page: ConversationDetailPage }>({
 	empty_conversation_detail_page: async ({ file_index_page, page }, use) => {
 		await file_index_page.start_conversation();
-		const conversation_detail_page = new ConversationDetailPage(page);
+		const conversation_detail_page = new ConversationDetailPage(page, new URL(page.url()).pathname);
 		await use(conversation_detail_page);
 	}
 
