@@ -1,108 +1,81 @@
-import path from 'path';
 import { test, expect } from '.';
+import { FileEditPage } from '../../playwright/fixtures';
 
-test('Mark folder as public', async ({ folder_detail_page, folder_edit_page, page }) => {
+test('marks_children_public', async ({ folder_detail_page, page }) => {
 	// Upload file
-	await folder_detail_page.upload_file();
-	await expect(page.getByTestId('inode-title')).toHaveCount(1);
+	await folder_detail_page.goto();
+	const file_path = await folder_detail_page.upload_file();
 
 	// Go to folder edit page & set public
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('edit-inode').click();
+	const folder_edit_page = new FileEditPage(page, folder_detail_page.path + '/edit');
+	await folder_edit_page.goto();
 	await folder_edit_page.update_public_state(true);
 
 	// Go to file edit page to check public state
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-title').click();
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('edit-inode').click();
-
+	await page.goto(file_path + '/edit');
 	await expect(page.getByTestId('inode-is-public-input')).toBeChecked();
 });
 
-test('Mark file in folder as public', async ({ folder_detail_page, folder_edit_page, page }) => {
+test('marks_self_public', async ({ folder_detail_page, page }) => {
 	// Upload file
-	await folder_detail_page.upload_file();
-	await expect(page.getByTestId('inode-title')).toHaveCount(1);
+	await folder_detail_page.goto();
+	const file_path = await folder_detail_page.upload_file();
 
 	// Go to file edit page & set public
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('edit-inode').click();
-	await folder_edit_page.update_public_state(true);
+	const file_edit_page = new FileEditPage(page, file_path + '/edit');
+	await file_edit_page.goto();
+	await file_edit_page.update_public_state(true);
 
 	// Go to folder edit page to check public state
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('edit-inode').click();
-
+	await page.goto(folder_detail_page.path + '/edit');
 	await expect(page.getByTestId('inode-is-public-input')).toBeChecked();
 });
 
-test('Mark public files in folder as private', async ({
-	folder_detail_page,
-	folder_edit_page,
-	page
-}) => {
+test('marks_self_private_after_unpublish', async ({ folder_detail_page, page }) => {
 	// Upload files
-	await folder_detail_page.upload_file();
-	await folder_detail_page.upload_file(
-		path.join(__dirname, '..', '..', 'test_data', 'test(0).pdf')
-	);
-	await expect(page.getByTestId('inode-title')).toHaveCount(2);
+	await folder_detail_page.goto();
+	const first_file_path = await folder_detail_page.upload_file();
+	const second_file_path = await folder_detail_page.upload_file('test(0).pdf');
 
-	// Go to file edit page & set public
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('edit-inode').click();
+	// Set folder to be public
+	const folder_edit_page = new FileEditPage(page, folder_detail_page.path + '/edit');
+	await folder_edit_page.goto();
 	await folder_edit_page.update_public_state(true);
 
-	// Go to folder and mark first file private
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-title').click();
-	await page.getByTestId('inode-actions').first().click();
-	await page.getByTestId('edit-inode').first().click();
-	await folder_edit_page.update_public_state(false);
+	// Mark first file private
+	const first_file_edit_page = new FileEditPage(page, first_file_path + '/edit');
+	await first_file_edit_page.goto();
+	await first_file_edit_page.update_public_state(false);
 
-	// Go to folder edit page to check public state
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('edit-inode').click();
+	// Check folder public state
+	await folder_edit_page.goto();
 	await expect(page.getByTestId('inode-is-public-input')).toBeChecked();
 
-	// Go to folder and mark second file private
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-title').click();
-	await page.getByTestId('inode-actions').last().click();
-	await page.getByTestId('edit-inode').last().click();
-	await folder_edit_page.update_public_state(false);
+	// Mark second file private
+	const second_file_edit_page = new FileEditPage(page, second_file_path + '/edit');
+	await second_file_edit_page.goto();
+	await second_file_edit_page.update_public_state(false);
 
 	// Go to folder edit page to check public state
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('edit-inode').click();
+	await folder_edit_page.goto();
 	await expect(page.getByTestId('inode-is-public-input')).toBeChecked({ checked: false });
 });
 
-test('Remove public file from folder', async ({ folder_detail_page, folder_edit_page, page }) => {
+test('marks_self_private_after_delete', async ({ folder_detail_page, page }) => {
 	// Upload file
+	await folder_detail_page.goto();
 	await folder_detail_page.upload_file();
-	await expect(page.getByTestId('inode-title')).toHaveCount(1);
 
 	// Go to file edit page & set public
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('edit-inode').click();
+	const folder_edit_page = new FileEditPage(page, folder_detail_page.path + '/edit');
+	await folder_edit_page.goto();
 	await folder_edit_page.update_public_state(true);
 
 	// Go back to folder and delete file
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-title').click();
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('delete-inode').click();
+	await folder_detail_page.goto();
+	await folder_detail_page.delete_file();
 
 	// Go to folder edit and check public state
-	await page.getByRole('navigation').getByRole('link', { name: 'Files' }).click();
-	await page.getByTestId('inode-actions').click();
-	await page.getByTestId('edit-inode').click();
+	await folder_edit_page.goto();
 	await expect(page.getByTestId('inode-is-public-input')).toBeChecked({ checked: false });
 });

@@ -1,6 +1,8 @@
+import { expect } from '@playwright/test';
+import path from 'path';
 import type { Page } from '@playwright/test';
 
-export class FileIndexPage {
+export class BasePage {
 	page: Page;
 	path: string;
 
@@ -12,16 +14,51 @@ export class FileIndexPage {
 	async goto() {
 		await this.page.goto(this.path);
 	}
+}
 
-	async create_folder(name: string) {
+export class FileIndexPage extends BasePage {
+	FILE = 'test.pdf';
+	FOLDER = 'folder';
+
+	private async get_href_for_inode(name: string) {
+		const href = await this.page
+			.getByTestId('inode-link')
+			.filter({ hasText: name })
+			.first()
+			.getAttribute('href');
+
+		expect(href).not.toBeNull();
+		return href!;
+	}
+
+	async create_folder(name: string = this.FOLDER) {
 		await this.page.getByTestId('show-folder-form').click();
 		await this.page.getByTestId('folder-name-input').fill(name);
 		await this.page.getByTestId('create-folder').click();
+		return this.get_href_for_inode(name);
 	}
 
-	async upload_file(file_path: string) {
-		// Trigger upload
+	async upload_file(name: string = this.FILE): Promise<string> {
+		const file_path = path.join(__dirname, '..', 'test_data', name);
 		await this.page.getByTestId('files-input').setInputFiles(file_path);
+		return this.get_href_for_inode(name);
+	}
+
+	private async delete_inode(name: string) {
+		const inode = this.page.locator('[data-testid=inode]', {
+			has: this.page.locator(`text="${name}"`)
+		});
+
+		await inode.getByTestId('inode-actions-toggle').click();
+		await inode.getByTestId('delete-inode').click();
+	}
+
+	delete_folder(name: string = this.FOLDER) {
+		return this.delete_inode(name);
+	}
+
+	delete_file(name: string = this.FILE) {
+		return this.delete_inode(name);
 	}
 
 	async start_conversation() {
@@ -40,13 +77,7 @@ export class FileIndexPage {
 	}
 }
 
-export class FileEditPage {
-	page: Page;
-
-	constructor(page: Page) {
-		this.page = page;
-	}
-
+export class FileEditPage extends BasePage {
 	async update_name(name: string) {
 		await this.page.getByTestId('inode-name-input').fill(name);
 		await this.page.getByTestId('update-inode').click();
@@ -58,13 +89,7 @@ export class FileEditPage {
 	}
 }
 
-export class ConversationDetailPage {
-	page: Page;
-
-	constructor(page: Page) {
-		this.page = page;
-	}
-
+export class ConversationDetailPage extends BasePage {
 	async prompt(query: string, similarity_top_k: number | undefined = undefined) {
 		await this.page.getByTestId('query-input').fill(query);
 		if (similarity_top_k) {
