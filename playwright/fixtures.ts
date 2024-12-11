@@ -1,4 +1,4 @@
-import { Locator } from '@playwright/test';
+import { Locator, expect } from '@playwright/test';
 import path from 'path';
 import type { Page } from '@playwright/test';
 
@@ -62,13 +62,17 @@ export class FileIndexPage extends BasePage {
 
 	async remove_all() {
 		const inode_actions = this.page.getByTestId('inode-actions');
-		console.log(inode_actions.count());
 
-		while ((await inode_actions.count()) > 0) {
+		while (true) {
+			const count = await inode_actions.count();
 			const actions = inode_actions.first();
 			await actions.getByTestId('inode-actions-toggle').click();
 			await actions.getByTestId('delete-inode').click();
-			await actions.waitFor({ state: 'hidden' });
+			await expect(inode_actions).toHaveCount(count - 1);
+
+			if (count - 1 == 0) {
+				break;
+			}
 		}
 	}
 }
