@@ -44,7 +44,7 @@ services:
         condition: service_healthy
 
   ui:
-    image: ghcr.io/resolve-works/insight-ui:v0.3.3
+    image: ghcr.io/resolve-works/insight-ui:v0.3.4
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
