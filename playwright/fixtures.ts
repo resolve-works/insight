@@ -65,14 +65,14 @@ export class FileIndexPage extends BasePage {
 
 		while (true) {
 			const count = await inode_actions.count();
+			if (count == 0) {
+				break;
+			}
+
 			const actions = inode_actions.first();
 			await actions.getByTestId('inode-actions-toggle').click();
 			await actions.getByTestId('delete-inode').click();
 			await expect(inode_actions).toHaveCount(count - 1);
-
-			if (count - 1 == 0) {
-				break;
-			}
 		}
 	}
 }
