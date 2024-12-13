@@ -16,7 +16,8 @@ prompts in a conversational form, together with good keyword search.
 </p>
 
 The initial development of Insight was funded by [Follow the
-Money](https://ftm.nl) to process large amount of FOIA requests.
+Money](https://ftm.nl), where it is used to process large amount of FOIA
+requests.
 
 ## Setting up a development environment
 
