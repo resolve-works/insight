@@ -4,6 +4,8 @@ _meta:
   config_version: 2
 
 external_user:
+  cluster_permissions:
+    - 'indices:data/read/msearch'
   index_permissions:
     - index_patterns:
         - 'inodes'
