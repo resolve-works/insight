@@ -44,7 +44,7 @@ services:
         condition: service_healthy
 
   ui:
-    image: ghcr.io/resolve-works/insight-ui:v0.3.10
+    image: ghcr.io/resolve-works/insight-ui:v0.3.11
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
@@ -104,7 +104,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/resolve-works/insight-worker:v0.3.8
+    image: ghcr.io/resolve-works/insight-worker:v0.3.9
     network_mode: host
     environment:
       QUEUE: default
@@ -129,7 +129,7 @@ services:
         condition: service_completed_successfully
 
   ingest:
-    image: ghcr.io/resolve-works/insight-worker:v0.3.8
+    image: ghcr.io/resolve-works/insight-worker:v0.3.9
     deploy:
       replicas: 3
     network_mode: host
@@ -233,7 +233,7 @@ services:
         condition: service_healthy
 
   migrate:
-    image: ghcr.io/resolve-works/insight-migrate:v0.3.6
+    image: ghcr.io/resolve-works/insight-migrate:v0.3.7
     environment:
       POSTGRES_URI: 'postgresql://insight:insight@postgres:5432/insight?sslmode=disable&x-migrations-table="private"."schema_migrations"&x-migrations-table-quoted=1'
     depends_on:
