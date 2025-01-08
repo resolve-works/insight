@@ -90,10 +90,10 @@ export class FileEditPage extends BasePage {
 }
 
 export class ConversationDetailPage extends BasePage {
-	async prompt(query: string, similarity_top_k: number | undefined = undefined) {
+	async prompt(query: string, amount: number | undefined = undefined) {
 		await this.page.getByTestId('query-input').fill(query);
-		if (similarity_top_k) {
-			await this.page.getByTestId('similarity-top-k-input').fill(similarity_top_k.toString());
+		if (amount) {
+			await this.page.getByTestId('amount-input').fill(amount.toString());
 		}
 		await this.page.getByTestId('create-prompt').click();
 	}
