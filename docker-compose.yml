@@ -23,7 +23,6 @@ services:
     volumes:
       - ./certs/keycloak.pem:/etc/ssl/keycloak/keycloak.pem
       - ./certs/keycloak-key.pem:/etc/ssl/keycloak/keycloak-key.pem
-
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,7 +43,7 @@ services:
         condition: service_healthy
 
   ui:
-    image: ghcr.io/resolve-works/insight-ui:v0.3.14
+    image: ghcr.io/resolve-works/insight-ui:v0.3.16
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
