@@ -43,7 +43,7 @@ services:
         condition: service_healthy
 
   ui:
-    image: ghcr.io/resolve-works/insight-ui:v0.3.16
+    image: ghcr.io/resolve-works/insight-ui:v0.3.17
     network_mode: host
     environment:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/insight.crt
@@ -103,7 +103,7 @@ services:
         condition: service_completed_successfully
 
   worker:
-    image: ghcr.io/resolve-works/insight-worker:v0.3.9
+    image: ghcr.io/resolve-works/insight-worker:v0.3.12
     network_mode: host
     environment:
       QUEUE: default
@@ -128,7 +128,7 @@ services:
         condition: service_completed_successfully
 
   ingest:
-    image: ghcr.io/resolve-works/insight-worker:v0.3.9
+    image: ghcr.io/resolve-works/insight-worker:v0.3.12
     deploy:
       replicas: 3
     network_mode: host
@@ -189,7 +189,7 @@ services:
         condition: service_healthy
 
   rabbitmq:
-    image: rabbitmq:3.12-management
+    image: rabbitmq:4.0-management
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 3s
