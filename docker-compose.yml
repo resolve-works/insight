@@ -189,7 +189,7 @@ services:
         condition: service_healthy
 
   rabbitmq:
-    image: rabbitmq:4.0-management
+    image: rabbitmq:4.0.6-management
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 3s

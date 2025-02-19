@@ -111,8 +111,8 @@
 			"vhost": "/"
 		}
 	],
-	"rabbit_version": "3.12.12",
-	"rabbitmq_version": "3.12.12",
+	"rabbit_version": "4.0.6",
+	"rabbitmq_version": "4.0.6",
 	"topic_permissions": [],
 	"users": [
 		{
