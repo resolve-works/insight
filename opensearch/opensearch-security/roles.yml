@@ -25,6 +25,7 @@ internal_worker:
     - 'indices:data/write/bulk'
     - 'indices:data/read*'
     - 'indices:admin/mappings/fields/get*'
+    - 'cluster:monitor/health'
   index_permissions:
     - index_patterns:
         - 'inodes'
@@ -32,5 +33,6 @@ internal_worker:
         - 'indices:data/read'
         - 'indices:data/read/search'
         - 'write'
+        - 'indices:admin/get'
         - 'indices:admin/create'
         - 'indices:admin/delete'
