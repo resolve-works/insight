@@ -11,18 +11,6 @@ backbone:
 workers:
 	docker-compose up -d worker ingest
 
-install_dependencies:
-	npm install && npx playwright install
-
-run_test:
-	npx playwright test
-
-test_ui:
-	npx playwright test --ui
-
-codegen:
-	npx playwright codegen --browser firefox --ignore-https-errors http://localhost:3000
-
 reset_database:
 	docker-compose exec postgres /bin/sh -c 'dropdb --username=$$POSTGRES_USER insight'
 	docker-compose exec postgres /bin/sh -c 'createdb --username=$$POSTGRES_USER insight'
